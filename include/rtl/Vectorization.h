@@ -522,18 +522,17 @@ namespace rtl
          */
         void setSigma(ElementType sigma) { extractor.setSigma(sigma); }
 
+        //! Sets initial shift of Nelder-Mead simplex vertices in global error optimization.
+        /*!
+         * Optimal value is usually between \a N/50 and \a N/500, where \a N is the number of processed points. Must be at least one, which is enforced by the function itself.
+         * @param simplex_shift new initial shift.
+         */
+        void setSimplexShift(size_t simplex_shift) { optimizer_total_error.setSimplexShift(simplex_shift); }
+
         //! Sets maximal number of iterations of the global error optimization.
         /*!
          * Usually the optimization terminates much faster. This limit prevents rare endless loops in the program.
          * @param max_iterations new maximal number of iterations.
-         */
-        void setSimplexShift(size_t simplex_shift) { optimizer_total_error.setSimplexShift(simplex_shift); }
-
-        //! Sets maximal permitted distance of intersection of the approximation lines from their neighbouring end points.
-        /*!
-         * \p delta should be circa 3-10 times larger that standard deviation used in preceding vectorization to avoid unnecessary splits of approximations
-         * and maintain functionality of the optimization procedure.
-         * @param delta new value of the maximal distance.
          */
         void setMaxIterations(size_t max_iterations) { optimizer_total_error.setMaxIterations(max_iterations); }
 
@@ -623,18 +622,17 @@ namespace rtl
          */
         void setSigma(ElementType sigma) { extractor.setSigma(sigma); }
 
+        //! Sets initial shift of Nelder-Mead simplex vertices in global error optimization.
+        /*!
+         * Optimal value is usually between \a N/50 and \a N/500, where \a N is the number of processed points. Must be at least one, which is enforced by the function itself.
+         * @param simplex_shift new initial shift.
+         */
+        void setSimplexShift(size_t simplex_shift) { optimizer_total_error.setSimplexShift(simplex_shift); }
+
         //! Sets maximal number of iterations of the global error optimization.
         /*!
          * Usually the optimization terminates much faster. This limit prevents rare endless loops in the program.
          * @param max_iterations new maximal number of iterations.
-         */
-        void setSimplexShift(size_t simplex_shift) { optimizer_total_error.setSimplexShift(simplex_shift); }
-
-        //! Sets maximal permitted distance of intersection of the approximation lines from their neighbouring end points.
-        /*!
-         * \p delta should be circa 3-10 times larger that standard deviation used in preceding vectorization to avoid unnecessary splits of approximations
-         * and maintain functionality of the optimization procedure.
-         * @param delta new value of the maximal distance.
          */
         void setMaxIterations(size_t max_iterations) { optimizer_total_error.setMaxIterations(max_iterations); }
 
