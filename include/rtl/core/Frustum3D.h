@@ -31,8 +31,14 @@
 
 namespace rtl
 {
-    template<typename Element>
-    class Transformation3D;
+    template<int, typename>
+    class TranslationND;
+
+    template<int, typename>
+    class RotationND;
+
+    template<int, typename>
+    class RigidTfND;
 
     //! 3D frustum representation.
     /*!
@@ -92,21 +98,70 @@ namespace rtl
         //! Returns distance between near and far plane.
         [[nodiscard]] ElementType getDepth() const { return frustumDepth_; }
 
+        //! Returns translated copy of the frustum.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new frustum after translation.
+         */
+        Frustum3D<Element> transformed(const TranslationND<3, Element> &tr) const
+        {
+            return Frustum3D<Element>(tr(origin_), tr(nearTopLeft_), tr(nearTopRight_), tr(nearBottomLeft_), tr(nearBottomRight_), frustumDepth_);
+        }
+
+        //! Translates *this frustum in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<3, Element> &tr)
+        {
+            origin_.transform(tr);
+            nearTopLeft_.transform(tr);
+            nearTopRight_.transform(tr);
+            nearBottomLeft_.transform(tr);
+            nearBottomRight_.transform(tr);
+        }
+
+        //! Returns rotated copy of the frustum.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new frustum after rotation.
+         */
+        Frustum3D<Element> transformed(const RotationND<3, Element> &rot) const
+        {
+            return Frustum3D<Element>(rot(origin_), rot(nearTopLeft_), rot(nearTopRight_), rot(nearBottomLeft_), rot(nearBottomRight_), frustumDepth_);
+        }
+
+        //! Rotates *this frustum in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<3, Element> &rot)
+        {
+            origin_.transform(rot);
+            nearTopLeft_.transform(rot);
+            nearTopRight_.transform(rot);
+            nearBottomLeft_.transform(rot);
+            nearBottomRight_.transform(rot);
+        }
+
         //! Returns transformed copy of the frustum.
         /*!
          * @param tf the transformation to be applied.
-         * @return new frustum instance after transformation.
+         * @return new frustum after transformation.
          */
-        Frustum3D<Element> transformed(const Transformation3D<Element> &tf) const
+        Frustum3D<Element> transformed(const RigidTfND<3, Element> &tf) const
         {
             return Frustum3D<Element>(tf(origin_), tf(nearTopLeft_), tf(nearTopRight_), tf(nearBottomLeft_), tf(nearBottomRight_), frustumDepth_);
         }
 
-        //! Transforms the frustum in place.
+        //! Transforms *this frustum in-place.
         /*!
+         *
          * @param tf the transformation to be applied.
          */
-        void transform(const Transformation3D<Element> &tf)
+        void transform(const RigidTfND<3, Element> &tf)
         {
             origin_.transform(tf);
             nearTopLeft_.transform(tf);

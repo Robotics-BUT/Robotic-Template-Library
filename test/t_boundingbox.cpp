@@ -113,17 +113,17 @@ TEST(t_boundingbox, iou) {
 TEST(t_boundingbox, transformation) {
 
     auto box = getUnitBox();
-    double a = rtl::C_PI / 4.0;
-    rtl::Transformation3d tr(a, rtl::Vector3d::baseX(), rtl::Vector3d());
+    double a = rtl::C_PId / 4.0;
+    rtl::RigidTf3d tr(a, rtl::Vector3d::baseX(), rtl::Vector3d());
     auto box_tr = box.transformed(tr);
 
     EXPECT_EQ(box.min().getElement(0), box_tr.min().getElement(0));
-    EXPECT_NEAR(box_tr.min().getElement(1), -rtl::C_SQRT2,0.0001);
-    EXPECT_NEAR(box_tr.min().getElement(2), -rtl::C_SQRT2,0.0001);
+    EXPECT_NEAR(box_tr.min().getElement(1), -rtl::C_SQRT2d,0.0001);
+    EXPECT_NEAR(box_tr.min().getElement(2), -rtl::C_SQRT2d,0.0001);
 
     EXPECT_EQ(box.max().getElement(0), box_tr.max().getElement(0));
-    EXPECT_NEAR(box_tr.max().getElement(1), rtl::C_SQRT2, 0.0001);
-    EXPECT_NEAR(box_tr.max().getElement(2), rtl::C_SQRT2, 0.0001);
+    EXPECT_NEAR(box_tr.max().getElement(1), rtl::C_SQRT2d, 0.0001);
+    EXPECT_NEAR(box_tr.max().getElement(2), rtl::C_SQRT2d, 0.0001);
 
     box.transform(tr);
 

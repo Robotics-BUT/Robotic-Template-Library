@@ -249,10 +249,10 @@ namespace rtl
             render_reg = BoundingBox3f::intersection(*render_reg, *max_reg);
 
         // if semi-automatic view orientation is used, compute it now
-        if (view_orientation.tr().hasNaN())
+        if (view_orientation.trVec().hasNaN())
         {
             auto render_reg_centre = view_orientation.rotMat() * render_reg->centroid();
-            view_orientation.setTranslation({-render_reg_centre.x(), -render_reg_centre.y(), 0});
+            view_orientation.setTrVec({-render_reg_centre.x(), -render_reg_centre.y(), 0});
             float aspect_ratio = export_height / export_width;
 
             auto z_shift_required = [this, &aspect_ratio](const Vector3f &v)
@@ -266,7 +266,7 @@ namespace rtl
 
             BoundingBox2f z_shift_bounds(render_reg->allVertices(z_shift_required));
             float z_shift = std::min(z_shift_bounds.min().x(), z_shift_bounds.min().y());
-            view_orientation.setTranslation({-render_reg_centre.x(), -render_reg_centre.y(), z_shift});
+            view_orientation.setTrVec({-render_reg_centre.x(), -render_reg_centre.y(), z_shift});
         }
 
         // resize adapting objects
@@ -506,7 +506,7 @@ namespace rtl
         return "\t\\" + mark + "{" + std::to_string(proj_2d.x() * sc) + "}{" + std::to_string(proj_2d.y() * sc) + "}{" + std::to_string(rotation) + "}{" + std::to_string(scale * sc) + "}\n";
     }
 
-    void LaTeXTikz3D::MarkPrimitive::project(const Transformation3f &tr, float fl)
+    void LaTeXTikz3D::MarkPrimitive::project(const RigidTf3f &tr, float fl)
     {
         pos_3d = tr(pos_3d);
         scale = -fl / pos_3d.z();
@@ -527,7 +527,7 @@ namespace rtl
                ") -- (" + std::to_string(proj_2d.end().x() * scale) + "," + std::to_string(proj_2d.end().y() * scale) + ");\n";
     }
 
-    void LaTeXTikz3D::LinePrimitive::project(const Transformation3f &tr, float fl)
+    void LaTeXTikz3D::LinePrimitive::project(const RigidTf3f &tr, float fl)
     {
         ls_3d = tr(ls_3d);
         proj_2d.setBegin(-fl * ls_3d.beg().x() / ls_3d.beg().z(), -fl * ls_3d.beg().y() / ls_3d.beg().z());
@@ -536,7 +536,7 @@ namespace rtl
 
     void LaTeXTikz3D::LinePrimitive::splitSort(std::unique_ptr<LaTeXTikz3D::MarkPrimitive> mp, std::unique_ptr<LaTeXTikz3D::MarkPrimitive> &under, std::unique_ptr<LaTeXTikz3D::MarkPrimitive> &above, float fl, float eps)
     {
-        float d = Vector3f::crossProduct(ls_3d.direction(), mp->pos_3d - ls_3d.beg()).lengthSquared();
+        float d = ls_3d.direction().cross(mp->pos_3d - ls_3d.beg()).lengthSquared();
         if (d < eps)
         {
             above = std::move(mp);
@@ -605,10 +605,10 @@ namespace rtl
         return code;
     }
 
-    void LaTeXTikz3D::PolygonPrimitive::project(const Transformation3f &tr, float fl)
+    void LaTeXTikz3D::PolygonPrimitive::project(const RigidTf3f &tr, float fl)
     {
         poly_3d = tr(poly_3d);
-        front_visible = Vector3f::dotProduct(poly_3d.normal(), (poly_3d.points()[0])) < 0;
+        front_visible = poly_3d.normal().dot(poly_3d.points()[0]) < 0;
         proj_2d.reservePoints(poly_3d.points().size());
         for (const auto &p : poly_3d.points())
             proj_2d.addPoint(Vector2f(-fl * p.x() / p.z(), -fl * p.y() / p.z()));
@@ -616,7 +616,7 @@ namespace rtl
 
     void LaTeXTikz3D::PolygonPrimitive::splitSort(std::unique_ptr<LaTeXTikz3D::MarkPrimitive> mp, std::unique_ptr<LaTeXTikz3D::MarkPrimitive> &under, std::unique_ptr<LaTeXTikz3D::MarkPrimitive> &above, float, float eps)
     {
-        float d = Vector3f::dotProduct(poly_3d.normal(), mp->pos_3d) - poly_3d.distance();
+        float d = poly_3d.normal().dot(mp->pos_3d) - poly_3d.distance();
         if (d > -eps)
             above = std::move(mp);
         else
@@ -625,10 +625,10 @@ namespace rtl
     
     void LaTeXTikz3D::PolygonPrimitive::splitSort(std::unique_ptr<LaTeXTikz3D::LinePrimitive> lp, std::unique_ptr<LaTeXTikz3D::LinePrimitive> &under, std::unique_ptr<LaTeXTikz3D::LinePrimitive> &above, float fl, float eps)
     {
-        float nd = Vector3f::dotProduct(poly_3d.normal(), lp->ls_3d.direction());
+        float nd = poly_3d.normal().dot(lp->ls_3d.direction());
         if (std::abs(nd) < eps)
         {
-            float d = Vector3f::dotProduct(poly_3d.normal(), (lp->ls_3d.beg() + lp->ls_3d.end()) / 2.0f) - poly_3d.distance();
+            float d = poly_3d.normal().dot((lp->ls_3d.beg() + lp->ls_3d.end()) / 2.0f) - poly_3d.distance();
             if (d > -eps)
                 above = std::move(lp);
             else
@@ -636,7 +636,7 @@ namespace rtl
         }
         else
         {
-            float t = - (Vector3f::dotProduct(poly_3d.normal(), lp->ls_3d.beg()) + poly_3d.d()) / nd;
+            float t = - (poly_3d.normal().dot(lp->ls_3d.beg()) + poly_3d.d()) / nd;
             if (t > eps && t < lp->ls_3d.length() - eps)
             {
                 Vector3f crossing = lp->ls_3d.beg() + t * lp->ls_3d.direction();
@@ -646,7 +646,7 @@ namespace rtl
                 std::unique_ptr<LinePrimitive> ls_end(new LinePrimitive(LineSegment3f(crossing, lp->ls_3d.end()), lp->style));
                 ls_end->proj_2d = LineSegment2f(ls_beg->proj_2d.end(), -Vector2f(ls_end->ls_3d.end().x(), ls_end->ls_3d.end().y()) * fl / ls_end->ls_3d.end().z());
 
-                if (Vector3f::dotProduct(poly_3d.normal(), lp->ls_3d.beg()) - poly_3d.distance() > 0)
+                if (poly_3d.normal().dot(lp->ls_3d.beg()) - poly_3d.distance() > 0)
                 {
                     above = std::move(ls_beg);
                     under = std::move(ls_end);
@@ -659,7 +659,7 @@ namespace rtl
             }
             else
             {
-                float d = Vector3f::dotProduct(poly_3d.normal(), (lp->ls_3d.beg() + lp->ls_3d.end()) / 2.0f) - poly_3d.distance();
+                float d = poly_3d.normal().dot((lp->ls_3d.beg() + lp->ls_3d.end()) / 2.0f) - poly_3d.distance();
                 if (d > 0)
                     above = std::move(lp);
                 else
@@ -676,7 +676,7 @@ namespace rtl
         // find a point of pp more distant than eps and determine, on which side of this polygon it lies
         for (; i < pp->poly_3d.points().size(); i++)
         {
-            float d = Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[i]) - poly_3d.distance();
+            float d = poly_3d.normal().dot(pp->poly_3d.points()[i]) - poly_3d.distance();
             if (std::abs(d) > eps)
             {
                 p_on_front = d > 0;
@@ -689,7 +689,7 @@ namespace rtl
             auto v_sum = Vector3f::zeros();
             for (const auto &pt : pp->poly_3d.points())
                 v_sum += pt;
-            p_on_front = Vector3f::dotProduct(poly_3d.normal(), v_sum / pp->poly_3d.points().size()) - poly_3d.distance() > 0;
+            p_on_front = poly_3d.normal().dot(v_sum / pp->poly_3d.points().size()) - poly_3d.distance() > 0;
         }
         else // else search for intersections of planes
         {
@@ -697,7 +697,7 @@ namespace rtl
             {
                 for (i++; i < pp->poly_3d.points().size(); i++)
                 {
-                    if (Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[i]) - poly_3d.distance() < -eps)
+                    if (poly_3d.normal().dot(pp->poly_3d.points()[i]) - poly_3d.distance() < -eps)
                     {
                         intersects = true;
                         break;
@@ -708,7 +708,7 @@ namespace rtl
             {
                 for (i++; i < pp->poly_3d.points().size(); i++)
                 {
-                    if (Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[i]) - poly_3d.distance() > eps)
+                    if (poly_3d.normal().dot(pp->poly_3d.points()[i]) - poly_3d.distance() > eps)
                     {
                         intersects = true;
                         break;
@@ -741,12 +741,12 @@ namespace rtl
             std::map<float, BrPt> br_pts;
             BrPt end_br_pt, tmp_br_pt;
             Vector3f br_pt_first_3d;
-            Vector3f il_d = Vector3f::crossProduct(poly_3d.normal(), pp->poly_3d.normal()).normalized();
+            Vector3f il_d = poly_3d.normal().cross(pp->poly_3d.normal()).normalized();
 
             for (size_t j = pp->proj_2d.points().size() - 1, k = 0; k < pp->proj_2d.points().size(); j = k, k++)
             {
-                bool j_on_il = std::abs(Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[j]) + poly_3d.d()) < eps;
-                bool k_on_il = std::abs(Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[k]) + poly_3d.d()) < eps;
+                bool j_on_il = std::abs(poly_3d.normal().dot(pp->poly_3d.points()[j]) + poly_3d.d()) < eps;
+                bool k_on_il = std::abs(poly_3d.normal().dot(pp->poly_3d.points()[k]) + poly_3d.d()) < eps;
 
                 if (j_on_il)
                 {
@@ -754,7 +754,7 @@ namespace rtl
                     {
                         if (std::isnan(tmp_br_pt.et))
                             br_pt_first_3d = pp->poly_3d.points()[k];
-                        float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : Vector3f::dotProduct(pp->poly_3d.points()[k] - br_pt_first_3d, il_d);
+                        float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : (pp->poly_3d.points()[k] - br_pt_first_3d).dot(il_d);
 
                         tmp_br_pt.et = bt;
                         if (bt == 0.0f)
@@ -778,7 +778,7 @@ namespace rtl
                     {
                         if (std::isnan(tmp_br_pt.et))
                             br_pt_first_3d = pp->poly_3d.points()[k];
-                        float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : Vector3f::dotProduct(pp->poly_3d.points()[k] - br_pt_first_3d, il_d);
+                        float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : (pp->poly_3d.points()[k] - br_pt_first_3d).dot(il_d);
 
                         tmp_br_pt.et = bt;
                         if (bt == 0.0f)
@@ -794,14 +794,14 @@ namespace rtl
                     else
                     {
                         Vector3f tmp_v3d = pp->poly_3d.points()[k] - pp->poly_3d.points()[j];
-                        float t_ls_p = -(Vector3f::dotProduct(poly_3d.normal(), pp->poly_3d.points()[j]) + poly_3d.d()) / Vector3f::dotProduct(poly_3d.normal(), tmp_v3d);
+                        float t_ls_p = -(poly_3d.normal().dot(pp->poly_3d.points()[j]) + poly_3d.d()) / poly_3d.normal().dot(tmp_v3d);
 
                         if (t_ls_p > 0.0f && t_ls_p < 1.0f)
                         {
                             tmp_v3d = pp->poly_3d.points()[j] + tmp_v3d * t_ls_p;
                             if (std::isnan(tmp_br_pt.et))
                                 br_pt_first_3d = tmp_v3d;
-                            float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : Vector3f::dotProduct(tmp_v3d - br_pt_first_3d, il_d);
+                            float bt = (std::isnan(tmp_br_pt.et)) ? 0.0f : (tmp_v3d - br_pt_first_3d).dot(il_d);
 
                             tmp_br_pt.et = bt;
                             if (bt == 0.0f)
@@ -841,7 +841,7 @@ namespace rtl
                 for (auto pt_i : it_bp.second.poly_pts)
                     pt_mean += pp->poly_3d.points()[pt_i];
                 pt_mean /= it_bp.second.poly_pts.size();
-                it_bp.second.to_above = Vector3f::dotProduct(poly_3d.normal(), pt_mean) - poly_3d.distance() > 0;
+                it_bp.second.to_above = poly_3d.normal().dot(pt_mean) - poly_3d.distance() > 0;
             }
 
             bool it_even = true;

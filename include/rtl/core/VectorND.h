@@ -36,11 +36,14 @@ namespace rtl
     template<int rows, int cols, typename Element>
     class Matrix;
 
-    template<typename Element>
-    class Transformation2D;
+    template<int dim, typename Element>
+    class TranslationND;
 
-    template<typename Element>
-    class Transformation3D;
+    template<int dim, typename Element>
+    class RotationND;
+
+    template<int dim, typename Element>
+    class RigidTfND;
 
     //! Base template for N-dimensional vectors.
     /*!
@@ -49,7 +52,7 @@ namespace rtl
      * identification.
      * @tparam dimensions dimensionality of the vector.
      * @tparam Element base type of vector elements.
-     * @tparam ChildTemplate template inheriting this one (CRTIP).
+     * @tparam ChildTemplate template inheriting this one (CRTP).
      */
     template<int dimensions, typename Element, template<int, typename> class ChildTemplate>
     class VectorND_common
@@ -74,6 +77,66 @@ namespace rtl
         ChildTemplate<dimensions, NewElement> cast() const
         {
             return ChildTemplate<dimensions, NewElement>(elements.template cast<NewElement>());
+        }
+
+        //! Returns translated copy of the vector.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new vector after translation.
+         */
+        ChildType transformed(const TranslationND<dimensions, Element> &tr) const
+        {
+            return ChildType((*this) + tr.trVec());
+        }
+
+        //! Translates *this vector in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<dimensions, Element> &tr)
+        {
+            *this = (*this) + tr.trVec();
+        }
+
+        //! Returns rotated copy of the vector.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new vector after rotation.
+         */
+        ChildType transformed(const RotationND<dimensions, Element> &rot) const
+        {
+            return ChildType(rot.rotMat() * (*this));
+        }
+
+        //! Rotates *this vector in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<dimensions, Element> &rot)
+        {
+            *this = rot.rotMat() * (*this);
+        }
+
+        //! Returns rotated copy of the vector.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new vector after rotation.
+         */
+        ChildType transformed(const RigidTfND<dimensions, Element> &tf) const
+        {
+            return ChildType(tf.rotMat() * (*this) + tf.trVec());
+        }
+
+        //! Rotates *this vector in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RigidTfND<dimensions, Element> &tf)
+        {
+            *this = tf.rotMat() * (*this) + tf.trVec();
         }
 
         //! Reference to underlying Eigen data.
@@ -150,7 +213,7 @@ namespace rtl
          */
         DistanceType length() const
         {
-            return std::sqrt(dotProduct(*this, *this));
+            return std::sqrt(this->dot(*this));
         }
 
         //! Squared length of the vector.
@@ -160,7 +223,7 @@ namespace rtl
          */
         DistanceType lengthSquared() const
         {
-            return dotProduct(*this, *this);
+            return this->dot(*this);
         }
 
         //! Normalizes the vector to the unit length.
@@ -304,14 +367,27 @@ namespace rtl
         //! Dot (inner) product of two vectors.
         /*!
          *
-         * @param v1 first operand.
-         * @param v2 second operand.
-         * @return \f$ v1 \cdot v2 \f$
+         * @param v first operand.
+         * @return \f$ *this \cdot v \f$
          */
-        static DistanceType dotProduct(const VectorND_common<dimensions, Element, ChildTemplate> &v1, const VectorND_common<dimensions, Element, ChildTemplate> &v2)
+        ElementType dot(const VectorND_common<dimensions, Element, ChildTemplate> &v) const
         {
-            DistanceType dp = v1.elements.dot(v2.elements);
+            DistanceType dp = elements.dot(v.elements);
             return dp;
+        }
+
+        //! Outer product of two vectors.
+        /*!
+         *
+         * @tparam dimensions2 dimensionality of the second vector.
+         * @tparam ChildTemplate2
+         * @param v second operand.
+         * @return \f$ *this \otimes v \f$
+         */
+        template<int dimensions2, template<int, typename> class ChildTemplate2>
+        Matrix<dimensions, dimensions2, Element> outer(const VectorND_common<dimensions2, Element, ChildTemplate2> &v) const
+        {
+            return Matrix<dimensions, dimensions2, Element>(elements * v.data().transpose());
         }
 
         //! Smaller angle between two vectors.
@@ -323,7 +399,7 @@ namespace rtl
          */
         static ElementType angleShortest(const VectorND_common<dimensions, Element, ChildTemplate> &v1, const VectorND_common<dimensions, Element, ChildTemplate> &v2)
         {
-            DistanceType dp = dotProduct(v1, v2);
+            ElementType dp = v1.dot(v2);
             return std::acos(dp / (v1.length() * v2.length()));
         }
 
@@ -363,7 +439,7 @@ namespace rtl
          */
         static DistanceType scalarProjection(const VectorND_common<dimensions, Element, ChildTemplate> &proj, const VectorND_common<dimensions, Element, ChildTemplate> &on)
         {
-            return dotProduct(proj, on) / on.length();
+            return proj.dot(on) / on.length();
         }
 
         //! Scalar projection of a vector on a unit vector.
@@ -375,7 +451,7 @@ namespace rtl
          */
         static DistanceType scalarProjectionOnUnit(const VectorND_common<dimensions, Element, ChildTemplate> &proj, const VectorND_common<dimensions, Element, ChildTemplate> &on)
         {
-            return dotProduct(proj, on);
+            return proj.dot(on);
         }
 
         //! Vector projection of one vector on another.
@@ -387,7 +463,7 @@ namespace rtl
          */
         static ChildType vectorProjection(const VectorND_common<dimensions, Element, ChildTemplate> &proj, const VectorND_common<dimensions, Element, ChildTemplate> &on)
         {
-            return on * (dotProduct(proj, on) / dotProduct(on, on));
+            return on * (proj.dot(on) / on.dot(on));
         }
 
         //! Vector projection of a vector on a unit vector.
@@ -399,7 +475,7 @@ namespace rtl
          */
         static ChildType vectorProjectionOnUnit(const VectorND_common<dimensions, Element, ChildTemplate> &proj, const VectorND_common<dimensions, Element, ChildTemplate> &on)
         {
-            return on * dotProduct(proj, on);
+            return on * proj.dot(on);
         }
 
         //! Unary minus for reversion of the vector's direction.
@@ -533,7 +609,7 @@ namespace rtl
      * Multiplication of a vector by a scalar multiplier from the left side.
      * @tparam dimensions dimensionality of the vector.
      * @tparam Element ElementType of the vector.
-     * @tparam Child child template (CRTIP).
+     * @tparam Child child template (CRTP).
      * @param factor scalar multiplier.
      * @param v vector to be multiplied.
      * @return the multiplied vector.
@@ -597,6 +673,9 @@ namespace rtl
         typedef typename VectorND_common<2, Element, VectorND>::ElementType ElementType;       //!< base type for vector elements.
         typedef typename VectorND_common<2, Element, VectorND>::DistanceType DistanceType;     //!< return type of the distance function.
         typedef typename VectorND_common<2, Element, VectorND>::EigenType EigenType;           //!< type of the underlying Eigen object.
+
+        using VectorND_common<2, Element, VectorND>::transform;
+        using VectorND_common<2, Element, VectorND>::transformed;
 
         //! Default constructor, the vector is uninitialized.
         VectorND()= default;
@@ -662,41 +741,20 @@ namespace rtl
         static ElementType angleCcw(const VectorND<2, Element> &from, const VectorND<2, Element> &to)
         {
             VectorND<2, Element> from_rot(-from.y(), from.x());
-            ElementType dot_orig = VectorND<2, Element>::dotProduct(from, to);
-            ElementType dot_rot = VectorND<2, Element>::dotProduct(from_rot, to);
+            ElementType dot_orig = from.dot(to);
+            ElementType dot_rot = from_rot.dot(to);
             return std::atan2(dot_rot, dot_orig);
         }
 
-        //! Magnitude of a vector resulting from cross product of \p v1 and \p v2 in 3D.
+        //! Magnitude of a vector resulting from cross product of \p v1 and \p v in 3D.
         /*!
          * Though the name is mathematically nonsense, the result of this computation is sometimes needed and one usually arrives to it from real 3D cross product properties.
-         * @param v1 first operand.
-         * @param v2 second operand.
-         * @return magnitude of \p v1 \f$ \times \f$ \p v2.
+         * @param v second operand.
+         * @return magnitude of \p *this \f$ \times \f$ \p v.
          */
-        static ElementType crossProduct(const VectorND<2, Element> &v1, const VectorND<2, Element> &v2)
+        ElementType cross(const VectorND<2, Element> &v) const
         {
-            return v1.x() * v2.y() - v1.y() * v2.x();
-        }
-
-        //! Returns transformed copy of the vector.
-        /*!
-         * @param tf the transformation to be applied.
-         * @return new vector after transformation.
-         */
-        VectorND<2, Element> transformed(const Transformation2D<Element> &tf) const
-        {
-            return VectorND<2, Element>(tf.rotMat() * (*this) + tf.tr());
-        }
-
-        //! Transforms *this vector in-place.
-        /*!
-         *
-         * @param tf the transformation to be applied.
-         */
-        void transform(const Transformation2D<Element> &tf)
-        {
-            *this = tf.rotMat() * (*this) + tf.tr();
+            return x() * v.y() - y() * v.x();
         }
 
         //! Unit vector in x axis direction.
@@ -727,6 +785,9 @@ namespace rtl
         typedef typename VectorND_common<3, Element, VectorND>::ElementType ElementType;         //!< base type for vector elements.
         typedef typename VectorND_common<3, Element, VectorND>::DistanceType DistanceType;       //!< return type of the distance function.
         typedef typename VectorND_common<3, Element, VectorND>::EigenType EigenType;             //!< type of the underlying Eigen object.
+
+        using VectorND_common<3, Element, VectorND>::transform;
+        using VectorND_common<3, Element, VectorND>::transformed;
 
         //! Default constructor, the vector is uninitialized.
         VectorND()= default;
@@ -784,37 +845,16 @@ namespace rtl
         //! Sets z coordinate.
         void setZ(Element z) { VectorND<3, Element>::elements[2] = z; }
 
-        //! Returns transformed copy of the vector.
-        /*!
-         * @param tf the transformation to be applied.
-         * @return new vector after transformation.
-         */
-        VectorND<3, Element> transformed(const Transformation3D<Element> &tf) const
-        {
-            return VectorND<3, Element>(tf.rotMat() * (*this) + tf.tr());
-        }
-
-        //! Transforms *this vector in-place.
-        /*!
-         *
-         * @param tf the transformation to be applied.
-         */
-        void transform(const Transformation3D<Element> &tf)
-        {
-            *this = tf.rotMat() * (*this) + tf.tr();
-        }
-
         //! Cross product of given vectors.
         /*!
          *
-         * @param v1 first operand.
-         * @param v2 second operand.
-         * @return result of \p v1 \f$ \times \f$ \p v2.
+         * @param v second operand.
+         * @return result of \p v1 \f$ \times \f$ \p v.
          */
-        static VectorND<3, Element> crossProduct(const VectorND<3, Element> &v1, const VectorND<3, Element> &v2)
+        VectorND<3, Element> cross(const VectorND<3, Element> &v) const
         {
             VectorND<3, Element> ret;
-            ret.elements = v1.elements.cross(v2.elements);
+            ret.elements = this->elements.cross(v.elements);
             return ret;
         }
 
@@ -839,7 +879,6 @@ namespace rtl
          */
         static VectorND<3, Element> baseZ() { return VectorND<3, Element>(0, 0, 1.0); }
     };
-
 }
 
 #endif // ROBOTICTEMPLATELIBRARY_VECTORND_H

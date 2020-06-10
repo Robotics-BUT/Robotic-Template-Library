@@ -239,7 +239,8 @@ namespace rtl
     {
         std::string style_name = saveStyle(style);
         Vector2f arc_beg(radius, 0.0f);
-        arc_beg = centre + Transformation2f::rotated(arc_beg, angle_beg);
+        Rotation2f rot(angle_beg);
+        arc_beg = centre + rot(arc_beg);
         std::string code = "\\filldraw[" + style_name + "] (" + std::to_string(addX(centre.x())) + ", " +
                            std::to_string(addY(centre.y())) + ") -- (" + std::to_string(addX(arc_beg.x())) + "," +
                            std::to_string(addY(arc_beg.y())) + ") arc (" +

@@ -27,428 +27,256 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
-#include <random>
-#include <chrono>
-#include <vector>
+#include <utility>
 
 #include "rtl/Core.h"
-#include "rtl/Transformation.h"
+#include "rtl/io/StdLib.h"
+#include "rtl/Test.h"
 
 #include <eigen3/Eigen/Dense>
 
-// Vector2D::angle() test
-template <typename E>
-void vector2DAngleCcwTest(float step, float epsilon)
+template <typename T>
+struct TesterVector2DAngleCcw
 {
-    rtl::Vector2D<E> base(1, 0);
-    float angle;
-
-    std::cout << "\nVector2D::angle() test:" << std::endl;
-    std::cout << "\tStep sum_nr: " << step << std::endl;
-    std::cout << "\tEpsilon sum_nr: " << epsilon << std::endl;
-
-    size_t err_cnt = 0;
-    for (float i = -rtl::C_PIf + step; i <= rtl::C_PIf; i+=step)
+    static void testFunction(double step)
     {
-        angle = rtl::Vector2D<E>::angleCcw(base, rtl::Vector2D<E>(std::cos(i), std::sin(i)));
-        if(std::abs(i - angle) > epsilon)
-            err_cnt++;
+
+        std::cout << "\nVector2D<" << rtl::test::type<T>::description()<< ">::angle() test:" << std::endl;
+        std::cout << "\tStep size: " << step << std::endl;
+        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError << std::endl;
+
+        rtl::Vector2D<T> base(1, 0);
+        T angle;
+        size_t err_cnt = 0;
+        for (T i = -rtl::C_PI<T> + step; i <= rtl::C_PI<T>; i += step)
+        {
+            angle = rtl::Vector2D<T>::angleCcw(base, rtl::Vector2D<T>(std::cos(i), std::sin(i)));
+            if (std::abs(i - angle) > rtl::test::type<T>::allowedError())
+                err_cnt++;
+        }
+        std::cout << "\tPrecision errors: " << err_cnt << std::endl;
+        std::cout << std::endl;
     }
-    std::cout << "\tPrecision errors: " << err_cnt << std::endl;
-    std::cout << std::endl;
-}
+};
 
-
-// Vector2D::angleFromZero() test
-template <typename E>
-void vector2DAngleFromZeroTest(float step, float epsilon)
+template <typename T>
+struct TesterVector2DAngleFromZero
 {
-    float angle;
-
-    std::cout << "\nVector2D::angleFromZero() test:" << std::endl;
-    std::cout << "\tStep sum_nr: " << step << std::endl;
-    std::cout << "\tEpsilon sum_nr: " << epsilon << std::endl;
-
-    size_t err_cnt = 0;
-    for (E i = -rtl::C_PI + step; i <= rtl::C_PI; i+=step)
+    static void testFunction(double step)
     {
-        rtl::Vector2D<E> base = rtl::Vector2D<E>(std::cos(i), std::sin(i));
-        angle = base.angleFromZero();
-        if(std::abs(i - angle) > epsilon)
-            err_cnt++;
-    }
-    std::cout << "\tPrecision errors: " << err_cnt << std::endl;
-    std::cout << std::endl;
-}
+        std::cout << "\nVector2D<" << rtl::test::type<T>::description()<< ">::angleFromZero() test:" << std::endl;
+        std::cout << "\tStep size: " << step << std::endl;
+        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError << std::endl;
 
-// Vector 2D angle function benchmarks
-template <typename E>
-void vector2DAngleSpeedTest(size_t repeat, float epsilon)
+        T angle;
+        size_t err_cnt = 0;
+        for (T i = -rtl::C_PI<T> + step; i <= rtl::C_PI<T>; i += step)
+        {
+            rtl::Vector2D<T> base = rtl::Vector2D<T>(std::cos(i), std::sin(i));
+            angle = base.angleFromZero();
+            if (std::abs(i - angle) > rtl::test::type<T>::allowedError())
+                err_cnt++;
+        }
+        std::cout << "\tPrecision errors: " << err_cnt << std::endl;
+        std::cout << std::endl;
+    }
+};
+
+template<int dim, typename T>
+struct TesterConstruction
 {
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<float> coord(-1, 1);
-    std::chrono::high_resolution_clock::time_point t_start, t_stop;
-    float angle, angle_tot;
-
-    std::cout << "\nOriented angle algorithm benchmarks:" << std::endl;
-
-    std::vector<rtl::Vector2D<E>> v1, v2;
-    for(size_t i = 0; i < repeat; i++)
+    template<std::size_t... indices>
+    static rtl::VectorND<dim, T> variadicConstructedVector(std::index_sequence<indices...>)
     {
-        v1.emplace_back(rtl::Vector2D<E>(coord(generator), coord(generator)));
-        v2.emplace_back(rtl::Vector2D<E>(coord(generator), coord(generator)));
+        return rtl::VectorND<dim, T>(static_cast<T>(indices)...);
     }
 
-    // AngleToZero timing
-    angle_tot = 0.0f;
-    t_start = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < repeat; i++)
+    static void testFunction()
     {
-        angle = std::atan2(v2[i].y(), v2[i].x()) - std::atan2(v1[i].y(), v1[i].x());
-        if(angle > rtl::C_PI)
-            angle -= 2 * rtl::C_PIf;
-        else if(angle < -rtl::C_PI)
-            angle += 2 * rtl::C_PIf;
-        angle_tot += angle;
+        using V = rtl::VectorND<dim, T>;
+        std::cout << "\n" << rtl::test::type<V>::description() << " construction test:" << std::endl;
+        V v;
+        std::cout<<"\tDefault-constructed vector: " << v << std::endl;
+        V v_copy(v);
+        std::cout<<"\tCopy-constructed vector: " << v_copy << std::endl;
+        V v_eigen(v.data());
+        std::cout<<"\tEigen-constructed vector: " << v_eigen << std::endl;
+        // Variadic template constructor test
+        V v_var = variadicConstructedVector(std::make_index_sequence<dim>());
+        std::cout<<"\tParameter pack constructed vector: " << v_var << std::endl;
+
+        V v_rnd = V::random(rtl::test::Random::uniformCallable((T)-1, (T)1));
+        std::cout<<"\tRandom-constructed vector: " << v_rnd << std::endl;
     }
+};
 
-    t_stop = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t_stop - t_start);
-    std::cout << "\t2x AngleToZero time: " << time_span.count() <<std::endl;
-    std::cout << "\t2x AngleToZero total: " << angle_tot <<std::endl;
-    std::cout << "\tTruthfulness not tested since only atan2 and difference of angles is used." << std::endl;
-    std::cout << std::endl;
-
-
-    // Legacy Angle
-    size_t nan_cnt = 0, err_cnt = 0;
-    angle_tot = 0.0f;
-    // Equivalency test:
-    for (size_t i = 0; i < repeat; i++)
-    {
-        float angle1 = v2[i].angleFromZero() - v1[i].angleFromZero();
-        if(angle1 > rtl::C_PI)
-            angle1 -= 2 * rtl::C_PIf;
-        else if(angle1 < -rtl::C_PI)
-            angle1 += 2 * rtl::C_PIf;
-
-        float cp, dp;
-        float angle2;
-        rtl::Vector2D<E> int_from = v1[i], int_to = v2[i];
-        int_from.normalize();
-        int_to.normalize();
-        cp = rtl::Vector2D<E>::crossProduct(int_from, int_to);
-        dp = rtl::Vector2D<E>::dotProduct(int_from, int_to);
-
-        if (dp > 0)
-            angle2 = std::asin(cp);
-        else
-            if(cp > 0)
-                angle2 = rtl::C_PIf - std::asin(cp);
-            else
-                angle2 = - rtl::C_PIf - std::asin(cp);
-
-        if(std::isnan(angle1) || std::isnan(angle2))
-            nan_cnt++;
-
-        if(std::abs(angle1 - angle2) > epsilon)
-            err_cnt++;
-    }
-
-    // timing
-    t_start = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < repeat; i++)
-    {
-        float cp, dp;
-        rtl::Vector2D<E> int_from = v1[i], int_to = v2[i];
-        int_from.normalize();
-        int_to.normalize();
-        cp = rtl::Vector2D<E>::crossProduct(int_from, int_to);
-        dp = rtl::Vector2D<E>::dotProduct(int_from, int_to);
-
-        if (dp > 0)
-            angle = std::asin(cp);
-        else
-            if(cp > 0)
-                angle = rtl::C_PIf - std::asin(cp);
-            else
-                angle = - rtl::C_PIf - std::asin(cp);
-        angle_tot += angle;
-    }
-    t_stop = std::chrono::high_resolution_clock::now();
-
-    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t_stop - t_start);
-    std::cout << "\tLegacy Angle time: " << time_span.count() <<std::endl;
-    std::cout << "\tLegacy Angle total: " << angle_tot <<std::endl;
-    std::cout << "\tProblem NaN: " <<nan_cnt<<std::endl;
-    std::cout << "\tProblem Err: " <<err_cnt<<std::endl;
-    std::cout << std::endl;
-
-
-    nan_cnt = 0;
-    err_cnt = 0;
-    // Equivalency test:
-    for (size_t i = 0; i < repeat; i++)
-    {
-        float angle1 = v2[i].angleFromZero() - v1[i].angleFromZero();
-        if(angle1 > rtl::C_PI)
-            angle1 -= 2 * rtl::C_PIf;
-        else if(angle1 < -rtl::C_PI)
-            angle1 += 2 * rtl::C_PIf;
-
-        rtl::Vector2D<E> from_rot(-v1[i].y(), v1[i].x());
-        float dot_orig = rtl::Vector2D<E>::dotProduct(v1[i], v2[i]);
-        float dot_rot = rtl::Vector2D<E>::dotProduct(from_rot, v2[i]);
-        float angle2 = std::atan2(dot_rot, dot_orig);
-
-        if(std::isnan(angle1) || std::isnan(angle2))
-            nan_cnt++;
-
-        if(abs(angle1 - angle2) > epsilon)
-            err_cnt++;
-    }
-
-    // Projection Angle timing
-    angle_tot = 0.0f;
-
-    t_start = std::chrono::high_resolution_clock::now();
-    for (size_t i = 0; i < repeat; i++)
-    {
-        rtl::Vector2D<E> from_rot(-v1[i].y(), v1[i].x());
-        float dot_orig = rtl::Vector2D<E>::dotProduct(v1[i], v2[i]);
-        float dot_rot = rtl::Vector2D<E>::dotProduct(from_rot, v2[i]);
-        angle_tot += std::atan2(dot_rot, dot_orig);
-    }
-    t_stop = std::chrono::high_resolution_clock::now();
-
-    time_span = std::chrono::duration_cast<std::chrono::duration<double>>(t_stop - t_start);
-    std::cout << "\tProjection Angle time: " << time_span.count() <<std::endl;
-    std::cout << "\tProjection Angle total: " << angle_tot <<std::endl;
-    std::cout << "\tProblem NaN: " <<nan_cnt<<std::endl;
-    std::cout << "\tProblem Err: " <<err_cnt<<std::endl;
-    std::cout << std::endl;
-}
-
-// VectorXX
-void vectorXXConstruction()
+template<int dim, typename T>
+struct TesterElementAccess
 {
-    std::cout<<"\nVectorXX construction test:"<<std::endl;
-    rtl::VectorND<3, int> v3i1, v3i2(v3i1), v3i3(v3i2.data());
-
-    // Variadic template constructor test
-    rtl::VectorND<2, float> v2f(2.0f,8.0f);
-    std::cout << "\tVectorND<2, float> variadic: " << v2f[0] << "  " << v2f[1]  << std::endl;
-    rtl::VectorND<3, float> v3f(2.0f,8.0f,8.0f);
-    std::cout << "\tVectorND<3, float> variadic: " << v3f[0] << "  " << v3f[1] << "  " << v3f[2] << std::endl;
-    rtl::VectorND<5, double> v5d(2.0, 8.0, 5.8, 6.3, 2.4);
-    std::cout << "\tVectorND<5, double> variadic: " << v5d[0] << "  " << v5d[1] << "  " << v5d[2] << "  " << v5d[3] << "  " << v5d[4] << std::endl;
-
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<float> rnd_float(-1, 1);
-    auto el_rnd_gen = [&generator, &rnd_float](){ return rnd_float(generator); };
-
-    auto v2fr = rtl::VectorND<2, float>::random(el_rnd_gen);
-    std::cout << "\tVectorND<2, float>::random(): " << v2fr[0] << "  " << v2fr[1]  << std::endl;
-    auto v3fr = rtl::VectorND<3, float>::random(el_rnd_gen);
-    std::cout << "\tVectorND<3, float>::random(): " << v3fr[0] << "  " << v3fr[1] << "  " << v3fr[2] << std::endl;
-    auto v5dr = rtl::VectorND<5, double>::random(el_rnd_gen);
-    std::cout << "\tVectorND<5, double>::random(): " << v5dr[0] << "  " << v5dr[1] << "  " << v5dr[2] << "  " << v5dr[3] << "  " << v5dr[4] << std::endl;
-
-    // Construction from Eigen
-    auto ev3d = Eigen::Matrix<float, 3, 1>::Ones();
-    rtl::Vector3f rtl_ev3d(ev3d);
-    auto ev2d = Eigen::Matrix<float, 3, 1>::Ones();
-    rtl::Vector3f rtl_ev2d(ev2d);
-}
-
-void vectorXXConversion()
-{
-    rtl::Vector2D<float> a_2d(1.0f,2.0f), b_2d;
-    rtl::VectorND<2, float> a_nd2, b_nd2(3.0f, 3.0f);
-
-    a_nd2 = a_2d;
-    b_2d = b_nd2;
-
-    std::cout << "\nConversion test:" << std::endl;
-    std::cout << "\tVector2D -> VectorND<2, float>: " << a_nd2[0] << ", " << a_nd2[1] << std::endl;
-    std::cout << "\tVectorND<2, float> -> Vector2D: " << b_2d[0] << ", " << b_2d[1] << std::endl;
-}
-
-void elementAccess()
-{
-    std::cout<<"\nElement acccess test:"<<std::endl;
-    rtl::VectorND<3, double> v3i;
-    rtl::VectorND<3, double>::ElementType x = 0.1, y = 0.2, z = 0.3;
-    v3i.setElement(0, x);
-    v3i.setElement(1, y);
-    v3i.setElement(2, z);
-    std::cout << "\tSet/get element: " << v3i.getElement(0) << "  " << v3i.getElement(1) << "  " << v3i.getElement(2) << std::endl;
-    v3i[0] = v3i[1] = v3i[2] = 0.0;
-    std::cout << "\tOperator []: " << v3i[0] << "  " << v3i[1] << "  " << v3i[2] << std::endl;
-}
+    static void testFunction()
+    {
+        std::cout << "\n" << rtl::test::type<rtl::VectorND<dim, T>>::description() << " element acccess test:" << std::endl;
+        rtl::VectorND<dim, T> v;
+        v.setElement(0, static_cast<T>(0));
+        for (size_t i = 0, j = 1; j < dim; i = j, j++)
+            v.setElement(j, v.getElement(i) + 1);
+        std::cout<<"\tSet/Get element initialization: " << v << std::endl;
+    }
+};
 
 template <typename E>
-void crossproductTest(unsigned int rep, float eps)
+struct TesterCrossProduct
 {
-    std::cout << "\nCross-product test - equivalency of manual and Eigen implementation." << std::endl;
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<E> rnd_float(-1, 1);
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        rtl::Vector3D<E> v1(rnd_float(generator), rnd_float(generator), rnd_float(generator)), v2(rnd_float(generator), rnd_float(generator), rnd_float(generator));
-        Eigen::Vector3f ev1, ev2;
-        ev1[0] = v1[0];
-        ev1[1] = v1[1];
-        ev1[2] = v1[2];
-        ev2[0] = v2[0];
-        ev2[1] = v2[1];
-        ev2[2] = v2[2];
-        rtl::Vector3D<E> c_rtl = rtl::Vector3D<E>::crossProduct(v1, v2);
-        Eigen::Vector3f c_eig = ev1.cross(ev2);
-        float error = (c_rtl[0] - c_eig[0]) * (c_rtl[0] - c_eig[0]) + (c_rtl[1] - c_eig[1]) * (c_rtl[1] - c_eig[1]) + (c_rtl[2] - c_eig[2]) * (c_rtl[2] - c_eig[2]);
-        if (error > eps)
-            std::cout<<"\tExcessive error " << error << " detected" << std::endl;
+        std::cout << "\nCross-product test - equivalency of manual and Eigen implementation." << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable((E)-1, (E)1);
+        using V = rtl::Vector3D<E>;
+        for (int i = 0; i < rep; i++)
+        {
+            auto v1 = V::random(el_gen), v2 = V::random(el_gen);
+            Eigen::Matrix<E, 3, 1> ev1, ev2;
+            ev1[0] = v1[0];
+            ev1[1] = v1[1];
+            ev1[2] = v1[2];
+            ev2[0] = v2[0];
+            ev2[1] = v2[1];
+            ev2[2] = v2[2];
+            V c_rtl = v1.cross(v2);
+            Eigen::Matrix<E, 3, 1> c_eig = ev1.cross(ev2);
+            E error = (c_rtl[0] - c_eig[0]) * (c_rtl[0] - c_eig[0]) + (c_rtl[1] - c_eig[1]) * (c_rtl[1] - c_eig[1]) + (c_rtl[2] - c_eig[2]) * (c_rtl[2] - c_eig[2]);
+            if (error > rtl::test::type<E>::allowedError())
+                std::cout << "\tExcessive error " << error << " detected" << std::endl;
+        }
     }
-}
+};
 
-template<class V>
-void vectorXXStaticOperations(unsigned int rep, float eps)
+template<int dim, typename T>
+struct TesterVectorStaticOperations
 {
-    std::cout<<"\nStatic operations test:"<<std::endl;
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<typename V::ElementType> rnd_element(-1, 1);
-    auto el_rnd_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
-
-    std::cout << "\tNaN construction:" << std::endl;
-    auto v_nan = V::nan();
-    if (!v_nan.hasNaN())
-        std::cout<<"\tNo NaNs in ::nan() initialized vector." << std::endl;
-
-    std::cout<<"\tDistance computation:"<<std::endl;
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        auto v1 = V::random(el_rnd_gen);
-        auto v2 = V::random(el_rnd_gen);
-        typename V::DistanceType err = std::abs(V::distanceSquared(v1, v2) / V::distance(v1, v2) - (v1 - v2).length());
-        if(err > eps)
-            std::cout<<"\tExcessive error " << err << std::endl;
-    }
+        using V = rtl::VectorND<dim, T>;
+        std::cout << "\nStatic operations test:" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable((T)-1, (T)1);
 
-    std::cout<<"\tScalar projection computation:"<<std::endl;
-    for(unsigned int i = 0; i < rep; i++)
-    {
-        auto v1 = V::random(el_rnd_gen);
-        auto v2 = V::random(el_rnd_gen);
-        typename V::DistanceType err = std::abs(V::scalarProjection(v1, v2) - V::scalarProjectionOnUnit(v1, v2.normalized()));
-        if(err > eps)
-            std::cout<<"\tExcessive error " << err << std::endl;
-    }
+        std::cout << "\tNaN construction:" << std::endl;
+        auto v_nan = V::nan();
+        if (!v_nan.hasNaN())
+            std::cout << "\tNo NaNs in ::nan() initialized vector." << std::endl;
 
-    std::cout<<"\tVector projection computation:"<<std::endl;
-    for(unsigned int i = 0; i < rep; i++)
-    {
-        auto v1 = V::random(el_rnd_gen);
-        auto v2 = V::random(el_rnd_gen);
-        typename V::DistanceType err = (V::vectorProjection(v1, v2) - V::vectorProjectionOnUnit(v1, v2.normalized())).length();
-        if(err > eps)
-            std::cout<<"\tExcessive error " << err << std::endl;
-    }
-}
+        std::cout << "\tDistance computation:" << std::endl;
+        for (int i = 0; i < rep; i++)
+        {
+            auto v1 = V::random(el_gen);
+            auto v2 = V::random(el_gen);
+            T err = std::abs(V::distanceSquared(v1, v2) / V::distance(v1, v2) - (v1 - v2).length());
+            if (err > rtl::test::type<T>::allowedError())
+                std::cout << "\tExcessive error " << err << std::endl;
+        }
 
-template<class V>
-void normalization(unsigned int rep, typename V::DistanceType eps)
+        std::cout << "\tScalar projection computation:" << std::endl;
+        for (int i = 0; i < rep; i++)
+        {
+            auto v1 = V::random(el_gen);
+            auto v2 = V::random(el_gen);
+            T err = std::abs(V::scalarProjection(v1, v2) - V::scalarProjectionOnUnit(v1, v2.normalized()));
+            if (err > rtl::test::type<T>::allowedError())
+                std::cout << "\tExcessive error " << err << std::endl;
+        }
+
+        std::cout << "\tVector projection computation:" << std::endl;
+        for (int i = 0; i < rep; i++)
+        {
+            auto v1 = V::random(el_gen);
+            auto v2 = V::random(el_gen);
+            T err = (V::vectorProjection(v1, v2) - V::vectorProjectionOnUnit(v1, v2.normalized())).length();
+            if (err > rtl::test::type<T>::allowedError())
+                std::cout << "\tExcessive error " << err << std::endl;
+        }
+    }
+};
+
+template<int d1, int d2, typename T>
+struct TesterOuterProduct
 {
-    std::cout<<"\nNormalization test:"<<std::endl;
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<typename V::ElementType> rnd_element(-1, 1);
-    auto el_rnd_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
-
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        auto v1 = V::random(el_rnd_gen);
-        typename V::DistanceType err = std::abs(v1.normalized().length() - static_cast<typename V::DistanceType>(1));
-        if(err > eps)
-            std::cout<<"\tExcessive error " << err << std::endl;
-    }
-}
+        std::cout << "\nOuter product test for " << rtl::test::type<rtl::VectorND<d1, T>>::description() << " and " << rtl::test::type<rtl::VectorND<d2, T>>::description() << ":" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable((T)-1, (T)1);
 
-template<class V>
-void transformation(unsigned int rep, typename V::DistanceType eps)
+        for (int r = 0; r < rep; r++)
+        {
+            auto v1 = rtl::VectorND<d1, T>::random(el_gen);
+            auto v2 = rtl::VectorND<d2, T>::random(el_gen);
+            auto op = v1.outer(v2);
+
+            for (int i = 0; i < d1; i++)
+                for(int j = 0; j < d2; j++)
+                    if (std::abs(op(i, j) - v1[i] * v2[j]) > rtl::test::type<T>::allowedError())
+                        std::cout<< "\tExcessive error for vectors v1 = " << v1 << " and v2 = " << v2 << std::endl;
+        }
+    }
+};
+
+template<int dim, typename T>
+struct TesterNormalization
 {
-    std::cout<<"\nTransformation test:"<<std::endl;
-    using TranformationType = typename std::conditional<V::dimensionality() == 2, rtl::Transformation2D<typename V::ElementType>,
-            typename std::conditional<V::dimensionality() == 3, rtl::Transformation3D<typename V::ElementType>, void>::type>::type;
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<typename V::ElementType> rnd_element(-1, 1);
-    std::uniform_real_distribution<typename V::ElementType> rnd_angle(-rtl::C_PI, rtl::C_PI);
-
-    auto el_rnd_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
-    auto ang_rnd_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };
-
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        V v1 = V::random(el_rnd_gen);
-        auto tr = TranformationType::random(ang_rnd_gen, el_rnd_gen);
-        V v_tr = v1.transformed(tr);
-        v_tr.transform(tr.inverted());
-        typename V::DistanceType err = V::distance(v1, v_tr);
-        if(err > eps)
-            std::cout<<"\tExcessive error " << err << std::endl;
+        using V = rtl::VectorND<dim, T>;
+        std::cout << "\nNormalization test:" << std::endl;
+        for (int i = 0; i < rep; i++)
+        {
+            auto v1 = V::random(rtl::test::Random::uniformCallable((T)-1, (T)1));
+            T err = std::abs(v1.normalized().length() - (T)1);
+            if (err > rtl::test::type<T>::allowedError())
+                std::cout << "\tExcessive error " << err << std::endl;
+        }
     }
-}
+};
+
+template<int dim, typename E>
+struct TesterRigidTransformation
+{
+    static void testFunction(int rep)
+    {
+        using V = rtl::VectorND<dim, E>;
+        using T = rtl::RigidTfND<dim, E>;
+        std::cout << "\n" << rtl::test::type<T>::description() << " transformation test:" << std::endl;
+
+        auto el_gen = rtl::test::Random::uniformCallable<E>((E)-1, (E)1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            V v1 = V::random(el_gen);
+            T tr = T::random(el_gen);
+            V v_tr = v1.transformed(tr);
+            tr.invert();
+            v_tr.transform(tr);
+            E err = V::distance(v1, v_tr);
+            if (err > rtl::test::type<V>::allowedError())
+                std::cout << "\tExcessive error " << err << std::endl;
+        }
+    }
+};
 
 int main()
 {
-    unsigned int repeat = 10000;
-    float err_eps = 0.00001f;
-    float angle_step = 0.01f;
+    int repeat = 1000;
+    double angle_step = 0.01;
 
-    // VectorXX tests
-    vectorXXConstruction();
+    rtl::test::RangeTypes<TesterConstruction, 1, 5, float, double> t_c;
+    rtl::test::RangeTypes<TesterElementAccess, 1 ,5, float, double> t_ea;
 
-    vectorXXConversion();
+    rtl::test::Types<TesterVector2DAngleCcw, float, double> t_vaccw(angle_step);
+    rtl::test::Types<TesterVector2DAngleFromZero, float, double> t_vafz(angle_step);
+    rtl::test::Types<TesterCrossProduct, float, double> t_cp(repeat);
 
-    elementAccess();
-
-    vector2DAngleCcwTest<float>(angle_step, err_eps);
-    vector2DAngleCcwTest<double>(angle_step, err_eps);
-
-    vector2DAngleFromZeroTest<float>(angle_step, err_eps);
-    vector2DAngleFromZeroTest<double>(angle_step, err_eps);
-
-    vector2DAngleSpeedTest<float>(repeat, err_eps);
-    vector2DAngleSpeedTest<double>(repeat, err_eps);
-
-    crossproductTest<float>(repeat, err_eps);
-    crossproductTest<double>(repeat, err_eps);
-
-    vectorXXStaticOperations<rtl::Vector3f>(repeat, err_eps);
-    vectorXXStaticOperations<rtl::Vector3d>(repeat, err_eps);
-    vectorXXStaticOperations<rtl::Vector2f>(repeat, err_eps);
-    vectorXXStaticOperations<rtl::Vector2d>(repeat, err_eps);
-    vectorXXStaticOperations<rtl::VectorND<4, double>>(repeat, err_eps);
-
-    normalization<rtl::Vector2f>(repeat, err_eps);
-    normalization<rtl::Vector2d>(repeat, err_eps);
-    normalization<rtl::Vector3f>(repeat, err_eps);
-    normalization<rtl::Vector3d>(repeat, err_eps);
-    normalization<rtl::VectorND<4, float>>(repeat, err_eps);
-
-    transformation<rtl::Vector2f>(repeat, err_eps);
-    transformation<rtl::Vector2d>(repeat, err_eps);
-    transformation<rtl::VectorND<2, float>>(repeat, err_eps);
-    transformation<rtl::VectorND<2, double>>(repeat, err_eps);
-
-    transformation<rtl::Vector3f>(repeat, err_eps);
-    transformation<rtl::Vector3d>(repeat, err_eps);
-    transformation<rtl::VectorND<3, float>>(repeat, err_eps);
-    transformation<rtl::VectorND<3, double>>(repeat, err_eps);
+    rtl::test::RangeTypes<TesterVectorStaticOperations, 1, 5, float, double> t_vso(repeat);
+    rtl::test::RangeTypes<TesterNormalization, 1, 5, float, double> t_n(repeat);
+    rtl::test::RangeRangeTypes<TesterOuterProduct, 1, 5, 1, 5, float, double> t_op(repeat);
+    rtl::test::RangeTypes<TesterRigidTransformation, 2, 5, float, double> t_rtf(repeat);
 
     return 0;
 }

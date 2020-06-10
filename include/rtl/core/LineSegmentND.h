@@ -32,11 +32,14 @@
 
 namespace rtl
 {
-    template<typename Element>
-    class Transformation2D;
+    template<int, typename>
+    class TranslationND;
 
-    template<typename Element>
-    class Transformation3D;
+    template<int, typename>
+    class RotationND;
+
+    template<int, typename>
+    class RigidTfND;
 
     //! Base template for N-dimensional line segments.
     /*!
@@ -45,7 +48,7 @@ namespace rtl
      * identification. The following notation is used in the function descriptions: \a B is the begin point, \a E is the and point and \a D is the direction vector.
      * @tparam dimensions dimensionality of the line segment.
      * @tparam Element base type of line segment coordinates.
-     * @tparam ChildTemplate template inheriting this one (CRTIP).
+     * @tparam ChildTemplate template inheriting this one (CRTP).
      */
     template<int dimensions, typename Element, template<int, typename> class ChildTemplate>
     class LineSegmentND_common
@@ -66,6 +69,71 @@ namespace rtl
 
         //! Default destructor.
         ~LineSegmentND_common() = default;
+
+        //! Returns translated copy of the line segment.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new line segment after translation.
+         */
+        ChildType transformed(const TranslationND<dimensions, Element> &tr) const
+        {
+            return ChildType(tr(int_beg), tr(int_end));
+        }
+
+        //! Translates *this line segment in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<dimensions, Element> &tr)
+        {
+            int_beg.transform(tr);
+            int_end.transform(tr);
+        }
+
+        //! Returns rotated copy of the line segment.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new line segment after rotation.
+         */
+        ChildType transformed(const RotationND<dimensions, Element> &rot) const
+        {
+            return ChildType(rot(int_beg), rot(int_end));
+        }
+
+        //! Rotates *this line segment in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<dimensions, Element> &rot)
+        {
+            int_beg.transform(rot);
+            int_end.transform(rot);
+            int_dir.transform(rot);
+        }
+
+        //! Returns transformed copy of the line segment.
+        /*!
+         * @param tf the transformation to be applied.
+         * @return new line segment after transformation.
+         */
+        ChildType transformed(const RigidTfND<dimensions, Element> &tf) const
+        {
+            return ChildType(int_beg.transformed(tf), int_end.transformed(tf));
+        }
+
+        //! Transforms *this line segment in-place.
+        /*!
+         *
+         * @param tf the transformation to be applied.
+         */
+        void transform(const RigidTfND<dimensions, Element> &tf)
+        {
+            int_beg.transform(tf);
+            int_end.transform(tf);
+            int_dir.transform(tf.rot());
+        }
 
         //! Returns begin-point of the line segment.
         /*!
@@ -104,7 +172,7 @@ namespace rtl
         typename VectorType::DistanceType distanceToPoint(const VectorType &point) const
         {
             VectorType dif = int_beg - point;
-            return (dif - (VectorType::dotProduct(dif, int_dir) * int_dir)).length();
+            return (dif - (dif.dot(int_dir) * int_dir)).length();
         }
 
         //! Returns the shortest squared Euclidean distance to given point.
@@ -115,7 +183,7 @@ namespace rtl
         typename VectorType::DistanceType distanceToPointSquared(const VectorType &point) const
         {
             VectorType dif = int_beg - point;
-            return (dif - (VectorType::dotProduct(dif, int_dir) * int_dir)).lengthSquared();
+            return (dif - (dif.dot(int_dir) * int_dir)).lengthSquared();
         }
 
         //! Length of the line segment.
@@ -219,16 +287,16 @@ namespace rtl
             VectorType d1 = int_end - int_beg;
             VectorType d2 = ls.int_end - ls.int_beg;
 
-            typename VectorType::DistanceType d1d1 = VectorType::dotProduct(d1, d1);
-            typename VectorType::DistanceType d1d2 = VectorType::dotProduct(d1, d2);
-            typename VectorType::DistanceType d2d2 = VectorType::dotProduct(d2, d2);
-            typename VectorType::DistanceType det = d1d1 * d2d2 - d1d2 * d1d2;
+            typename VectorType::ElementType d1d1 = d1.dot(d1);
+            typename VectorType::ElementType d1d2 = d1.dot(d2);
+            typename VectorType::ElementType d2d2 = d2.dot(d2);
+            typename VectorType::ElementType det = d1d1 * d2d2 - d1d2 * d1d2;
 
             if (det == 0.0f)
                 return false;
 
             VectorType b2_b1 = ls.int_beg - int_beg;
-            t = (VectorType::dotProduct(b2_b1, d1) * d2d2 - VectorType::dotProduct(b2_b1, d2) * d1d2) / det;
+            t = (b2_b1.dot(d1) * d2d2 - b2_b1.dot(d2) * d1d2) / det;
             return true;
         }
 
@@ -248,7 +316,7 @@ namespace rtl
 
             typename VectorType::DistanceType det = 1 - d1d2 * d1d2;
             VectorType b2_b1 = ls.int_beg - int_beg;
-            t = (VectorType::dotProduct(b2_b1, int_dir) - VectorType::dotProduct(b2_b1, ls.int_dir) * d1d2) / det;
+            t = (b2_b1.dot(int_dir) - b2_b1.dot(ls.int_dir) * d1d2) / det;
             return true;
         }
 
@@ -381,17 +449,17 @@ namespace rtl
             VectorType d1 = ls1.int_end - ls1.int_beg;
             VectorType d2 = ls2.int_end - ls2.int_beg;
 
-            typename VectorType::DistanceType d1d1 = VectorType::dotProduct(d1, d1);
-            typename VectorType::DistanceType d2d2 = VectorType::dotProduct(d2, d2);
-            typename VectorType::DistanceType d1d2 = VectorType::dotProduct(d1, d2);
-            typename VectorType::DistanceType det = d1d1 * d2d2 - d1d2 * d1d2;
+            typename VectorType::ElementType d1d1 = d1.dot(d1);
+            typename VectorType::ElementType d2d2 = d2.dot(d2);
+            typename VectorType::ElementType d1d2 = d1.dot(d2);
+            typename VectorType::ElementType det = d1d1 * d2d2 - d1d2 * d1d2;
 
             if (det == 0)
                 return false;
 
             VectorType b2_b1 = ls2.int_beg - ls1.int_beg;
-            t1 = (VectorType::dotProduct(b2_b1, d1) * d2d2 - VectorType::dotProduct(b2_b1, d2) * d1d2) / det;
-            t2 = (VectorType::dotProduct(b2_b1, d1) * d1d2 - VectorType::dotProduct(b2_b1, d2) * d1d1) / det;
+            t1 = (b2_b1.dot(d1) * d2d2 - b2_b1.dot(d2) * d1d2) / det;
+            t2 = (b2_b1.dot(d1) * d1d2 - b2_b1.dot(d2) * d1d1) / det;
             return true;
         }
 
@@ -407,15 +475,15 @@ namespace rtl
          */
         static bool closestPointUnit(const LineSegmentND_common<dimensions, Element, ChildTemplate> &ls1, const LineSegmentND_common<dimensions, Element, ChildTemplate> &ls2, typename VectorType::DistanceType &t1, typename VectorType::DistanceType &t2)
         {
-            typename VectorType::DistanceType d1d2 = VectorType::dotProduct(ls1.int_dir, ls2.int_dir);
+            typename VectorType::ElementType d1d2 = ls1.int_dir.dot(ls2.int_dir);
 
             if (d1d2 >= 1)
                 return false;
 
-            typename VectorType::DistanceType det = 1 - d1d2 * d1d2;
+            typename VectorType::ElementType det = 1 - d1d2 * d1d2;
             VectorType b2_b1 = ls2.int_beg - ls1.int_beg;
-            t1 = (VectorType::dotProduct(b2_b1, ls1.int_dir) - VectorType::dotProduct(b2_b1, ls2.int_dir) * d1d2) / det;
-            t2 = (VectorType::dotProduct(b2_b1, ls1.int_dir) * d1d2 - VectorType::dotProduct(b2_b1, ls2.int_dir)) / det;
+            t1 = (b2_b1.dot(ls1.int_dir) - b2_b1.dot(ls2.int_dir) * d1d2) / det;
+            t2 = (b2_b1.dot(ls1.int_dir) * d1d2 - b2_b1.dot(ls2.int_dir)) / det;
             return true;
         }
 
@@ -560,7 +628,7 @@ namespace rtl
          */
         typename VectorType::DistanceType distanceToOrigin() const
         {
-            return std::abs(VectorType::dotProduct(this->int_beg, normal()));
+            return std::abs(this->int_beg.dot(normal()));
         } // c = -(ax + by)
 
         //! Set new begin point from coordinates.
@@ -578,28 +646,6 @@ namespace rtl
          * @param end_y y coordinate of the new end point.
          */
         void setEnd(Element end_x, Element end_y) { LineSegmentND_common<2, Element, LineSegmentND>::setEnd(VectorType(end_x, end_y)); }
-
-        //! Returns transformed copy of the line segment.
-        /*!
-         * @param tf the transformation to be applied.
-         * @return new line segment after transformation.
-         */
-        LineSegmentND<2, Element> transformed(const Transformation2D<Element> &tf) const
-        {
-            return LineSegmentND<2, Element>(LineSegmentND<2, Element>::int_beg.transformed(tf), LineSegmentND<2, Element>::int_end.transformed(tf));
-        }
-
-        //! Transforms *this line segment in-place.
-        /*!
-         *
-         * @param tf the transformation to be applied.
-         */
-        void transform(const Transformation2D<Element> &tf)
-        {
-            LineSegmentND<2, Element>::int_beg.transform(tf);
-            LineSegmentND<2, Element>::int_end.transform(tf);
-            LineSegmentND<2, Element>::int_dir = tf.rotMat() * LineSegmentND<2, Element>::int_dir;
-        }
 
         //! Convenience alias to cropByHyperrect()
         bool cropByRect(const VectorType &corner1, const VectorType &corner2, Element &segment_beg_t, Element &segment_end_t)
@@ -741,27 +787,6 @@ namespace rtl
          */
         LineSegmentND(const VectorType &beg, const VectorType &end, const VectorType dir) : LineSegmentND_common<3, Element, LineSegmentND>(beg, end, dir) {}
 
-        //! Returns transformed copy of the line segment.
-        /*!
-         * @param tf the transformation to be applied.
-         * @return new line segment after transformation.
-         */
-        LineSegmentND<3, Element> transformed(const Transformation3D<Element> &tf) const
-        {
-            return LineSegmentND<3, Element>(LineSegmentND<3, Element>::int_beg.transformed(tf), LineSegmentND<3, Element>::int_end.transformed(tf));
-        }
-
-        //! Transforms *this line segment in-place.
-        /*!
-         *
-         * @param tf the transformation to be applied.
-         */
-        void transform(const Transformation3D<Element> &tf)
-        {
-            LineSegmentND<3, Element>::int_beg.transform(tf);
-            LineSegmentND<3, Element>::int_end.transform(tf);
-            LineSegmentND<3, Element>::int_dir = tf.rotMat() * LineSegmentND<3, Element>::int_dir;
-        }
     };
 }
 

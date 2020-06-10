@@ -32,6 +32,7 @@
 
 #include "rtl/Core.h"
 #include "rtl/Transformation.h"
+#include "rtl/Test.h"
 #include "rtl/io/StdLib.h"
 
 // LineSegment2D (original implementation) and LineSegmentND equivalency test
@@ -115,33 +116,33 @@ void lsndClosestPoint(unsigned int rep, T eps)
     }
 }
 
-template<class L>
-void transformation(unsigned int rep, typename L::ElementType eps)
+template<int dim, typename E>
+struct TesterRigidTransformation
 {
-    std::cout<<"\nTransformation test:"<<std::endl;
-    using TranformationType = typename std::conditional<L::dimensionality() == 2, rtl::Transformation2D<typename L::ElementType>,
-            typename std::conditional<L::dimensionality() == 3, rtl::Transformation3D<typename L::ElementType>, void>::type>::type;
-
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<typename L::ElementType> rnd_element(-1, 1);
-    std::uniform_real_distribution<typename L::ElementType> rnd_angle(-rtl::C_PI, rtl::C_PI);
-    auto el_rnd_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
-    auto ang_rnd_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };
-
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        L l1 = L::random(el_rnd_gen);
-        auto tr = TranformationType::random(ang_rnd_gen, el_rnd_gen);
-        L l_tr = l1.transformed(tr);
-        if (L::VectorType::distance(l_tr.direction(), (l_tr.end() - l_tr.beg()).normalized()) > eps)
-            std::cout<<"\tNon-conforming direction vector." << " for " << l1 << " and " << tr  << std::endl;
-        l_tr.transform(tr.inverted());
-        typename L::DistanceType err = L::distance(l1, l_tr);
-        if(err.combined(1, 1) > eps)
-            std::cout<<"\tExcessive distance error " << err.combined(1, 1) << " for " << l1 << " and " << tr << std::endl;
+        using V = rtl::VectorND<dim, E>;
+        using L = rtl::LineSegmentND<dim, E>;
+        using T = rtl::RigidTfND<dim, E>;
+        std::cout << "\n" << rtl::test::type<T>::description() << " transformation test:" << std::endl;
+
+        auto el_gen = rtl::test::Random::uniformCallable<E>((E)-1, (E)1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            L l1 = L::random(el_gen);
+            auto tr = T::random(el_gen);
+            L l_tr = l1.transformed(tr);
+            if (V::distance(l_tr.direction(), (l_tr.end() - l_tr.beg()).normalized()) > rtl::test::type<V>::allowedError())
+                std::cout << "\tNon-conforming direction vector." << " for " << l1 << " and " << tr << std::endl;
+            l_tr.transform(tr.inverted());
+            if (V::distance(l1.beg(), l_tr.beg()) > rtl::test::type<V>::allowedError() ||
+                    V::distance(l1.end(), l_tr.end()) > rtl::test::type<V>::allowedError() ||
+                    V::distance(l1.direction(), l_tr.direction()) > rtl::test::type<V>::allowedError())
+                std::cout << "\tExcessive distance error for " << l1 << " and " << tr << "in forward-backward test." << std::endl;
+        }
     }
-}
+};
 
 // LineSegmentND hyperrect fitting
 template <size_t dim, typename T>
@@ -185,15 +186,7 @@ int main()
     lsndClosestPoint<float>(repeat, 0.01f);
     lsndClosestPoint<double>(repeat, 0.0001f);
 
-    transformation<rtl::LineSegment2f>(repeat, err_eps_f);
-    transformation<rtl::LineSegment2d>(repeat, err_eps_d);
-    transformation<rtl::LineSegmentND<2, float>>(repeat, err_eps_f);
-    transformation<rtl::LineSegmentND<2, double>>(repeat, err_eps_d);
-
-    transformation<rtl::LineSegment3f>(repeat, err_eps_f);
-    transformation<rtl::LineSegment3d>(repeat, err_eps_d);
-    transformation<rtl::LineSegmentND<3, float>>(repeat, err_eps_f);
-    transformation<rtl::LineSegmentND<3, double>>(repeat, err_eps_d);
+    rtl::test::RangeTypes<TesterRigidTransformation, 2, 5, float, double> t_rtf(100);
 
     lsndFitHyperRect<2, float>(repeat, err_eps_f);
     lsndFitHyperRect<3, float>(repeat, err_eps_f);

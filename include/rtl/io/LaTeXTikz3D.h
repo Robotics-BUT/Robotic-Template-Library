@@ -87,7 +87,7 @@ namespace rtl
          * @param fov field of view in degrees.
          * @param orientation transformation applied on the scene before rendering.
          */
-        void setView(float fov, const Transformation3f &orientation)
+        void setView(float fov, const RigidTf3f &orientation)
         {
             focal_length = 1.0f / std::tan(fov / 180.0f * rtl::C_PIf / 2.0f);
             view_orientation = orientation;
@@ -102,7 +102,7 @@ namespace rtl
         void setView(float fov, const Vector3f &camera_dir)
         {
             focal_length = 1.0f / std::tan(fov / 180.0f * rtl::C_PIf / 2.0f);
-            view_orientation = Transformation3f(Quaternionf(-Vector3f::baseZ(), camera_dir), Vector3f::nan());
+            view_orientation = RigidTf3f(Quaternionf(-Vector3f::baseZ(), camera_dir), Vector3f::nan());
         }
 
         //! Sets free space border around content of the picture.
@@ -273,7 +273,7 @@ namespace rtl
         {
             virtual ~RenderPrimitive() = default;
 
-            virtual void project(const Transformation3f &tr, float fl) = 0;
+            virtual void project(const RigidTf3f &tr, float fl) = 0;
             virtual std::string render(float scale) = 0;
             virtual RenderPrimitive* ptr() = 0;
             virtual bool frontVisible() = 0;
@@ -290,7 +290,7 @@ namespace rtl
             MarkPrimitive(const Vector3f &pos, std::string mn, float rot, float rad) : pos_3d{pos}, rotation{rot}, radius{rad}, mark{std::move(mn)} {}
             ~MarkPrimitive() override = default;
 
-            void project(const Transformation3f &tr, float fl) override;
+            void project(const RigidTf3f &tr, float fl) override;
             std::string render(float scale) override;
             MarkPrimitive* ptr() override { return this; }
             bool frontVisible() override { return true; }
@@ -309,7 +309,7 @@ namespace rtl
             LinePrimitive(const LineSegment3f &ls, std::string st) : ls_3d{ls}, style{std::move(st)} {}
             ~LinePrimitive() override = default;
 
-            void project(const Transformation3f &tr, float fl) override;
+            void project(const RigidTf3f &tr, float fl) override;
             std::string render(float scale) override;
             LinePrimitive* ptr() override { return this; }
             bool frontVisible() override { return true; }
@@ -336,7 +336,7 @@ namespace rtl
             }
             ~PolygonPrimitive() override = default;
 
-            void project(const Transformation3f &tr, float fl) override;
+            void project(const RigidTf3f &tr, float fl) override;
             std::string render(float scale) override;
             PolygonPrimitive* ptr() override { return this; }
             bool frontVisible() override { return front_visible; }
@@ -447,7 +447,7 @@ namespace rtl
 
         float epsilon{0.001f};
         float export_width{}, export_height{}, export_border{}, focal_length{};
-        Transformation3f view_orientation;
+        RigidTf3f view_orientation;
         std::unique_ptr<BoundingBox3f> min_reg{nullptr}, max_reg{nullptr}, render_reg{nullptr};
         std::unique_ptr<BoundingBox2f> clipping{nullptr};
         std::string frame_style;

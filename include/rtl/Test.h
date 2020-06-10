@@ -24,44 +24,11 @@
 //
 // Contact person: Ales Jelinek <Ales.Jelinek@ceitec.vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_TRANSFORMATION_H
-#define ROBOTICTEMPLATELIBRARY_TRANSFORMATION_H
+#ifndef ROBOTICTEMPLATELIBRARY_TEST_H
+#define ROBOTICTEMPLATELIBRARY_TEST_H
 
-#include "rtl/tf/TranslationND.h"
-#include "rtl/tf/RotationND.h"
-#include "rtl/tf/RigidTfND.h"
+#include "rtl/test/TemplateTester.h"
+#include "rtl/test/TypeDetails.h"
+#include "rtl/test/Random.h"
 
-namespace rtl
-{
-    template<typename T>
-    using Translation2D = TranslationND<2, T>;
-    using Translation2f = Translation2D<float>;
-    using Translation2d = Translation2D<double>;
-
-    template<typename T>
-    using Translation3D = TranslationND<3, T>;
-    using Translation3f = Translation3D<float>;
-    using Translation3d = Translation3D<double>;
-
-    template<typename T>
-    using Rotation2D = RotationND<2, T>;
-    using Rotation2f = Rotation2D<float>;
-    using Rotation2d = Rotation2D<double>;
-
-    template<typename T>
-    using Rotation3D = RotationND<3, T>;
-    using Rotation3f = Rotation2D<float>;
-    using Rotation3d = Rotation2D<double>;
-
-    template<typename T>
-    using RigidTf2D = RigidTfND<2, T>;
-    using RigidTf2f = RigidTf2D<float>;
-    using RigidTf2d = RigidTf2D<double>;
-
-    template<typename T>
-    using RigidTf3D = RigidTfND<3, T>;
-    using RigidTf3f = RigidTf3D<float>;
-    using RigidTf3d = RigidTf3D<double>;
-}
-
-#endif //ROBOTICTEMPLATELIBRARY_TRANSFORMATION_H
+#endif //ROBOTICTEMPLATELIBRARY_TEST_H

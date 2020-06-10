@@ -33,33 +33,60 @@
 
 namespace rtl
 {
-    const static double C_E = 2.71828182845904523536;           //!< Euler number
-    const static double C_LOG2E = 1.44269504088896340736;       //!< \f$\log_2 e \f$
-    const static double C_LOG10E = 0.434294481903251827651;     //!< \f$\log_{10} e \f$
-    const static double C_LN2 = 0.693147180559945309417;        //!< \f$\ln 2 \f$
-    const static double C_LN10 = 2.30258509299404568402;        //!< \f$\ln 10 \f$
-    const static double C_PI = 3.14159265358979323846;          //!< \f$\pi \f$
-    const static double C_PI_2 = 1.57079632679489661923;        //!< \f$\pi / 2 \f$
-    const static double C_PI_4 = 0.785398163397448309616;       //!< \f$\pi / 4\f$
-    const static double C_1_PI = 0.318309886183790671538;       //!< \f$ 1 / \pi \f$
-    const static double C_2_PI = 0.636619772367581343076;       //!< \f$ 2 / \pi \f$
-    const static double C_2_SQRTPI = 1.12837916709551257390;    //!< \f$ 2 / \sqrt{\pi} \f$
-    const static double C_SQRT2 = 1.41421356237309504880;       //!< \f$ \sqrt{2} \f$
-    const static double C_SQRT1_2 = 0.707106781186547524401;    //!< \f$ 1 / \sqrt{2} \f$
+    template<typename T>
+    const static T C_E = (T)2.71828182845904523536L;           //!< Euler number
+    template<typename T>
+    const static T C_LOG2E = (T)1.44269504088896340736L;       //!< \f$\log_2 e \f$
+    template<typename T>
+    const static T C_LOG10E = (T)0.434294481903251827651L;     //!< \f$\log_{10} e \f$
+    template<typename T>
+    const static T C_LN2 = (T)0.693147180559945309417L;        //!< \f$\ln 2 \f$
+    template<typename T>
+    const static T C_LN10 = (T)2.30258509299404568402L;        //!< \f$\ln 10 \f$
+    template<typename T>
+    const static T C_PI = (T)3.14159265358979323846L;          //!< \f$\pi \f$
+    template<typename T>
+    const static T C_PI_2 = (T)1.57079632679489661923L;        //!< \f$\pi / 2 \f$
+    template<typename T>
+    const static T C_PI_4 = (T)0.785398163397448309616L;       //!< \f$\pi / 4\f$
+    template<typename T>
+    const static T C_1_PI = (T)0.318309886183790671538L;       //!< \f$ 1 / \pi \f$
+    template<typename T>
+    const static T C_2_PI = (T)0.636619772367581343076L;       //!< \f$ 2 / \pi \f$
+    template<typename T>
+    const static T C_2_SQRTPI = (T)1.12837916709551257390L;    //!< \f$ 2 / \sqrt{\pi} \f$
+    template<typename T>
+    const static T C_SQRT2 = (T)1.41421356237309504880L;       //!< \f$ \sqrt{2} \f$
+    template<typename T>
+    const static T C_SQRT1_2 = (T)0.707106781186547524401L;    //!< \f$ 1 / \sqrt{2} \f$
 
-    const static float C_Ef = 2.71828182845904523536f;          //!< Euler number
-    const static float C_LOG2Ef = 1.44269504088896340736f;      //!< \f$\log_2 e \f$
-    const static float C_LOG10Ef = 0.434294481903251827651f;    //!< \f$\log_{10} e \f$
-    const static float C_LN2f = 0.693147180559945309417f;       //!< \f$\ln 2 \f$
-    const static float C_LN10f = 2.30258509299404568402f;       //!< \f$\ln 10 \f$
-    const static float C_PIf = 3.14159265358979323846f;         //!< \f$\pi \f$
-    const static float C_PI_2f = 1.57079632679489661923f;       //!< \f$\pi / 2 \f$
-    const static float C_PI_4f = 0.785398163397448309616f;      //!< \f$\pi / 4\f$
-    const static float C_1_PIf = 0.318309886183790671538f;      //!< \f$ 1 / \pi \f$
-    const static float C_2_PIf = 0.636619772367581343076f;      //!< \f$ 2 / \pi \f$
-    const static float C_2_SQRTPIf = 1.12837916709551257390f;   //!< \f$ 2 / \sqrt{\pi} \f$
-    const static float C_SQRT2f = 1.41421356237309504880f;      //!< \f$ \sqrt{2} \f$
-    const static float C_SQRT1_2f = 0.707106781186547524401f;   //!< \f$ 1 / \sqrt{2} \f$
+    const static auto C_Ef = C_E<float>;                      //!< Euler number
+    const static auto C_LOG2Ef = C_LOG2E<float>;              //!< \f$\log_2 e \f$
+    const static auto C_LOG10Ef = C_LOG10E<float>;            //!< \f$\log_{10} e \f$
+    const static auto C_LN2f = C_LN2<float>;                  //!< \f$\ln 2 \f$
+    const static auto C_LN10f = C_LN10<float>;                //!< \f$\ln 10 \f$
+    const static auto C_PIf = C_PI<float>;                    //!< \f$\pi \f$
+    const static auto C_PI_2f = C_PI_2<float>;                //!< \f$\pi / 2 \f$
+    const static auto C_PI_4f = C_PI_4<float>;                //!< \f$\pi / 4\f$
+    const static auto C_1_PIf = C_1_PI<float>;                //!< \f$ 1 / \pi \f$
+    const static auto C_2_PIf = C_2_PI<float>;                //!< \f$ 2 / \pi \f$
+    const static auto C_2_SQRTPIf = C_2_SQRTPI<float>;        //!< \f$ 2 / \sqrt{\pi} \f$
+    const static auto C_SQRT2f = C_SQRT2<float>;              //!< \f$ \sqrt{2} \f$
+    const static auto C_SQRT1_2f = C_SQRT1_2<float>;          //!< \f$ 1 / \sqrt{2} \f$
+
+    const static auto C_Ed = C_E<double>;                     //!< Euler number
+    const static auto C_LOG2Ed = C_LOG2E<double>;             //!< \f$\log_2 e \f$
+    const static auto C_LOG10Ed = C_LOG10E<double>;           //!< \f$\log_{10} e \f$
+    const static auto C_LN2d = C_LN2<double>;                 //!< \f$\ln 2 \f$
+    const static auto C_LN10d = C_LN10<double>;               //!< \f$\ln 10 \f$
+    const static auto C_PId = C_PI<double>;                   //!< \f$\pi \f$
+    const static auto C_PI_2d = C_PI_2<double>;               //!< \f$\pi / 2 \f$
+    const static auto C_PI_4d = C_PI_4<double>;               //!< \f$\pi / 4\f$
+    const static auto C_1_PId = C_1_PI<double>;               //!< \f$ 1 / \pi \f$
+    const static auto C_2_PId = C_2_PI<double>;               //!< \f$ 2 / \pi \f$
+    const static auto C_2_SQRTPId = C_2_SQRTPI<double>;       //!< \f$ 2 / \sqrt{\pi} \f$
+    const static auto C_SQRT2d = C_SQRT2<double>;             //!< \f$ \sqrt{2} \f$
+    const static auto C_SQRT1_2d = C_SQRT1_2<double>;         //!< \f$ 1 / \sqrt{2} \f$
 }
 
 #endif // ROBOTICTEMPLATELIBRARY_UTILITYCONSTANTS_H

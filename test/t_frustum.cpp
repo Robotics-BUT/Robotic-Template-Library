@@ -102,7 +102,7 @@ TEST(t_frustum, far_getters) {
 TEST(t_frustum, transformation_zero) {
     using V = rtl::Frustum3D<double>::VectorType;
 
-    rtl::Transformation3D<double> tf{rtl::Quaternion<double>::identity(), rtl::Vector3D<double>{0,0,0}};
+    rtl::RigidTf3d tf{rtl::Quaternion<double>::identity(), rtl::Vector3D<double>{0,0,0}};
     double xDist = 10;
     double depth = 1;
     rtl::Frustum3D<double> frustum(V{0,0,0}, V{xDist,1,1}, V{xDist,-1,1}, V{xDist,1,-1}, V{xDist,-1,-1}, depth);
@@ -157,7 +157,7 @@ TEST(t_frustum, transformation_translation) {
     double xDist = 10;
     double depth = 1;
     double translationX = 2;
-    rtl::Transformation3D<double> tf{rtl::Quaternion<double>{}, rtl::Vector3D<double>{translationX,0,0}};
+    rtl::RigidTf3d tf{rtl::Quaternion<double>::identity(), rtl::Vector3D<double>{translationX,0,0}};
     rtl::Frustum3D<double> frustum(V{0,0,0}, V{xDist,1,1}, V{xDist,-1,1}, V{xDist,1,-1}, V{xDist,-1,-1}, depth);
     double scale = ( (xDist + depth)/ xDist );
     auto transformedFrustum = frustum.transformed(tf);
@@ -204,7 +204,7 @@ TEST(t_frustum, transformation_rotation) {
 
     double xDist = 10;
     double depth = 1;
-    rtl::Transformation3D<double> tf{0,0,M_PI/2, rtl::Vector3D<double>{0,0,0}};
+    rtl::RigidTf3d tf{0,0,rtl::C_PId/2, rtl::Vector3D<double>{0,0,0}};
     rtl::Frustum3D<double> frustum(V{0,0,0}, V{xDist,1,1}, V{xDist,-1,1}, V{xDist,1,-1}, V{xDist,-1,-1}, depth);
     double scale = ( (xDist + depth)/ xDist );
     auto transformedFrustum = frustum.transformed(tf);
@@ -253,7 +253,7 @@ TEST(t_frustum, transformation_tf) {
     double xDist = 10;
     double depth = 1;
     double translationX = 2;
-    rtl::Transformation3D<double> tf{0,0,M_PI/2, rtl::Vector3D<double>{translationX,0,0}};
+    rtl::RigidTf3d tf{0,0,rtl::C_PId/2, rtl::Vector3D<double>{translationX,0,0}};
     rtl::Frustum3D<double> frustum(V{0,0,0}, V{xDist,1,1}, V{xDist,-1,1}, V{xDist,1,-1}, V{xDist,-1,-1}, depth);
     double scale = ( (xDist + depth)/ xDist );
     auto transformedFrustum = frustum.transformed(tf);

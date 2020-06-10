@@ -32,8 +32,14 @@
 
 namespace rtl
 {
-    template<typename Element>
-    class Transformation3D;
+    template<int, typename>
+    class TranslationND;
+
+    template<int, typename>
+    class RotationND;
+
+    template<int, typename>
+    class RigidTfND;
 
     //! Three dimensional polygon class.
     /*!
@@ -110,20 +116,82 @@ namespace rtl
         //! Read only access to the vertices.
         [[nodiscard]] const std::vector<VectorType>& points() const { return int_pts; }
 
-        Polygon3D<Element> transformed(const Transformation3D<Element> &tf) const
+        //! Returns translated copy of the polygon.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new polygon after translation.
+         */
+        Polygon3D<ElementType> transformed(const TranslationND<3, Element> &tr) const
         {
-            auto new_normal = tf.rotMat() * int_normal;
-            ElementType  new_dist = int_dist + VectorType::dotProduct(tf.tr(), new_normal);
+            ElementType  new_dist = int_dist + tr.trVec().dot(int_normal);
+            Polygon3D<ElementType> ret(int_normal, new_dist);
+            for (const auto &p : int_pts)
+                ret.addPointDirect(tr(p));
+            return ret;
+        }
+
+        //! Translates *this polygon in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<3, Element> &tr)
+        {
+            int_dist += tr.trVec().dot(int_normal);
+            for (auto &p : int_pts)
+                p.transform(tr);
+        }
+
+        //! Returns rotated copy of the polygon.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new polygon after rotation.
+         */
+        Polygon3D<ElementType> transformed(const RotationND<3, Element> &rot) const
+        {
+            auto new_normal = rot(int_normal);
+            Polygon3D<ElementType> ret(new_normal, int_dist);
+            for (const auto &p : int_pts)
+                ret.addPointDirect(rot(p));
+            return ret;
+        }
+
+        //! Rotates *this polygon in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<3, Element> &rot)
+        {
+            int_normal.transform(rot);
+            for (auto &p : int_pts)
+                p.transform(rot);
+        }
+
+        //! Returns transformed copy of the polygon.
+        /*!
+         * @param tf the transformation to be applied.
+         * @return new polygon after transformation.
+         */
+        Polygon3D<ElementType> transformed(const RigidTfND<3, Element> &tf) const
+        {
+            auto new_normal = int_normal.transformed(tf.rot());
+            ElementType  new_dist = int_dist + tf.trVec().dot(new_normal);
             Polygon3D<ElementType> ret(new_normal, new_dist);
             for (const auto &p : int_pts)
                 ret.addPointDirect(tf(p));
             return ret;
         }
 
-        void transform(const Transformation3D<Element> &tf)
+        //! Transforms *this polygon in-place.
+        /*!
+         *
+         * @param tf the transformation to be applied.
+         */
+        void transform(const RigidTfND<3, Element> &tf)
         {
-            int_normal.transform(tf);
-            int_dist += VectorType::dotProduct(tf.tr(), int_normal);
+            int_normal.transform(tf.rot());
+            int_dist += tf.tr().dot(int_normal);
             for (auto &p : int_pts)
                 p.transform(tf);
         }

@@ -132,7 +132,7 @@ namespace rtl
             clusters.clear();
             bool has_cluster;
             std::vector<size_t> first_occurence;
-            ElementType dist2, scale_factor = (ElementType)step_size * 2.0f * C_PI / points.size();
+            ElementType dist2, scale_factor = (ElementType)step_size * 2 * C_PI<ElementType> / points.size();
             scale_factor *= scale_factor;
 
             // cluster pertinence search

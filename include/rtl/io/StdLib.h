@@ -31,8 +31,8 @@
 #include <ostream>
 
 #include "rtl/core/VectorND.h"
-#include "rtl/tf/Transformation2D.h"
-#include "rtl/tf/Transformation3D.h"
+#include "rtl/core/LineSegmentND.h"
+#include "rtl/tf/RigidTfND.h"
 
 /*! \file
  *  \brief RTL export to STL streams.
@@ -123,22 +123,23 @@ std::ostream & operator<<( std::ostream & os, const rtl::Quaternion<E> &q)
     return os;
 }
 
-//! Two dimensional transformation to std::ostream operator.
+//! Rigid transformation to std::ostream operator.
 /*!
  *
+ * @tparam dim dimensionality of the transformation.
  * @tparam E ElementType of the transformation.
  * @param os output stream.
  * @param tr transformation to be printed.
  * @return reference to \p os.
  */
-template<typename E>
-std::ostream & operator<<( std::ostream & os, const rtl::Transformation2D<E> &tr)
+template<int dim, typename E>
+std::ostream & operator<<( std::ostream & os, const rtl::RigidTfND<dim, E> &tr)
 {
-    os << "R: " << tr.rotMat() << "   t: " << tr.tr();
+    os << "R: " << tr.rotMat() << "   t: " << tr.trVec();
     return os;
 }
 
-//! Three dimensional transformation to std::ostream operator.
+//! Three dimensional rigid transformation to std::ostream operator.
 /*!
  *
  * @tparam E ElementType of the transformation.
@@ -147,9 +148,9 @@ std::ostream & operator<<( std::ostream & os, const rtl::Transformation2D<E> &tr
  * @return reference to \p os.
  */
 template<typename E>
-std::ostream & operator<<( std::ostream & os, const rtl::Transformation3D<E> &tr)
+std::ostream & operator<<( std::ostream & os, const rtl::RigidTfND<3, E> &tr)
 {
-    os << "R: " << tr.rotMat() << "   t: " << tr.tr() << "   axix:" << tr.rotAxis() << "   angle:" << tr.rotAngle();
+    os << "R: " << tr.rotMat() << "   t: " << tr.trVec() << "   axix:" << tr.rotAxis() << "   angle:" << tr.rotAngle();
     return os;
 }
 

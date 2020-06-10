@@ -218,7 +218,7 @@ struct BenchmarkItem3D
 
     void exportLaTeX(rtl::LaTeXTikz3D &le)
     {
-        le.setView(45, rtl::Transformation3f(-rtl::C_PI / 4.0, rtl::Vector3f::baseX(), rtl::Vector3f::nan()));
+        le.setView(45, rtl::RigidTf3f(-rtl::C_PIf / 4.0, rtl::Vector3f::baseX(), rtl::Vector3f::nan()));
         if (points.size() < 1000)
             le.addMarks(points, "style={draw=black,fill=black}", rtl::LaTeXTikz3D::latex_mark_dot, 0.0f, 0.02f);
         else

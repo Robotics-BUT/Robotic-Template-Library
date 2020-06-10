@@ -34,8 +34,14 @@
 
 namespace rtl
 {
-    template<typename Element>
-    class Transformation3D;
+    template<int, typename>
+    class TranslationND;
+
+    template<int, typename>
+    class RotationND;
+
+    template<int, typename>
+    class RigidTfND;
 
     //! Axis aligned bounding box - implementation for N-dimensional space.
     /*! Generic implementation of an axis aligned bounding box in N-dimensional space scpecified by two vertices. The min() vertex represents the lower bound in all dimensions and the
@@ -172,27 +178,68 @@ namespace rtl
             return vertices;
         }
 
+        //! Returns translated copy of the bounding box.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new bounding box after translation.
+         */
+        BoundingBoxND<dim, Element> transformed(const TranslationND<dim, Element> &tr) const
+        {
+            BoundingBoxND<dim, Element> ret(*this);
+            ret.b_min += tr.trVec();
+            ret.b_max += tr.trVec();
+            return ret;
+        }
+
+        //! Translates *this bounding box in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<dim, Element> &tr)
+        {
+            b_min += tr.trVec();
+            b_max += tr.trVec();
+        }
+
+        //! Returns rotated copy of the bounding box.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new bounding box after rotation.
+         */
+        BoundingBoxND<dim, Element> transformed(const RotationND<dim, Element> &rot) const
+        {
+            return BoundingBoxND<dim, Element>(allVertices(rot));
+        }
+
+        //! Rotates *this bounding box in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<dim, Element> &rot)
+        {
+            auto tmp = this->transformed(rot);
+            b_min = tmp.b_min;
+            b_max = tmp.b_max;
+        }
+
         //! Returns transformed copy of the bounding box.
         /*!
-         * Only for 3D bounding boxes. Will be extended to all dimensions in the future.
-         * @tparam enabled SFINAE enabling parameter.
          * @param tf the transformation to be applied.
-         * @return new bounding box covering this instance after transformation.
+         * @return new bounding box after transformation.
          */
-        template<bool enabled = dim == 3>
-        BoundingBoxND<dim, Element> transformed(const Transformation3D<Element> &tf, typename std::enable_if<enabled>::type* = 0) const
+        BoundingBoxND<dim, Element> transformed(const RigidTfND<dim, Element> &tf) const
         {
             return BoundingBoxND<dim, Element>(allVertices(tf));
         }
 
-        //! Transforms this instance in-place.
+        //! Transforms *this bounding box in-place.
         /*!
-         * Only for 3D bounding boxes. Will be extended to all dimensions in the future.
-         * @tparam enabled SFINAE enabling parameter.
+         *
          * @param tf the transformation to be applied.
          */
-        template<bool enabled = dim == 3>
-        void transform(const Transformation3D<Element> &tf, typename std::enable_if<enabled>::type* = 0)
+        void transform(const RigidTfND<dim, Element> &tf)
         {
             auto tmp = this->transformed(tf);
             b_min = tmp.b_min;

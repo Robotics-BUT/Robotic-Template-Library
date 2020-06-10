@@ -33,6 +33,15 @@
 
 namespace rtl
 {
+    template<int, typename>
+    class TranslationND;
+
+    template<int, typename>
+    class RotationND;
+
+    template<int, typename>
+    class RigidTfND;
+
     //! Two dimensional polygon class.
     /*!
      * For now, it only aggregates points in std::vector and makes them available in a unified way with Polygon3D template.
@@ -51,6 +60,78 @@ namespace rtl
 
         //! Default destructor.
         ~Polygon2D() = default;
+
+        //! Returns translated copy of the polygon.
+        /*!
+         * @param tr the translation to be applied.
+         * @return new polygon after translation.
+         */
+        Polygon2D<ElementType> transformed(const TranslationND<2, Element> &tr) const
+        {
+            Polygon2D<ElementType> ret;
+            for (const auto &p : int_pts)
+                ret.addPointDirect(tr(p));
+            return ret;
+        }
+
+        //! Translates *this polygon in-place.
+        /*!
+         *
+         * @param tr the translation to be applied.
+         */
+        void transform(const TranslationND<2, Element> &tr)
+        {
+            for (auto &p : int_pts)
+                p.transform(tr);
+        }
+
+        //! Returns rotated copy of the polygon.
+        /*!
+         * @param rot the rotation to be applied.
+         * @return new polygon after rotation.
+         */
+        Polygon2D<ElementType> transformed(const RotationND<2, Element> &rot) const
+        {
+            Polygon2D<ElementType> ret;
+            for (const auto &p : int_pts)
+                ret.addPointDirect(rot(p));
+            return ret;
+        }
+
+        //! Rotates *this polygon in-place.
+        /*!
+         *
+         * @param rot the rotation to be applied.
+         */
+        void transform(const RotationND<2, Element> &rot)
+        {
+            for (auto &p : int_pts)
+                p.transform(rot);
+        }
+
+        //! Returns transformed copy of the polygon.
+        /*!
+         * @param tf the transformation to be applied.
+         * @return new polygon after transformation.
+         */
+        Polygon2D<ElementType> transformed(const RigidTfND<2, Element> &tf) const
+        {
+            Polygon2D<ElementType> ret;
+            for (const auto &p : int_pts)
+                ret.addPointDirect(tf(p));
+            return ret;
+        }
+
+        //! Transforms *this polygon in-place.
+        /*!
+         *
+         * @param tf the transformation to be applied.
+         */
+        void transform(const RigidTfND<2, Element> &tf)
+        {
+            for (auto &p : int_pts)
+                p.transform(tf);
+        }
 
         //! Read only access to the vertices.
         [[nodiscard]] const std::vector<VectorType>& points() const { return int_pts; }

@@ -151,7 +151,7 @@ namespace rtl
          */
         VectorType project(const VectorType &pt) const
         {
-            return pt - normal() * (VectorType::dotProduct(normal(), pt) + dist);
+            return pt - normal() * (normal().dot(pt) + dist);
         }
 
         //! Projects two points onto the approximation line to trim it to line segment.
@@ -163,8 +163,8 @@ namespace rtl
         ConstrainedType trim(const VectorType &beg, const VectorType &end) const
         {
             VectorType int_beg, int_end, n = normal();
-            int_beg = beg - n * (VectorType::dotProduct(n, beg) + dist);
-            int_end = end - n * (VectorType::dotProduct(n, end) + dist);
+            int_beg = beg - n * (n.dot(beg) + dist);
+            int_end = end - n * (n.dot(end) + dist);
             return ConstrainedType(int_beg, int_end);
         }
 

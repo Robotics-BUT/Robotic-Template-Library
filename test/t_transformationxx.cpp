@@ -26,160 +26,243 @@
 
 #include <iostream>
 #include <cmath>
-#include <random>
-#include <chrono>
-#include <vector>
 
 #include "rtl/Core.h"
 #include "rtl/Transformation.h"
+#include "rtl/io/StdLib.h"
+#include "rtl/Test.h"
 
-template <typename T>
-void tr2D_fullRotTest(unsigned int rep, T eps)
+template<typename E>
+void testRotation3DConsistency(const rtl::Rotation3D<E> &rot)
 {
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<T> rand(-1, 1);
-    std::uniform_int_distribution<unsigned int> divisor(1, 20);
-    std::cout << "\nTransformation2D full rotation test:" << std::endl;
-
-    for(unsigned int i = 0; i < rep; i++)
-    {
-        rtl::Vector2D<T> vec_orig(rand(generator), rand(generator)), vec_tr = vec_orig;
-        unsigned int d = divisor(generator);
-        rtl::Transformation2D<T> tr(2.0 * rtl::C_PI / (T)d, 0, 0);
-        for(unsigned int j = 0; j < d; j++)
-            vec_tr = tr(vec_tr);
-        T error = rtl::Vector2D<T>::distance(vec_orig, vec_tr);
-        if(error > eps)
-            std::cout<< "Excessive error " << error << " after applying the transformation " << d << " times." <<std::endl;
-    }
+    using M = rtl::Matrix<3, 3, E>;
+    Eigen::AngleAxis<E> aa(rot.rotAngle(), rot.rotAxis().data());
+    M aa_mat(aa.toRotationMatrix());
+    if(M::distance(rot.rotMat(), aa_mat) > rtl::test::type<M>::allowedError())
+        std::cout<<"\tInconsistent " << rtl::test::type<rtl::Rotation3D<E>>::description() << std::endl;
 }
 
-template <typename T>
-void tr2D_forwardBackwardTest(unsigned int rep, T eps)
+template <int dim, typename E>
+struct TesterTranslationInversion
 {
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<T> rnd_float(-1, 1);
-    std::uniform_int_distribution<unsigned int> tr_nr(1, 20);
-    std::uniform_real_distribution<T> rnd_angle(-rtl::C_PI, rtl::C_PI);
-    std::cout << "\nTransformation2D forward-backward transformation test:" << std::endl;
-
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep)
     {
-        rtl::Vector2D<T> vec_orig(rnd_float(generator), rnd_float(generator)), vec_tr = vec_orig;
-        unsigned int n = tr_nr(generator);
-        std::vector<rtl::Transformation2D<T>> trs;
+        using V = rtl::VectorND<dim, E>;
+        using T = rtl::TranslationND<dim, E>;
 
-        for(unsigned int j = 0; j < n; j++)
+        std::cout << "\n" << rtl::test::type<T>::description() << " inversion test:" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable<E>((E)-1, (E)1);
+
+        for (int i = 0; i < rep; i++)
         {
-            rtl::Transformation2D<T> tr(rnd_angle(generator), rnd_float(generator), rnd_float(generator));
-            vec_tr = tr(vec_tr);
-            trs.push_back(tr);
+            T tr = T::random(el_gen);
+            T tr_inv_inv = tr.inverted().inverted();
+            E error = V::distance(tr.trVec(), tr_inv_inv.trVec());
+            if (error > rtl::test::type<V>::allowedError())
+                std::cout << "\tTranslation not the same after double inversion. Error: " << error << std::endl;
         }
-        for(unsigned int j = n - 1; j < n; j--)
-            vec_tr = trs[j].inverted()(vec_tr);
-        T error = rtl::Vector2D<T>::distance(vec_orig, vec_tr);
-        if(error > eps)
-            std::cout<< "Excessive error " << error << " after applying " << n << " transformations." <<std::endl;
     }
-}
+};
 
-template <typename T>
-void tr3D_fullRotTest(unsigned int rep, T eps)
+template<int dim, typename T>
+struct TesterRotationSpecialSetRot
 {
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<T> rand(-1, 1);
-    std::uniform_int_distribution<unsigned int> divisor(1, 20);
-    std::cout << "\nTransformation3D full rotation test:" << std::endl;
-
-    for(unsigned int i = 0; i < rep; i++)
+    static void testFunction(int repeat)
     {
-        rtl::Vector3D<T> vec_orig(rand(generator), rand(generator), rand(generator)), vec_tr = vec_orig;
-        unsigned int d = divisor(generator);
-        rtl::Transformation3D<T> tr(2.0 * rtl::C_PI / (T)d, rtl::Vector3D<T>(rand(generator), rand(generator), rand(generator)), rtl::Vector3D<T>::zeros());
-        for(unsigned int j = 0; j < d; j++)
-            vec_tr = tr(vec_tr);
-        T error = rtl::Vector3D<T>::distance(vec_orig, vec_tr);
-        if(error > eps)
-            std::cout<< "Excessive error " << error << " after applying the transformation " << d << " times." <<std::endl;
-    }
-}
+        using V = rtl::VectorND<dim, T>;
+        using M = rtl::Matrix<dim, dim, T>;
+        using R = rtl::RotationND<dim, T>;
+        auto el_gen =  rtl::test::Random::uniformCallable<T>((T)-1, (T)1);
 
-template <typename T>
-void tr3D_forwardBackwardTest(unsigned int rep, T eps)
-{
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<T> rnd_float(-1, 1);
-    std::uniform_int_distribution<unsigned int> tr_nr(1, 20);
-    std::uniform_real_distribution<T> rnd_angle(-rtl::C_PI, rtl::C_PI);
-    std::cout << "\nTransformation3D forward-backward transformation test:" << std::endl;
+        std::cout << "\n" << rtl::test::type<R>::description() << " setting rotation with two vectors. Equivalency of special and general implementation test:" << std::endl;
 
-    for(unsigned int i = 0; i < rep; i++)
-    {
-        rtl::Vector3D<T> vec_orig(rnd_float(generator), rnd_float(generator), rnd_float(generator)), vec_tr = vec_orig;
-        unsigned int n = tr_nr(generator);
-        std::vector<rtl::Transformation3D<T>> trs;
-
-        for(unsigned int j = 0; j < n; j++)
+        for (int i = 0; i < repeat; i++)
         {
-            rtl::Transformation3D<T> tr(rnd_angle(generator), rtl::Vector3D<T>(rnd_float(generator), rnd_float(generator), rnd_float(generator)), rtl::Vector3D<T>(rnd_float(generator), rnd_float(generator), rnd_float(generator)));
-            vec_tr = tr(vec_tr);
-            trs.push_back(tr);
+            V v1 = V::random(el_gen), v2 = V::random(el_gen);
+            R rot_spec(v1, v2);
+            R rot_gen;
+            rot_gen.rtl::template RotationND_common<dim, T, rtl::RotationND>::setRot(v1, v2);
+
+            T error = M::distance(rot_gen.rotMat(), rot_spec.rotMat());
+            if (error > rtl::test::type<M>::allowedError())
+                std::cout << "\tExcessive error " << error << " for vectors " << v1 << " and " << v2 << std::endl;
+            if (std::abs(rot_spec.rotAngle()) > rtl::C_PI<T>)
+                std::cout << "\tLarger angle (" << rot_gen.rotAngle() / rtl::C_PI<T> << ") selected for the rotation." << std::endl;
+            if constexpr (dim == 3)
+                testRotation3DConsistency(rot_spec);
         }
-        for(unsigned int j = n - 1; j < n; j--)
-            vec_tr = trs[j].inverted()(vec_tr);
-        T error = rtl::Vector3D<T>::distance(vec_orig, vec_tr);
-        if(error > eps)
-            std::cout<< "Excessive error " << error << " after applying " << n << " transformations." <<std::endl;
     }
-}
-template <typename T>
-void tr3D_rpy(unsigned int rep, T eps)
+};
+
+template <int dim, typename T>
+struct TesterRotationFull
 {
-    unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
-    std::default_random_engine generator(seed);
-    std::uniform_real_distribution<T> rnd_angle(-rtl::C_PI, rtl::C_PI);
-    auto ang_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };
-    rtl::Vector3D<T> tr;
-
-    std::cout << "\nTransformation3D RPY constructor/getter test:" << std::endl;
-
-    for (unsigned int i = 0; i < rep; i++)
+    static void testFunction(int rep, int div_max)
     {
-        T r = ang_gen(), p = ang_gen(), y = ang_gen(), r1, p1, y1;
-        rtl::Transformation3D<T> t1(r, p, y, tr);
-        t1.rpy(r1, p1, y1);
-        rtl::Transformation3D<T> t2(r1, p1, y1, tr);
-        T dist = t1.rotAngle() - t2.rotAngle();
-        if (std::abs(dist) > eps)
-            std::cout<<"\t\tInconsistent RPY constructor/getter for: r = " << r <<", p = " << p << ", y = " << y << std::endl;
+        using V = rtl::VectorND<dim, T>;
+        using R = rtl::RotationND<dim, T>;
+
+        std::cout << "\n" << rtl::test::type<R>::description() << " full rotation test:" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable<T>((T)-1, (T)1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            V vec_orig = V::random(el_gen).normalized();
+            V vec_ortho = V::random(el_gen);
+            vec_ortho = (vec_ortho - vec_orig.dot(vec_ortho) * vec_orig).normalized();
+            V vec_tr = V::random(el_gen), vec_tr_orig = vec_tr;
+            int d = rtl::test::Random::uniformValue<int>(3, div_max);
+            T angle = 2.0 * rtl::C_PI<T> / (T) d;
+            R rot(vec_orig, std::cos(angle) * vec_orig + std::sin(angle) * vec_ortho);
+            for (int j = 0; j < d; j++)
+                vec_tr = rot(vec_tr);
+            T error = V::distance(vec_tr_orig, vec_tr);
+            if (error > rtl::test::type<V>::allowedError())
+                std::cout << "\tExcessive error " << error << " after applying the rotation " << d << " times." << std::endl;
+        }
     }
-}
+};
+
+template <int dim, typename T>
+struct TesterRotationInversion
+{
+    static void testFunction(int rep)
+    {
+        using R = rtl::RotationND<dim, T>;
+        using M = rtl::Matrix<dim, dim, T>;
+
+        std::cout << "\n" << rtl::test::type<R>::description() << " inversion test:" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable<T>((T)-1, (T)1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            R rot = R::random(el_gen);
+            R rot_inv_inv = rot.inverted().inverted();
+            T error = M::distance(rot.rotMat(), rot_inv_inv.rotMat());
+            if (error > rtl::test::type<M>::allowedError())
+                std::cout << "\tRotation not the same after double inversion. Error: " << error << std::endl;
+            if constexpr (dim == 3)
+                testRotation3DConsistency(rot_inv_inv);
+        }
+    }
+};
+
+template <int dim, typename T>
+struct TesterRigidTfInversion
+{
+    static void testFunction(int rep)
+    {
+        using Tf = rtl::RigidTfND<dim, T>;
+        using V = rtl::VectorND<dim, T>;
+        using M = rtl::Matrix<dim, dim, T>;
+
+        std::cout << "\n" << rtl::test::type<Tf>::description() << " inversion test:" << std::endl;
+        auto el_gen = rtl::test::Random::uniformCallable<T>((T)-1, (T)1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            Tf tf = Tf::random(el_gen);
+            Tf tf_inv_inv = tf.inverted().inverted();
+            T error = M::distance(tf.rotMat(), tf_inv_inv.rotMat());
+            if (error > rtl::test::type<M>::allowedError())
+                std::cout << "\tRotation not the same after double inversion. Error: " << error << std::endl;
+            error = V::distance(tf.trVec(), tf_inv_inv.trVec());
+            if (error > rtl::test::type<V>::allowedError())
+                std::cout << "\tTranslation not the same after double inversion. Error: " << error << std::endl;
+        }
+    }
+};
+
+template <int dim, typename E>
+struct TesterComposition
+{
+    template<typename T1, typename T2>
+    static void testComposition(int rep)
+    {
+        std::cout << "\nComposition consistency test for " << rtl::test::type<T1>::description() << " and " << rtl::test::type<T2>::description() << std::endl;
+
+        using V = rtl::VectorND<dim, E>;
+        auto el_gen = rtl::test::Random::uniformCallable<E>(-1, 1);
+
+        for (int i = 0; i < rep; i++)
+        {
+            V vec = V::random(el_gen);
+            T1 tr1 = T1::random(el_gen);
+            T2 tr2 = T2::random(el_gen);
+
+            auto tr_comp = tr2(tr1);
+            V vec_comp = tr_comp(vec);
+            V vec_tr_tr = vec.transformed(tr1).transformed(tr2);
+            V vec_call_call = tr2(tr1(vec));
+
+            if (V::distance(vec_tr_tr, vec_comp) > rtl::test::type<V>::allowedError())
+                std::cout << "\tInconsistency between vec.transformed(tr1).transformed(tr2) and tr_comp(vec)." << std::endl;
+            if (V::distance(vec_tr_tr, vec_call_call) > rtl::test::type<V>::allowedError())
+                std::cout << "\tInconsistency between vec.transformed(tr1).transformed(tr2) and tr2(tr1(vec))." << std::endl;
+            if (V::distance(vec_call_call, vec_comp) > rtl::test::type<V>::allowedError())
+                std::cout << "\tInconsistency between tr2(tr1(vec)) and tr_comp(vec)." << std::endl;
+            if constexpr (dim == 3 && std::is_same<T1, rtl::Rotation3D<E>>::value && std::is_same<T2, rtl::Rotation3D<E>>::value)
+                testRotation3DConsistency(tr_comp);
+        }
+    }
+
+    static void testFunction(int rep)
+    {
+        using Tr = rtl::TranslationND<dim, E>;
+        using Rot = rtl::RotationND<dim, E>;
+        using Rtf = rtl::RigidTfND<dim, E>;
+
+        testComposition<Tr, Tr>(rep);
+        testComposition<Tr, Rot>(rep);
+        testComposition<Tr, Rtf>(rep);
+
+        testComposition<Rot, Tr>(rep);
+        testComposition<Rot, Rot>(rep);
+        testComposition<Rot, Rtf>(rep);
+
+        testComposition<Rtf, Tr>(rep);
+        testComposition<Rtf, Rot>(rep);
+        testComposition<Rtf, Rtf>(rep);
+    }
+};
+
+template <typename T>
+struct TesterRotation3DRpy
+{
+    static void testFunction(int rep)
+    {
+        using M = rtl::Matrix<3, 3, T>;
+        using R = rtl::RotationND<3, T>;
+        auto ang_gen = rtl::test::Random::uniformCallable(-rtl::C_PI<T>, rtl::C_PI<T>);
+        std::cout << "\n" << rtl::test::type<R>::description() << " RPY constructor/getter test:" << std::endl;
+
+        for (int i = 0; i < rep; i++)
+        {
+            T r = ang_gen(), p = ang_gen(), y = ang_gen(), r1, p1, y1;
+            R rot_1(r, p, y);
+            rot_1.rotRpy(r1, p1, y1);
+            R rot_2(r1, p1, y1);
+            T error = M::distance(rot_1.rotMat(), rot_2.rotMat());
+            if (error > rtl::test::type<M>::allowedError())
+                std::cout << "\tInconsistent RPY constructor/getter for: r = " << r << ", p = " << p << ", y = " << y << std::endl;
+        }
+    }
+};
 
 int main()
 {
-    unsigned int repeat = 1000;
-    float err_eps_f = 0.00001f;
-    double err_eps_d = 0.000000001;
+    int repeat = 10;
 
-    // TransformationXX tests
-    tr3D_rpy<float>(repeat, err_eps_f);
-    tr3D_rpy<double>(repeat, err_eps_d);
+    rtl::test::RangeTypes<TesterTranslationInversion, 1, 5, float, double> t_tr_inv(repeat);
 
-    tr2D_fullRotTest<float>(repeat, err_eps_f);
-    tr2D_fullRotTest<double >(repeat, err_eps_d);
+    rtl::test::RangeTypes<TesterRotationSpecialSetRot, 2, 3, float, double> t_rot_ssr(repeat);
+    rtl::test::Types<TesterRotation3DRpy, float, double> t_rot_3d_rpy(repeat);
+    rtl::test::RangeTypes<TesterRotationFull, 2, 5, float, double> t_rot_full(repeat, 20);
+    rtl::test::RangeTypes<TesterRotationInversion, 2, 5, float, double> t_rot_inv(repeat);
 
-    tr2D_forwardBackwardTest<float>(repeat, err_eps_f);
-    tr2D_forwardBackwardTest<double>(repeat, err_eps_d);
+    rtl::test::RangeTypes<TesterRigidTfInversion, 2, 5, float, double> t_rig_inv(repeat);
 
-    tr3D_fullRotTest<float>(repeat, err_eps_f);
-    tr3D_fullRotTest<double>(repeat, err_eps_d);
-
-    tr3D_forwardBackwardTest<float>(repeat, err_eps_f);
-    tr3D_forwardBackwardTest<double>(repeat, err_eps_d);
+    rtl::test::RangeTypes<TesterComposition, 2, 4, float, double> t_comp(repeat);
 
     return 0;
 }

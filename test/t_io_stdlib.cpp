@@ -50,7 +50,7 @@ void printRndElRndAngTypes(size_t repeat, typename T::ElementType el_min = -1, t
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_real_distribution<typename T::ElementType> rnd_element(el_min, el_max);
-    std::uniform_real_distribution<typename T::ElementType> rnd_angle(-rtl::C_PI, rtl::C_PI);
+    std::uniform_real_distribution<typename T::ElementType> rnd_angle(-rtl::C_PI<typename T::ElementType>, rtl::C_PI<typename T::ElementType>);
     auto lambda_el_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
     auto lambda_ang_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };
 
@@ -82,9 +82,9 @@ void runTestsForType(const std::string &type_name, size_t repeat, E el_min, E el
     std::cout<<"\nPrinting rotation rtl::Quaternion<" << type_name << ">:"<<std::endl;
     printRndElRndAngTypes<rtl::Quaternion<E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rotation rtl::Transformation2D<" << type_name << ">:"<<std::endl;
-    printRndElRndAngTypes<rtl::Transformation2D<E>>(repeat, el_min, el_max);
+    printRndElTypes<rtl::RigidTf2D<E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rotation rtl::Transformation3D<" << type_name << ">:"<<std::endl;
-    printRndElRndAngTypes<rtl::Transformation3D<E>>(repeat, el_min, el_max);
+    printRndElTypes<rtl::RigidTf3D<E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rtl::LineSegmentND<2, " << type_name << ">:"<<std::endl;
     printRndElTypes<rtl::LineSegmentND<2, E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rtl::LineSegmentND<4, " << type_name << ">:"<<std::endl;

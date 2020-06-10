@@ -49,7 +49,7 @@ std::vector<rtl::Vector2D<T>> genStepCycle(int n, T radius, T step_prob)
     {
         if (rnd_element(generator) < step_prob)
             r = radius * 2 * rnd_element(generator);
-        output.emplace_back(std::cos((T) i * 2 * rtl::C_PI / (T) (n - 1)) * r, std::sin((T) i * 2 * rtl::C_PI / (T) (n - 1)) * r);
+        output.emplace_back(std::cos((T) i * 2 * rtl::C_PI<T> / (T) (n - 1)) * r, std::sin((T) i * 2 * rtl::C_PI<T> / (T) (n - 1)) * r);
     }
     return output;
 }
@@ -106,10 +106,10 @@ void testCAR_Segmenter3D(std::vector<rtl::Vector3f> points, rtl::LaTeXTikz3D &le
     seg.loadData(points);
 
     le.clearAll();
-    rtl::Transformation3f view_tr;
-    view_tr.setAngleAxis(rtl::C_PI / 2.0, rtl::Vector3f(1, 1, 1));
-    view_tr.setTranslationX(-2.0);
-    view_tr.setTranslationZ(-5.0);
+    rtl::RigidTf3f view_tr = rtl::RigidTf3f::identity();
+    view_tr.setAngleAxis(rtl::C_PIf / 2.0, rtl::Vector3f(1, 1, 1));
+    view_tr.setTrVecX(-2.0);
+    view_tr.setTrVecZ(-5.0);
     le.setExportSize(10, 10);
     le.setView(75, view_tr);
     le.setMinPlotRegion(rtl::Vector3f(-2.0f, -2.0f, -2.0f), rtl::Vector3f(2.0f, 2.0f, 2.0f));
@@ -168,10 +168,10 @@ void testIA_Segmenter3D(std::vector<rtl::Vector3f> points, rtl::LaTeXTikz3D &le)
         seg.addPoint(p);
 
     le.clearAll();
-    rtl::Transformation3f view_tr;
-    view_tr.setAngleAxis(rtl::C_PI / 2.0, rtl::Vector3f(1, 1, 1));
-    view_tr.setTranslationX(-2.0);
-    view_tr.setTranslationZ(-5.0);
+    rtl::RigidTf3f view_tr = rtl::RigidTf3f ::identity();
+    view_tr.setAngleAxis(rtl::C_PIf / 2.0, rtl::Vector3f(1, 1, 1));
+    view_tr.setTrVecX(-2.0);
+    view_tr.setTrVecZ(-5.0);
     le.setExportSize(10, 10);
     le.setView(75, view_tr);
     le.setMinPlotRegion(rtl::Vector3f(-2.0f, -2.0f, -2.0f), rtl::Vector3f(2.0f, 2.0f, 2.0f));
@@ -208,12 +208,12 @@ int main()
     testCAR_Segmenter2D(genStepCycle<float>(1000, 1.0, 0.01), le2d);
     ld.addLE(le2d, "CAR segmenter in 2D.");
 
-    testCAR_Segmenter3D(genStepSpiral<float>(1000, 1.0, 0.2, 5 * rtl::C_PI, 0.01), le3d);
+    testCAR_Segmenter3D(genStepSpiral<float>(1000, 1.0, 0.2, 5 * rtl::C_PIf, 0.01), le3d);
     ld.addLE(le3d, "CAR segmenter in 3D.");
 
     testIA_Segmenter2D(genStepCycle<float>(1000, 1.0, 0.01), le2d);
     ld.addLE(le2d, "IA segmenter in 2D.");
 
-    testIA_Segmenter3D(genStepSpiral<float>(1000, 1.0, 0.2, 5 * rtl::C_PI, 0.01), le3d);
+    testIA_Segmenter3D(genStepSpiral<float>(1000, 1.0, 0.2, 5 * rtl::C_PIf, 0.01), le3d);
     ld.addLE(le3d, "IA segmenter in 3D.");
 }

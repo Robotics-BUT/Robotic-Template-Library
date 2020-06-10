@@ -63,7 +63,7 @@ void quaternionConstruction(size_t repeat, E eps)
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_real_distribution<E> rnd_element(-1, 1);
-    std::uniform_real_distribution<E> rnd_angle(-rtl::C_PI, rtl::C_PI);
+    std::uniform_real_distribution<E> rnd_angle(-rtl::C_PI<E>, rtl::C_PI<E>);
 
     auto lambda_el_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
     auto lambda_ang_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };

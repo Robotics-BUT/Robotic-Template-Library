@@ -43,7 +43,7 @@ namespace rtl
     /*!
      * Common operations for all precomputed sums.
      * @tparam Compute type for precise computations.
-     * @tparam Derived derived precomputed sums implementation (CRTIP).
+     * @tparam Derived derived precomputed sums implementation (CRTP).
      * @tparam Names structure with enumerator naming of the sums.
      */
     template <typename Compute, class Derived, class Names>
