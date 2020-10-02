@@ -156,12 +156,13 @@ namespace rtl
 
         //! Decomposes unit quaternion into roll-pitch-yaw angles.
         /*!
+         * Unit quaternion is mandatory for correct results, this function does not perform any checks.
          * Does not necessarily return RPY used for construction of the quaternion, other valid combinations representing the same rotation are possible as well.
-         * @param roll rotation around \a x axis return parameter.
-         * @param pitch rotation around \a y axis return parameter.
-         * @param yaw rotation around \a z axis return parameter.
+         * @param roll rotation around \a x axis return parameter in range [0, \f$\pi \f$].
+         * @param pitch rotation around \a y axis return parameter in range [-\f$\pi \f$, \f$\pi \f$].
+         * @param yaw rotation around \a z axis return parameter in range [-\f$\pi \f$, \f$\pi \f$].
          */
-        void rpy(ElementType &roll, ElementType &pitch, ElementType &yaw)
+        void rpy(ElementType &roll, ElementType &pitch, ElementType &yaw) const
         {
             auto v = int_quat.toRotationMatrix().eulerAngles(0, 1, 2);
             roll = v[0];
@@ -223,7 +224,7 @@ namespace rtl
          * @param scale interpolation parameter in the range [0; 1].
          * @return interpolated quaternion.
          */
-        Quaternion slerp(const Quaternion& q, ElementType scale)
+        Quaternion slerp(const Quaternion& q, ElementType scale) const
         {
             return Quaternion(int_quat.slerp(scale, q.int_quat));
         }

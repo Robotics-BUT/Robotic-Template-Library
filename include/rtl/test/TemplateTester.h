@@ -178,6 +178,72 @@ namespace rtl::test
         }
     };
 
+    template<template<int, typename, typename > class Tester, int r_min, int r_max, typename ...Types>
+    class RangeTypesTypes
+    {
+    public:
+
+        template<typename... Types2>
+        class with
+        {
+        public:
+            template<typename... TesterArgsTypes>
+            explicit with(TesterArgsTypes... testerArgsValues)
+            {
+                typedef void(*TestFuncPtr)(TesterArgsTypes...);
+                TestFuncPtr test_functions[func_nr];
+
+                expandTypes2<TestFuncPtr*, r_max, Types2...>(test_functions);
+                for (auto func : test_functions)
+                    (*func)(testerArgsValues...);
+            }
+        private:
+            const static auto func_nr = (r_max - r_min + 1) * sizeof...(Types) * sizeof...(Types2);
+            size_t func_counter = 0;
+
+
+
+            template<typename TF, int r1, typename E, typename ...Es>
+            typename std::enable_if<sizeof...(Es) != 0, void>::type expandTypes2(TF test_functions)
+            {
+                expandTypes2<TF, r1, Es...>(test_functions);
+                expandTypes<TF, r1, E, Types...>(test_functions);
+            }
+
+            template<typename TF, int r1, typename E>
+            void expandTypes2(TF test_functions)
+            {
+                expandTypes<TF, r1, E, Types...>(test_functions);
+            }
+
+
+            template<typename TF, int r1, typename T2, typename E, typename ...Es>
+            typename std::enable_if<sizeof...(Es) != 0, void>::type expandTypes(TF test_functions)
+            {
+                expandTypes<TF, r1, T2, Es...>(test_functions);
+                expandDim1<TF, r1, T2, E>(test_functions);
+            }
+
+            template<typename TF, int r1, typename T2, typename E>
+            void expandTypes(TF test_functions)
+            {
+                expandDim1<TF, r1, T2, E>(test_functions);
+            }
+
+            template<typename TF, int r1, typename T2, typename E>
+            void expandDim1(TF test_functions)
+            {
+                if constexpr (r1 > r_min)
+                    expandDim1<TF, r1 - 1, T2, E>(test_functions);
+                test_functions[func_counter++] = &Tester<r1, E, T2>::testFunction;
+            }
+        };
+
+    private:
+
+
+    };
+
     //! Template for running tester objects with two integer and one typename template parameter.
     /*!
      * For usage with this template, the tester object should correspond to the following example:

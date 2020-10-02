@@ -94,9 +94,124 @@ int main()
     le3.clearAll();
     le3.addFace(square, "style={fill=red}", "style={fill=red}", "");
     le3.addFace(rtl::RigidTf3f(rtl::C_PIf / 4.0f, rtl::Vector3f::baseY(), rtl::Vector3f::zeros())(square), "style={fill=blue}", "style={fill=blue}", "");
-    ld.addGridLE(rot_view_lambda_const_dist, 4, 20);
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
 
-    auto coliding_cubes = [&le3, &square](int i_max, int i) -> rtl::LaTeXTikz3D&
+    rtl::Polygon3Df cutting_square(rtl::Vector3f::baseZ(), 0);
+    cutting_square.addPoint(rtl::Vector3f(5, 5, 0));
+    cutting_square.addPoint(rtl::Vector3f(5, -5, 0));
+    cutting_square.addPoint(rtl::Vector3f(-5, -5, 0));
+    cutting_square.addPoint(rtl::Vector3f(-5, 5, 0));
+    cutting_square.transform(rtl::Rotation3f(rtl::C_PIf / 4, rtl::Vector3f::baseX()));
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj0(rtl::Vector3f::baseZ(), 0);
+    obj0.addPoint(rtl::Vector3f(4, 0, 0));
+    obj0.addPoint(rtl::Vector3f(4, -4, 0));
+    obj0.addPoint(rtl::Vector3f(-4, -4, 0));
+    obj0.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj0.addPoint(rtl::Vector3f(0, 4, 0));
+    obj0.addPoint(rtl::Vector3f(0, 0, 0));
+    le3.addFace(obj0, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj1(rtl::Vector3f::baseZ(), 0);
+    obj1.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj1.addPoint(rtl::Vector3f(-1, 4, 0));
+    obj1.addPoint(rtl::Vector3f(-1, -1, 0));
+    obj1.addPoint(rtl::Vector3f(1, -1, 0));
+    obj1.addPoint(rtl::Vector3f(1, 4, 0));
+    obj1.addPoint(rtl::Vector3f(4, 4, 0));
+    obj1.addPoint(rtl::Vector3f(4, -4, 0));
+    obj1.addPoint(rtl::Vector3f(-4, -4, 0));
+    le3.addFace(obj1, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj2(rtl::Vector3f::baseZ(), 0);
+    obj2.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj2.addPoint(rtl::Vector3f(-4, -4, 0));
+    obj2.addPoint(rtl::Vector3f(4, -4, 0));
+    obj2.addPoint(rtl::Vector3f(4, 4, 0));
+    obj2.addPoint(rtl::Vector3f(-2, 4, 0));
+    obj2.addPoint(rtl::Vector3f(-2, -2, 0));
+    obj2.addPoint(rtl::Vector3f(2, -2, 0));
+    obj2.addPoint(rtl::Vector3f(2, 2, 0));
+    obj2.addPoint(rtl::Vector3f(0, 2, 0));
+    obj2.addPoint(rtl::Vector3f(0, 1, 0));
+    obj2.addPoint(rtl::Vector3f(1, 1, 0));
+    obj2.addPoint(rtl::Vector3f(1, -1, 0));
+    obj2.addPoint(rtl::Vector3f(-1, -1, 0));
+    obj2.addPoint(rtl::Vector3f(-1, 3, 0));
+    obj2.addPoint(rtl::Vector3f(3, 3, 0));
+    obj2.addPoint(rtl::Vector3f(3, -3, 0));
+    obj2.addPoint(rtl::Vector3f(-3, -3, 0));
+    obj2.addPoint(rtl::Vector3f(-3, 4, 0));
+    le3.addFace(obj2, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj3(rtl::Vector3f::baseZ(), 0);
+    obj3.addPoint(rtl::Vector3f(-3, 0, 0));
+    obj3.addPoint(rtl::Vector3f(-4, 2, 0));
+    obj3.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj3.addPoint(rtl::Vector3f(1, 4, 0));
+    obj3.addPoint(rtl::Vector3f(1, -2, 0));
+    obj3.addPoint(rtl::Vector3f(2, -2, 0));
+    obj3.addPoint(rtl::Vector3f(3, 0, 0));
+    obj3.addPoint(rtl::Vector3f(4, -2, 0));
+    obj3.addPoint(rtl::Vector3f(4, -4, 0));
+    obj3.addPoint(rtl::Vector3f(-1, -4, 0));
+    obj3.addPoint(rtl::Vector3f(-1, 2, 0));
+    obj3.addPoint(rtl::Vector3f(-2, 2, 0));
+    le3.addFace(obj3, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj4(rtl::Vector3f::baseZ(), 0);
+    obj4.addPoint(rtl::Vector3f(-3, 0, 0));
+    obj4.addPoint(rtl::Vector3f(-4, 2, 0));
+    obj4.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj4.addPoint(rtl::Vector3f(4, 4, 0));
+    obj4.addPoint(rtl::Vector3f(4, -4, 0));
+    obj4.addPoint(rtl::Vector3f(-4, -4, 0));
+    obj4.addPoint(rtl::Vector3f(-4, 0, 0));
+    obj4.addPoint(rtl::Vector3f(-1, 0, 0));
+    obj4.addPoint(rtl::Vector3f(-1, -1, 0));
+    obj4.addPoint(rtl::Vector3f(1, -1, 0));
+    obj4.addPoint(rtl::Vector3f(1, 2, 0));
+    obj4.addPoint(rtl::Vector3f(-2, 2, 0));
+    le3.addFace(obj4, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+
+    le3.clearAll();
+    le3.addFace(cutting_square, "style={fill=blue}", "style={fill=blue}", "");
+    rtl::Polygon3Df obj5(rtl::Vector3f::baseZ(), 0);
+    obj5.addPoint(rtl::Vector3f(-4, 4, 0));
+    obj5.addPoint(rtl::Vector3f(-4, -4, 0));
+    obj5.addPoint(rtl::Vector3f(4, -4, 0));
+    obj5.addPoint(rtl::Vector3f(4, 4, 0));
+    obj5.addPoint(rtl::Vector3f(3, 4, 0));
+    obj5.addPoint(rtl::Vector3f(3, 0, 0));
+    obj5.addPoint(rtl::Vector3f(1, 0, 0));
+    obj5.addPoint(rtl::Vector3f(1, -2, 0));
+    obj5.addPoint(rtl::Vector3f(-1, -2, 0));
+    obj5.addPoint(rtl::Vector3f(-1, 0, 0));
+    obj5.addPoint(rtl::Vector3f(-3, 0, 0));
+    obj5.addPoint(rtl::Vector3f(-3, 4, 0));
+    le3.addFace(obj5, "style={fill=red}", "style={fill=red}", "");
+    ld.addGridLE(rot_view_lambda_frame_fit, 4, 20);
+
+
+    auto colliding_cubes = [&le3, &square](int i_max, int i) -> rtl::LaTeXTikz3D&
     {
         float factor = float(i) / float(i_max);
         le3.setView(75, rtl::RigidTf3f(0.0f, rtl::Vector3f(1, 1, 1), rtl::Vector3f(0, 0, -3)));
@@ -120,7 +235,7 @@ int main()
 
         return le3;
     };
-    ld.addGridLE(coliding_cubes, 4, 20);
+    ld.addGridLE(colliding_cubes, 4, 20);
 
 
     le3.clearAll();

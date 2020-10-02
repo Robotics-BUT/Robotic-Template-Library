@@ -24,6 +24,7 @@
 //
 // Contact person: Ales Jelinek <Ales.Jelinek@ceitec.vutbr.cz>
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <random>
 #include <chrono>
@@ -32,6 +33,8 @@
 
 #include "rtl/Core.h"
 #include "rtl/io/StdLib.h"
+
+#define STRING_STREAM(x) static_cast<std::ostringstream &&>((std::ostringstream() << x)).str()
 
 template <typename T>
 void matrixConstruction()
@@ -46,10 +49,12 @@ void matrixConstruction()
 
     // static construction
     using M = rtl::Matrix<6, 6, T>;
-    if (M::identity() * M::ones() + M::zeros() != M::ones())
-        std::cout<<"Static matrix initialization fails." << std::endl;
-    if (!M::nan().hasNaN())
-        std::cout<<"\tNo NaNs in ::nan() initialized matrix." << std::endl;
+    if (M::identity() * M::ones() + M::zeros() != M::ones()) {
+        ASSERT_ANY_THROW(STRING_STREAM("Static matrix initialization fails."));
+    }
+    if (!M::nan().hasNaN()) {
+        ASSERT_ANY_THROW(STRING_STREAM("\tNo NaNs in ::nan() initialized matrix."));
+    }
 }
 
 void matrixConversion()
@@ -153,9 +158,13 @@ void matrixOperators()
         k.setColumn(x, i.getColumn(x));
     }
     if (i != j)
-        std::cout<<"\tRow operations failed."<<std::endl;
+    {
+        ASSERT_ANY_THROW(STRING_STREAM("\tRow operations failed."));
+    }
     if (i != k)
-        std::cout<<"\tColumn operations failed."<<std::endl;
+    {
+        ASSERT_ANY_THROW(STRING_STREAM("\tColumn operations failed."));
+    }
 }
 
 template <typename T>
@@ -169,6 +178,7 @@ void matrixLinAlg(T err)
 
     using M = rtl::Matrix<3, 3, T>;
     auto m3 = M::random(el_rnd_gen);
+    
     // Other matrix operations
     std::cout<<"\tRandom matrix M:"<<std::endl;
     std::cout<<"\t\t"<<m3<<std::endl;
@@ -185,14 +195,16 @@ void matrixLinAlg(T err)
     std::cout<<"\tM trace:"<<std::endl;
     std::cout<<"\t\t"<<m3.trace()<<std::endl;
 
-    if (M::distance(m3, m3.transposed().transposed()) > err)
-        std::cout<<"Excessive double-transpose error for: "<<m3<<std::endl;
-    if (M::distance(m3, m3.inverted().inverted()) > err)
-        std::cout<<"Excessive double-inverse error for: "<<m3<<std::endl;
+    if (M::distance(m3, m3.transposed().transposed()) > err) {
+        ASSERT_ANY_THROW(STRING_STREAM("Excessive double-transpose error for: " << m3));
+    }
+    if (M::distance(m3, m3.inverted().inverted()) > err) {
+        ASSERT_ANY_THROW(STRING_STREAM("Excessive double-inverse error for: " << m3));
+    }
 }
 
-int main()
-{
+TEST(t_matrix_tests, general_test) {
+    
     float err_f = 0.0001f;
     double err_d = 0.000001f;
     // Matrix tests
@@ -206,6 +218,10 @@ int main()
 
     matrixLinAlg<float>(err_f);
     matrixLinAlg<double>(err_d);
+}
 
-    return 0;
+int main(int argc, char **argv){
+
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

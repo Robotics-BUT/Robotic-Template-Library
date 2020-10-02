@@ -170,6 +170,9 @@ namespace rtl
             nearBottomRight_.transform(tf);
         }
 
+        //! Dimensionality of the frustum.
+        static constexpr int dimensionality() { return 3; }
+
     private:
         VectorType origin_;
         VectorType nearTopLeft_;

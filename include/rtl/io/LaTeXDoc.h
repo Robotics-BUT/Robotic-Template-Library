@@ -35,6 +35,8 @@
 
 #include "rtl/io/LaTeXTikz2D.h"
 #include "rtl/io/LaTeXTikz3D.h"
+#include "rtl/io/LaTeXTable.h"
+#include "rtl/io/LaTeXUtility.h"
 
 namespace rtl
 {
@@ -69,6 +71,7 @@ namespace rtl
             ofs.open(tex_path, std::ofstream::out | std::ofstream::trunc);
             ofs << "\\documentclass{article}\n";
             ofs << "\\usepackage{graphicx}\n";
+            ofs << "\\usepackage[table]{xcolor}\n";
             ofs << "\\graphicspath{ {./" + tmp_dir + "/} }\n";
             ofs << "\\begin{document}\n\n";
         }
@@ -185,10 +188,15 @@ namespace rtl
                     ofs << "&\n";
                 tmp_cnt++;
             }
+            ofs << "\\end{tabular}\n\n";
             if (!desc.empty())
                 ofs << "\\caption{" + desc + "}\n";
-            ofs << "\\end{tabular}\n\n";
             ofs << "\\end{figure}\n\n";
+        }
+
+        void addTable(const LaTeXTable &tab, const std::string &desc)
+        {
+            tab.writeTable(ofs, desc);
         }
 
     private:

@@ -202,6 +202,8 @@ void testIA_Segmenter3D(std::vector<rtl::Vector3f> points, rtl::LaTeXTikz3D &le)
 int main()
 {
     rtl::LaTeXDoc ld("t_segmentation_out", "seg_test");
+    ld.setRemoveTmpDir([](const std::string &){ return true; });
+
     rtl::LaTeXTikz2D le2d;
     rtl::LaTeXTikz3D le3d;
 

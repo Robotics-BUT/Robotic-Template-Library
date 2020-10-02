@@ -1,0 +1,57 @@
+image: ros_noetic_image
+
+stages:
+  - build_rtl
+  - build_usage_ex
+  - build_usage_tests
+  - tests
+
+build_rtl_job:
+  tags:
+    - ros_noetic
+  stage: build_rtl
+  script:
+    - mkdir build && cd build
+    - cmake ..
+    - make -j4
+
+
+build_usage_ex_job:
+  tags:
+    - ros_noetic
+  stage: build_usage_ex
+  dependencies:
+    - build_rtl_job
+  script:
+    - mkdir build && cd build
+    - cmake .. -DENABLE_TESTS=False -DENABLE_USAGE_EXAMPLES=True
+    - make -j4
+
+
+build_tests_job:
+  tags:
+    - ros_noetic
+  stage: build_usage_tests
+  dependencies:
+    - build_usage_ex_job
+  script:
+    - mkdir build && cd build
+    - cmake .. -DENABLE_TESTS=True -DENABLE_USAGE_EXAMPLES=False
+    - make -j4
+  artifacts:
+    paths:
+      - build/
+
+
+test_job:
+  tags:
+    - ros_noetic
+  stage: tests
+  dependencies:
+    - build_tests_job
+  script:
+    - cd build/
+    - make test
+
+
+

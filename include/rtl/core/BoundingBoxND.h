@@ -54,7 +54,7 @@ namespace rtl
      * @tparam Element type for underlying vectors.
      */
 
-    template<size_t dim, typename Element>
+    template<int dim, typename Element>
     class BoundingBoxND
     {
     public:
@@ -302,15 +302,18 @@ namespace rtl
                 return std::unique_ptr<BoundingBoxND<dim, ElementType>>(nullptr);
         }
 
+        //! Dimensionality of the bounding box.
+        static constexpr int dimensionality() { return dim; }
+
     private:
         static VectorType identityFunc(VectorType &&v) { return v; }
 
-        VectorType minPoint(const VectorType &v1, const VectorType &v2)
+        VectorType minPoint(const VectorType &v1, const VectorType &v2) const
         {
             return VectorType(v1.data().array().min(v2.data().array()).matrix());
         }
 
-        VectorType maxPoint(const VectorType &v1, const VectorType &v2)
+        VectorType maxPoint(const VectorType &v1, const VectorType &v2) const
         {
             return VectorType(v1.data().array().max(v2.data().array()).matrix());
         }

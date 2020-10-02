@@ -171,6 +171,9 @@ namespace rtl
                 addPoint(*it);
         }
 
+        //! Dimensionality of the polygon.
+        static constexpr int dimensionality() { return 2; }
+
     private:
         std::vector<VectorType> int_pts;
     };

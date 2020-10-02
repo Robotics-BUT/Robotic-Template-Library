@@ -36,6 +36,12 @@
 
 namespace rtl::test
 {
+    namespace
+    {
+        template<typename P, typename... Ps>
+        struct PackDescriptionExpander;
+    }
+
     //! Type details for testing purposes.
     /*!
      * General template is not compilable and gives "No details specified for this type." static assert error message.
@@ -66,6 +72,36 @@ namespace rtl::test
         static std::string description() { return "double"; }
     };
 
+
+    //! Type details for unsigned int.
+    template<>
+    struct type<int>
+    {
+        //! Compile-time value of maximal allowed error in tests.
+        static constexpr double allowedError() { return 0; }
+        //! Human readable name of given type returned as std::string.
+        static std::string description() { return "int"; }
+    };
+
+    //! Type details for unsigned int.
+    template<>
+    struct type<unsigned int>
+    {
+        //! Compile-time value of maximal allowed error in tests.
+        static constexpr double allowedError() { return 0; }
+        //! Human readable name of given type returned as std::string.
+        static std::string description() { return "unsigned int"; }
+    };
+
+
+    //! Type details for std::string.
+    template<>
+    struct type<std::string>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description() { return "std::string"; }
+    };
+
     //! Type details for rtl::Matrix specializations.
     template<int r, int c, typename E>
     struct type<rtl::Matrix<r, c, E>>
@@ -76,6 +112,18 @@ namespace rtl::test
         static std::string description() { return "rtl::MatrixND<" + std::to_string(r) + ", " + std::to_string(c) + ", " + type<E>::description() + ">"; }
     };
 
+    //! Type details for Quaternion template.
+    template<typename T>
+    struct type<rtl::Quaternion<T>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::Quaternion<" + type<T>::description() + ">";
+            return desc;
+        }
+    };
+
     //! Type details for rtl::VectorND specializations.
     template<int d, typename E>
     struct type<rtl::VectorND<d, E>>
@@ -84,6 +132,22 @@ namespace rtl::test
         static constexpr E allowedError() {return d * type<E>::allowedError(); }
         //! Human readable name of given type returned as std::string.
         static std::string description() { return "rtl::VectorND<" + std::to_string(d) + ", " + type<E>::description() + ">"; }
+    };
+
+    //! Type details for rtl::LineSegmentND specializations.
+    template<int d, typename E>
+    struct type<rtl::LineSegmentND<d, E>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description() { return "rtl::LineSegmentND<" + std::to_string(d) + ", " + type<E>::description() + ">"; }
+    };
+
+    //! Type details for rtl::BoundingBoxND specializations.
+    template<int d, typename E>
+    struct type<rtl::BoundingBoxND<d, E>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description() { return "rtl::BoundingBoxND<" + std::to_string(d) + ", " + type<E>::description() + ">"; }
     };
 
     //! Type details for rtl::RotationND specializations.
@@ -110,6 +174,80 @@ namespace rtl::test
         static std::string description() { return "rtl::RigidTfND<" + std::to_string(d) + ", " + type<E>::description() + ">"; }
     };
 
+    //! Type details for GeneralTf specializations.
+    template<typename T, typename... Tfs>
+    struct type<rtl::GeneralTf<T, Tfs...>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::GeneralTf<" + PackDescriptionExpander<T, Tfs...>::description() + ">";
+            return desc;
+        }
+    };
+
+    //! Type details for VariantResultType specializations.
+    template<typename T, typename... Tfs>
+    struct type<rtl::VariantResultType<T, Tfs...>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::VariantResultType<" + PackDescriptionExpander<T, Tfs...>::description() + ">";
+            return desc;
+        }
+    };
+
+    //! Type details for Polygon2D template.
+    template<typename T>
+    struct type<rtl::Polygon2D<T>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::Polygon2D<" + type<T>::description() + ">";
+            return desc;
+        }
+    };
+
+    //! Type details for Polygon3D template.
+    template<typename T>
+    struct type<rtl::Polygon3D<T>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::Polygon3D<" + type<T>::description() + ">";
+            return desc;
+        }
+    };
+
+    //! Type details for Frustum3D template.
+    template<typename T>
+    struct type<rtl::Frustum3D<T>>
+    {
+        //! Human readable name of given type returned as std::string.
+        static std::string description()
+        {
+            static std::string desc = "rtl::Frustum3D<" + type<T>::description() + ">";
+            return desc;
+        }
+    };
+
+    namespace
+    {
+        template<typename P, typename... Ps>
+        struct PackDescriptionExpander
+        {
+            static std::string description()
+            {
+                if constexpr (sizeof...(Ps) == 0)
+                    return type<P>::description();
+                else
+                    return type<P>::description() + ", " + PackDescriptionExpander<Ps...>::description();
+            }
+        };
+    }
 }
 
 #endif //ROBOTICTEMPLATELIBRARY_TYPEDETAILS_H

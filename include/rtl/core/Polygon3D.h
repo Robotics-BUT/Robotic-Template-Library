@@ -260,6 +260,9 @@ namespace rtl
                 addPointDirect(*it);
         }
 
+        //! Dimensionality of the polygon.
+        static constexpr int dimensionality() { return 3; }
+
     private:
         VectorType int_normal;
         ElementType int_dist{};

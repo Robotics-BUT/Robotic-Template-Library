@@ -31,21 +31,22 @@
 #include "rtl/io/StdLib.h"
 #include "rtl/Core.h"
 #include "rtl/Transformation.h"
+#include "rtl/Test.h"
 
 template <typename T>
-void printRndElTypes(size_t repeat, typename T::ElementType el_min = -1, typename T::ElementType el_max = 1)
+void printRndElTypes(int repeat, typename T::ElementType el_min = -1, typename T::ElementType el_max = 1)
 {
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_real_distribution<typename T::ElementType> rnd_element(el_min, el_max);
     auto lambda_el_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
 
-    for (size_t i = 0; i < repeat; i++)
+    for (int i = 0; i < repeat; i++)
         std::cout<<T::random(lambda_el_gen)<<std::endl;
 }
 
 template <typename T>
-void printRndElRndAngTypes(size_t repeat, typename T::ElementType el_min = -1, typename T::ElementType el_max = 1)
+void printRndElRndAngTypes(int repeat, typename T::ElementType el_min = -1, typename T::ElementType el_max = 1)
 {
     unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
@@ -54,12 +55,12 @@ void printRndElRndAngTypes(size_t repeat, typename T::ElementType el_min = -1, t
     auto lambda_el_gen = [&generator, &rnd_element](){ return rnd_element(generator); };
     auto lambda_ang_gen = [&generator, &rnd_angle](){ return rnd_angle(generator); };
 
-    for (size_t i = 0; i < repeat; i++)
+    for (int i = 0; i < repeat; i++)
         std::cout<<T::random(lambda_ang_gen, lambda_el_gen)<<std::endl;
 }
 
 template <typename E>
-void runTestsForType(const std::string &type_name, size_t repeat, E el_min, E el_max)
+void runTestsForType(const std::string &type_name, int repeat, E el_min, E el_max)
 {
     std::cout<<"\nPrinting rtl::VectorND<2, " << type_name << ">:"<<std::endl;
     printRndElTypes<rtl::VectorND<2, E>>(repeat, el_min, el_max);
@@ -81,9 +82,9 @@ void runTestsForType(const std::string &type_name, size_t repeat, E el_min, E el
     printRndElTypes<rtl::Quaternion<E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rotation rtl::Quaternion<" << type_name << ">:"<<std::endl;
     printRndElRndAngTypes<rtl::Quaternion<E>>(repeat, el_min, el_max);
-    std::cout<<"\nPrinting rotation rtl::Transformation2D<" << type_name << ">:"<<std::endl;
+    std::cout<<"\nPrinting rotation rtl::RigidTf2D<" << type_name << ">:"<<std::endl;
     printRndElTypes<rtl::RigidTf2D<E>>(repeat, el_min, el_max);
-    std::cout<<"\nPrinting rotation rtl::Transformation3D<" << type_name << ">:"<<std::endl;
+    std::cout<<"\nPrinting rotation rtl::RigidTf3D<" << type_name << ">:"<<std::endl;
     printRndElTypes<rtl::RigidTf3D<E>>(repeat, el_min, el_max);
     std::cout<<"\nPrinting rtl::LineSegmentND<2, " << type_name << ">:"<<std::endl;
     printRndElTypes<rtl::LineSegmentND<2, E>>(repeat, el_min, el_max);
@@ -95,9 +96,37 @@ void runTestsForType(const std::string &type_name, size_t repeat, E el_min, E el
     printRndElTypes<rtl::LineSegment3D<E>>(repeat, el_min, el_max);
 }
 
+template<template<int, typename> class TfTemplate, int r_min, int r_max, typename... Es>
+struct TesterWrapperGeneralTf
+{
+    template<int dim, typename E>
+    struct TesterGeneralTf
+    {
+        static void testFunction(int rep)
+        {
+            auto el_gen = rtl::test::Random::uniformCallable((E)-1, (E)1);
+            using T = TfTemplate<dim, E>;
+            using GT = rtl::GeneralTf<T>;
+            std::cout<<"\nPrinting " << rtl::test::type<GT>::description() << ":"<<std::endl;
+
+            for (int i = 0; i < rep; i++)
+            {
+                GT gtf(T::random(el_gen));
+                std::cout<<gtf<<std::endl;
+            }
+        }
+    };
+
+    explicit TesterWrapperGeneralTf(int rep)
+    {
+        rtl::test::RangeTypes<TesterGeneralTf, r_min, r_max, Es...> t(rep);
+    }
+
+};
+
 int main()
 {
-    size_t repeat = 5;
+    int repeat = 5;
 
     std::cout << "Small elements test" << std::endl;
     runTestsForType<float>("float", repeat, -10.0f, 10.0f);
@@ -106,6 +135,10 @@ int main()
     std::cout << "\n\n\n\nLarge elements test" << std::endl;
     runTestsForType<float>("float", repeat, -1e30f, 1e30f);
     runTestsForType<double>("double", repeat, -1e50, 1e50);
+
+    TesterWrapperGeneralTf<rtl::TranslationND, 1, 5, float, double> t_gtf_tr(repeat);
+    TesterWrapperGeneralTf<rtl::RotationND, 2, 5, float, double> t_gtf_rot(repeat);
+    TesterWrapperGeneralTf<rtl::RigidTfND, 2, 5, float, double> t_gtf_rig(repeat);
 
     return 0;
 }

@@ -130,7 +130,7 @@ namespace rtl
          * @return the rotated variant of the argument.
          */
         template<class T>
-        auto operator()(const T &t) const -> decltype(t.transformed(ChildType()))
+        auto operator()(const T &t) const
         {
             return t.transformed(childThis());
         }
@@ -203,6 +203,9 @@ namespace rtl
         {
             return ChildType(VectorType::random(el_rnd_gen), VectorType::random(el_rnd_gen));
         }
+
+        //! Dimensionality of the rotation.
+        static constexpr int dimensionality() { return dimensions; }
 
     protected:
         RotationND_common()= default;
@@ -302,7 +305,7 @@ namespace rtl
         //! Angle constructor.
         /*!
          *
-         * @param angle rotation angle in the counter-clockwise direction.
+         * @param angle rotation angle in the counter-clockwise direction in radians.
          */
         explicit RotationND(ElementType angle)
         {
@@ -368,7 +371,7 @@ namespace rtl
         //! Recalculate the rotation for given angle.
         /*!
          *
-         * @param angle rotation angle in the counter-clockwise direction.
+         * @param angle rotation angle in the counter-clockwise direction in radians.
          */
         void setAngle(Element angle)
         {

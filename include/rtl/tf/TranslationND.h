@@ -113,7 +113,7 @@ namespace rtl
          * @return the translated variant of the argument.
          */
         template<class T>
-        decltype(std::declval<T>().transformed(ChildType())) operator()(const T &t) const
+        auto operator()(const T &t) const
         {
             return t.transformed(childThis());
         }
@@ -204,6 +204,9 @@ namespace rtl
         {
             return ChildType(VectorType::random(el_rnd_gen));
         }
+
+        //! Dimensionality of the translation.
+        static constexpr int dimensionality() { return dimensions; }
 
     protected:
         TranslationND_common()= default;

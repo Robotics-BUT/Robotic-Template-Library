@@ -30,6 +30,8 @@
 #include "rtl/tf/TranslationND.h"
 #include "rtl/tf/RotationND.h"
 #include "rtl/tf/RigidTfND.h"
+#include "rtl/tf/TfTree.h"
+#include "rtl/tf/TfChain.h"
 
 namespace rtl
 {
@@ -50,8 +52,8 @@ namespace rtl
 
     template<typename T>
     using Rotation3D = RotationND<3, T>;
-    using Rotation3f = Rotation2D<float>;
-    using Rotation3d = Rotation2D<double>;
+    using Rotation3f = Rotation3D<float>;
+    using Rotation3d = Rotation3D<double>;
 
     template<typename T>
     using RigidTf2D = RigidTfND<2, T>;

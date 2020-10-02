@@ -33,6 +33,9 @@
 #include "rtl/core/VectorND.h"
 #include "rtl/core/LineSegmentND.h"
 #include "rtl/tf/RigidTfND.h"
+#include "rtl/tf/GeneralTf.h"
+#include "rtl/tf/TfTree.h"
+#include "rtl/tf/TfTreeNode.h"
 
 /*! \file
  *  \brief RTL export to STL streams.
@@ -123,6 +126,54 @@ std::ostream & operator<<( std::ostream & os, const rtl::Quaternion<E> &q)
     return os;
 }
 
+//! Translation transformation to std::ostream operator.
+/*!
+ *
+ * @tparam dim dimensionality of the transformation.
+ * @tparam E ElementType of the transformation.
+ * @param os output stream.
+ * @param tr transformation to be printed.
+ * @return reference to \p os.
+ */
+template<int dim, typename E>
+std::ostream & operator<<( std::ostream & os, const rtl::TranslationND<dim, E> &tr)
+{
+    os << "t: " << tr.trVec();
+    return os;
+}
+
+//! Rotation transformation to std::ostream operator.
+/*!
+ *
+ * @tparam dim dimensionality of the transformation.
+ * @tparam E ElementType of the transformation.
+ * @param os output stream.
+ * @param tr transformation to be printed.
+ * @return reference to \p os.
+ */
+template<int dim, typename E>
+std::ostream & operator<<( std::ostream & os, const rtl::RotationND<dim, E> &rot)
+{
+    os << "R: " << rot.rotMat();
+    return os;
+}
+
+//! 3D rotation transformation to std::ostream operator.
+/*!
+ *
+ * @tparam dim dimensionality of the transformation.
+ * @tparam E ElementType of the transformation.
+ * @param os output stream.
+ * @param tr transformation to be printed.
+ * @return reference to \p os.
+ */
+template<typename E>
+std::ostream & operator<<( std::ostream & os, const rtl::RotationND<3, E> &rot)
+{
+    os << "R: " << rot.rotMat() << "   axix: " << rot.rotAxis() << "   angle: " << rot.rotAngle();
+    return os;
+}
+
 //! Rigid transformation to std::ostream operator.
 /*!
  *
@@ -135,22 +186,70 @@ std::ostream & operator<<( std::ostream & os, const rtl::Quaternion<E> &q)
 template<int dim, typename E>
 std::ostream & operator<<( std::ostream & os, const rtl::RigidTfND<dim, E> &tr)
 {
-    os << "R: " << tr.rotMat() << "   t: " << tr.trVec();
+    os << tr.rot() << "   " << tr.tr();
     return os;
 }
 
-//! Three dimensional rigid transformation to std::ostream operator.
+//! General transformation to std::ostream operator.
 /*!
  *
- * @tparam E ElementType of the transformation.
+ * @tparam T One transformation type possibly hold by the rtl::GeneralTf template. At least one is mandatory.
+ * @tparam Tfs Other transformation types possibly hold by the rtl::GeneralTf template.
  * @param os output stream.
- * @param tr transformation to be printed.
+ * @param gtr transformation to be printed.
  * @return reference to \p os.
  */
-template<typename E>
-std::ostream & operator<<( std::ostream & os, const rtl::RigidTfND<3, E> &tr)
+template<typename T, typename... Tfs> // Additional type T ensures, that this overload is only considered, if there is at least one parameter in the rtl::GeneralTf<> template.
+std::ostream & operator<<( std::ostream & os, const rtl::GeneralTf<T, Tfs...> &gtr)
 {
-    os << "R: " << tr.rotMat() << "   t: " << tr.trVec() << "   axix:" << tr.rotAxis() << "   angle:" << tr.rotAngle();
+    gtr.visit([&os](auto&& arg){os << arg;});
+    return os;
+}
+
+//! Transformation tree node to std::ostream operator.
+/*!
+ *
+ * @tparam K Type of the key used in the node.
+ * @tparam T Type of the transformation used in the node.
+ * @param os output stream.
+ * @param node node to be printed.
+ * @return reference to /p os.
+ */
+template<typename K, typename T>
+std::ostream & operator<<( std::ostream & os, const rtl::TfTreeNode<K, T> &node)
+{
+    os << node.key() << "   " << node.tf();
+    return os;
+}
+
+//! Transformation tree to std::ostream. Note this function generates multi-line output due to complexity of the data structure.
+/*!
+ *
+ * @tparam K Type of keys used int the tree.
+ * @tparam T Type of transformation used in the tree.
+ * @param os output stream.
+ * @param tree tree to be printed.
+ * @return reference to /p os.
+ */
+template<typename K, typename T>
+std::ostream & operator<<( std::ostream & os, const rtl::TfTree<K, T> &tree)
+{
+    auto print_with_childs = [](std::ostream & os, const typename rtl::TfTree<K, T>::NodeType& n) -> void
+            {
+                auto print_with_childs_impl=[](std::ostream & os, const typename rtl::TfTree<K, T>::NodeType& n, const auto& print_with_childs_ref) -> void
+                        {
+                            for (size_t i = 0; i < n.depth(); i++) os << "\t";
+                            os << n << "\n";
+                            for (const auto c : n.children())
+                                print_with_childs_ref(os, *c, print_with_childs_ref);
+                        };
+                print_with_childs_impl(os, n, print_with_childs_impl);
+            };
+
+    auto root = tree.root();
+    os << root.key() << "\n";
+    for (auto c : root.children())
+        print_with_childs(os, *c);
     return os;
 }
 

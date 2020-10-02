@@ -24,6 +24,7 @@
 //
 // Contact person: Ales Jelinek <Ales.Jelinek@ceitec.vutbr.cz>
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <cmath>
 #include <ctime>
@@ -35,6 +36,8 @@
 
 #include <eigen3/Eigen/Dense>
 
+#define STRING_STREAM(x) static_cast<std::ostringstream &&>((std::ostringstream() << x)).str()
+
 template <typename T>
 struct TesterVector2DAngleCcw
 {
@@ -43,7 +46,7 @@ struct TesterVector2DAngleCcw
 
         std::cout << "\nVector2D<" << rtl::test::type<T>::description()<< ">::angle() test:" << std::endl;
         std::cout << "\tStep size: " << step << std::endl;
-        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError << std::endl;
+        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError() << std::endl;
 
         rtl::Vector2D<T> base(1, 0);
         T angle;
@@ -54,8 +57,9 @@ struct TesterVector2DAngleCcw
             if (std::abs(i - angle) > rtl::test::type<T>::allowedError())
                 err_cnt++;
         }
-        std::cout << "\tPrecision errors: " << err_cnt << std::endl;
-        std::cout << std::endl;
+        if (err_cnt) {
+            ASSERT_ANY_THROW(STRING_STREAM("\tPrecision errors: " << err_cnt));
+        }
     }
 };
 
@@ -66,7 +70,7 @@ struct TesterVector2DAngleFromZero
     {
         std::cout << "\nVector2D<" << rtl::test::type<T>::description()<< ">::angleFromZero() test:" << std::endl;
         std::cout << "\tStep size: " << step << std::endl;
-        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError << std::endl;
+        std::cout << "\tAllowed error: " << rtl::test::type<T>::allowedError() << std::endl;
 
         T angle;
         size_t err_cnt = 0;
@@ -77,8 +81,9 @@ struct TesterVector2DAngleFromZero
             if (std::abs(i - angle) > rtl::test::type<T>::allowedError())
                 err_cnt++;
         }
-        std::cout << "\tPrecision errors: " << err_cnt << std::endl;
-        std::cout << std::endl;
+        if (err_cnt) {
+            ASSERT_ANY_THROW(STRING_STREAM("\tPrecision errors: " << err_cnt));
+        }
     }
 };
 
@@ -145,8 +150,9 @@ struct TesterCrossProduct
             V c_rtl = v1.cross(v2);
             Eigen::Matrix<E, 3, 1> c_eig = ev1.cross(ev2);
             E error = (c_rtl[0] - c_eig[0]) * (c_rtl[0] - c_eig[0]) + (c_rtl[1] - c_eig[1]) * (c_rtl[1] - c_eig[1]) + (c_rtl[2] - c_eig[2]) * (c_rtl[2] - c_eig[2]);
-            if (error > rtl::test::type<E>::allowedError())
-                std::cout << "\tExcessive error " << error << " detected" << std::endl;
+            if (error > rtl::test::type<E>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << error << " detected"));
+            }
         }
     }
 };
@@ -171,8 +177,9 @@ struct TesterVectorStaticOperations
             auto v1 = V::random(el_gen);
             auto v2 = V::random(el_gen);
             T err = std::abs(V::distanceSquared(v1, v2) / V::distance(v1, v2) - (v1 - v2).length());
-            if (err > rtl::test::type<T>::allowedError())
-                std::cout << "\tExcessive error " << err << std::endl;
+            if (err > rtl::test::type<T>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << err));
+            }
         }
 
         std::cout << "\tScalar projection computation:" << std::endl;
@@ -181,8 +188,9 @@ struct TesterVectorStaticOperations
             auto v1 = V::random(el_gen);
             auto v2 = V::random(el_gen);
             T err = std::abs(V::scalarProjection(v1, v2) - V::scalarProjectionOnUnit(v1, v2.normalized()));
-            if (err > rtl::test::type<T>::allowedError())
-                std::cout << "\tExcessive error " << err << std::endl;
+            if (err > rtl::test::type<T>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << err));
+            }
         }
 
         std::cout << "\tVector projection computation:" << std::endl;
@@ -191,8 +199,9 @@ struct TesterVectorStaticOperations
             auto v1 = V::random(el_gen);
             auto v2 = V::random(el_gen);
             T err = (V::vectorProjection(v1, v2) - V::vectorProjectionOnUnit(v1, v2.normalized())).length();
-            if (err > rtl::test::type<T>::allowedError())
-                std::cout << "\tExcessive error " << err << std::endl;
+            if (err > rtl::test::type<T>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << err));
+            }
         }
     }
 };
@@ -213,8 +222,9 @@ struct TesterOuterProduct
 
             for (int i = 0; i < d1; i++)
                 for(int j = 0; j < d2; j++)
-                    if (std::abs(op(i, j) - v1[i] * v2[j]) > rtl::test::type<T>::allowedError())
-                        std::cout<< "\tExcessive error for vectors v1 = " << v1 << " and v2 = " << v2 << std::endl;
+                    if (std::abs(op(i, j) - v1[i] * v2[j]) > rtl::test::type<T>::allowedError()) {
+                        ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error for vectors v1 = " << v1 << " and v2 = " << v2));
+                    }
         }
     }
 };
@@ -230,8 +240,9 @@ struct TesterNormalization
         {
             auto v1 = V::random(rtl::test::Random::uniformCallable((T)-1, (T)1));
             T err = std::abs(v1.normalized().length() - (T)1);
-            if (err > rtl::test::type<T>::allowedError())
-                std::cout << "\tExcessive error " << err << std::endl;
+            if (err > rtl::test::type<T>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << err));
+            }
         }
     }
 };
@@ -255,14 +266,15 @@ struct TesterRigidTransformation
             tr.invert();
             v_tr.transform(tr);
             E err = V::distance(v1, v_tr);
-            if (err > rtl::test::type<V>::allowedError())
-                std::cout << "\tExcessive error " << err << std::endl;
+            if (err > rtl::test::type<V>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tExcessive error " << err));
+            }
         }
     }
 };
 
-int main()
-{
+TEST(t_vectorxx, general_test) {
+
     int repeat = 1000;
     double angle_step = 0.01;
 
@@ -277,7 +289,12 @@ int main()
     rtl::test::RangeTypes<TesterNormalization, 1, 5, float, double> t_n(repeat);
     rtl::test::RangeRangeTypes<TesterOuterProduct, 1, 5, 1, 5, float, double> t_op(repeat);
     rtl::test::RangeTypes<TesterRigidTransformation, 2, 5, float, double> t_rtf(repeat);
-
-    return 0;
 }
 
+
+
+int main(int argc, char **argv){
+
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

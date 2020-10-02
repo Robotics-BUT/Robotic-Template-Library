@@ -648,13 +648,13 @@ namespace rtl
         void setEnd(Element end_x, Element end_y) { LineSegmentND_common<2, Element, LineSegmentND>::setEnd(VectorType(end_x, end_y)); }
 
         //! Convenience alias to cropByHyperrect()
-        bool cropByRect(const VectorType &corner1, const VectorType &corner2, Element &segment_beg_t, Element &segment_end_t)
+        bool cropByRect(const VectorType &corner1, const VectorType &corner2, Element &segment_beg_t, Element &segment_end_t) const
         {
             return cropByHyperRect(corner1, corner2, segment_beg_t, segment_end_t);
         }
 
         //! Convenience alias to cropByHyperrect()
-        bool cropByRect(const VectorType &corner1, const VectorType &corner2, VectorType &segment_beg, VectorType &segment_end)
+        bool cropByRect(const VectorType &corner1, const VectorType &corner2, VectorType &segment_beg, VectorType &segment_end) const
         {
             return cropByHyperRect(corner1, corner2, segment_beg, segment_end);
         }

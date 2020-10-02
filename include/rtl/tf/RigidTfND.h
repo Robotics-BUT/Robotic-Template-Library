@@ -157,7 +157,7 @@ namespace rtl
          * @return the translated variant of the argument.
          */
         template<class T>
-        auto operator()(const T &t) const -> decltype(t.transformed(ChildType()))
+        auto operator()(const T &t) const
         {
             return t.transformed(childThis());
         }
@@ -246,6 +246,9 @@ namespace rtl
         {
             return ChildType(RotationType::random(el_rnd_gen), TranslationType::random(el_rnd_gen));
         }
+
+        //! Dimensionality of the rigid transformation.
+        static constexpr int dimensionality() { return dimensions; }
 
     protected:
         RigidTfND_common()= default;

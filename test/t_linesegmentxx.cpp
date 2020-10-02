@@ -24,6 +24,7 @@
 //
 // Contact person: Ales Jelinek <Ales.Jelinek@ceitec.vutbr.cz>
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <cmath>
 #include <ctime>
@@ -35,6 +36,8 @@
 #include "rtl/Test.h"
 #include "rtl/io/StdLib.h"
 
+#define STRING_STREAM(x) static_cast<std::ostringstream &&>((std::ostringstream() << x)).str()
+
 // LineSegment2D (original implementation) and LineSegmentND equivalency test
 template <typename T>
 void ls2D_lsND_lengthDistTest(unsigned int rep, T eps)
@@ -45,25 +48,35 @@ void ls2D_lsND_lengthDistTest(unsigned int rep, T eps)
 
     std::cout << "\nLineSegmentND length and dist test:" << std::endl;
 
-    for (unsigned int i = 0; i < rep; i++)
-    {
-        rtl::Vector2D<T> beg(dist(generator), dist(generator)), end(dist(generator), dist(generator)), pt(dist(generator), dist(generator));
+    for (unsigned int i = 0; i < rep; i++) {
+        rtl::Vector2D<T> beg(dist(generator), dist(generator)), end(dist(generator), dist(generator)), pt(
+                dist(generator), dist(generator));
         rtl::LineSegment2D<T> ls2d(beg, end);
         rtl::LineSegmentND<2, T> lsnd(beg, end);
 
         T diff_length = ls2d.length() - lsnd.length();
-        if(std::abs(diff_length) > eps)
-            std::cout << "Length error!  Beg: "<< beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y() << "  Diff: " << diff_length << std::endl;
+        if (std::abs(diff_length) > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM(
+                    "Length error!  Beg: " << beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y()
+                                           << "  Diff: " << diff_length));
+        }
 
         T diff_d_orig = ls2d.distanceToOrigin() - lsnd.distanceToOrigin();
 
-        if(std::abs(diff_d_orig) > eps)
-            std::cout << "Distance to origin error!  Beg: "<< beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y() << "  Diff: " << diff_d_orig << std::endl;
+        if (std::abs(diff_d_orig) > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM(
+                    "Distance to origin error!  Beg: " << beg.x() << ", " << beg.y() << "  End: " << end.x() << ", "
+                                                       << end.y() << "  Diff: " << diff_d_orig));
+        }
 
         T diff_d_point = ls2d.distanceToPoint(pt) - lsnd.distanceToPoint(pt);
 
-        if(std::abs(diff_d_point) > eps)
-            std::cout << "Distance to point error!  Beg: "<< beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y() << "  Point: " << pt.x() << ", " << pt.y() << "  Diff: " << diff_d_point << std::endl;
+        if (std::abs(diff_d_point) > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM(
+                    "Distance to point error!  Beg: " << beg.x() << ", " << beg.y() << "  End: " << end.x() << ", "
+                                                      << end.y() << "  Point: " << pt.x() << ", " << pt.y()
+                                                      << "  Diff: " << diff_d_point));
+        }
     }
 }
 
@@ -86,8 +99,9 @@ void lsndProjection(unsigned int rep, T eps)
         rtl::Vector2D<T> pt = lsnd.beg() + shift * lsnd.direction() + 2 * dist(generator) * lsnd.normal();
         T proj = lsnd.scalarProjectionUnit(pt);
 
-        if(std::abs(shift - proj) > eps)
-            std::cout << "Point projection error!  Beg: "<< beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y() << "  Point: " << pt.x() << ", " << pt.y() << "  Shift: " << shift << std::endl;
+        if(std::abs(shift - proj) > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM("Point projection error!  Beg: "<< beg.x() << ", " << beg.y() << "  End: " << end.x() << ", " << end.y() << "  Point: " << pt.x() << ", " << pt.y() << "  Shift: " << shift));
+        }
     }
 }
 
@@ -111,8 +125,9 @@ void lsndClosestPoint(unsigned int rep, T eps)
         ls2d_1.closestPoint(ls2d_2, t_1);
         ls2d_2.closestPoint(ls2d_1, t_2);
         if (rtl::LineSegment2D<T>::closestPoint(ls2d_1, ls2d_2, u_1, u_2))
-            if(std::abs(t_1 - u_1) > eps || abs(t_2 - u_2) > eps)
-                std::cout << "Closest point error!" << std::endl;
+            if(std::abs(t_1 - u_1) > eps || abs(t_2 - u_2) > eps) {
+                ASSERT_ANY_THROW(STRING_STREAM("Closest point error!" ));
+            }
     }
 }
 
@@ -133,13 +148,16 @@ struct TesterRigidTransformation
             L l1 = L::random(el_gen);
             auto tr = T::random(el_gen);
             L l_tr = l1.transformed(tr);
-            if (V::distance(l_tr.direction(), (l_tr.end() - l_tr.beg()).normalized()) > rtl::test::type<V>::allowedError())
-                std::cout << "\tNon-conforming direction vector." << " for " << l1 << " and " << tr << std::endl;
+            if (V::distance(l_tr.direction(), (l_tr.end() - l_tr.beg()).normalized()) > rtl::test::type<V>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM("\tNon-conforming direction vector." << " for " << l1 << " and " << tr));
+            }
             l_tr.transform(tr.inverted());
             if (V::distance(l1.beg(), l_tr.beg()) > rtl::test::type<V>::allowedError() ||
                     V::distance(l1.end(), l_tr.end()) > rtl::test::type<V>::allowedError() ||
-                    V::distance(l1.direction(), l_tr.direction()) > rtl::test::type<V>::allowedError())
-                std::cout << "\tExcessive distance error for " << l1 << " and " << tr << "in forward-backward test." << std::endl;
+                    V::distance(l1.direction(), l_tr.direction()) > rtl::test::type<V>::allowedError()) {
+                ASSERT_ANY_THROW(STRING_STREAM(
+                        "\tExcessive distance error for " << l1 << " and " << tr << "in forward-backward test."));
+            }
         }
     }
 };
@@ -164,14 +182,15 @@ void lsndFitHyperRect(unsigned int rep, T )
         {
             auto err = ((ls.end() - ls.beg()).normalized() - ls.direction()).length();
 
-            if (std::abs(err) > 1.0)
-                std::cout << "Inconsistent direction detected!" << std::endl;
+            if (std::abs(err) > 1.0) {
+                ASSERT_ANY_THROW(STRING_STREAM("Inconsistent direction detected!"));
+            }
         }
     }
 }
 
-int main()
-{
+TEST(t_linesegmentxx_test, general_test) {
+
     unsigned int repeat = 1000;
     float err_eps_f = 0.001f;
     double err_eps_d = 0.0000001;
@@ -192,6 +211,11 @@ int main()
     lsndFitHyperRect<3, float>(repeat, err_eps_f);
     lsndFitHyperRect<2, double>(repeat, err_eps_d);
     lsndFitHyperRect<3, double>(repeat, err_eps_d);
+}
 
-    return 0;
+
+int main(int argc, char **argv){
+
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

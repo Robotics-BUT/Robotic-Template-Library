@@ -24,12 +24,15 @@
 //
 // Contact person: Ales Jelinek <Ales.Jelinek@ceitec.vutbr.cz>
 
+#include <gtest/gtest.h>
 #include <iostream>
 #include <cmath>
 #include <random>
 #include <chrono>
 
 #include "rtl/Core.h"
+
+#define STRING_STREAM(x) static_cast<std::ostringstream &&>((std::ostringstream() << x)).str()
 
 template<typename E>
 void coutQuat(const rtl::Quaternion<E> &q)
@@ -82,8 +85,9 @@ void quaternionConstruction(size_t repeat, E eps)
         q9.rpy(r1, p1, y1);
         rtl::Quaternion<E> q10(r1, p1, y1);
         E dist = rtl::Quaternion<E>::distance(q9, q10);
-        if (dist > eps && dist - 2.0 > eps)
-            std::cout<<"\t\tInconsistent RPY constructor/getter for: r = " << r <<", p = " << p << ", y = " << y << std::endl;
+        if (dist > eps && dist - 2.0 > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM("\t\tInconsistent RPY constructor/getter for: r = " << r << ", p = " << p << ", y = " << y));
+        }
     }
 }
 
@@ -109,8 +113,9 @@ void quaternionArithmetic(unsigned int rep, E eps)
         q_res = q_res * 4;
         q_res /= 2;
         q_res = q_res / 2;
-        if (rtl::Quaternion<E>::distance(q_res, q2) > eps)
-            std::cout<<"\tToo large imprecision."<<std::endl;
+        if (rtl::Quaternion<E>::distance(q_res, q2) > eps) {
+            ASSERT_ANY_THROW(STRING_STREAM("\tToo large imprecision."));
+        }
     }
 }
 
@@ -129,26 +134,37 @@ void quaternionOperations(unsigned int rep, E eps)
         rtl::Quaternion<E> q1 = rtl::Quaternion<E>::random(lambda_el_gen), q2 = rtl::Quaternion<E>::random(lambda_el_gen);
         q1 = q1 / q1.norm();
         if (std::abs(q1.normSquared() - 1.0) > eps)
-            std::cout<<"\tNorm imprecision."<<std::endl;
+        {
+            ASSERT_ANY_THROW(STRING_STREAM("\tNorm imprecision."));
+        }
         auto q2i = q2.inverted();
         auto q2s = q2 * q2i;
         if (std::abs(q2s.scalar() - 1.0) > eps || rtl::Vector3D<E>::distance(q2s.vector(), rtl::Vector3D<E>::zeros()) > eps)
-            std::cout<<"\tInversion imprecision."<<std::endl;
+        {
+            ASSERT_ANY_THROW(STRING_STREAM("\tInversion imprecision."));
+        }
         auto q1s = (q1 + q1.conjugated()) / 2.0;
         if (std::abs(q1s.scalar() - q1.scalar()) > eps || rtl::Vector3D<E>::distance(q1s.vector(), rtl::Vector3D<E>::zeros()) > eps)
-            std::cout<<"\tConjugate imprecision."<<std::endl;
+        {
+            ASSERT_ANY_THROW(STRING_STREAM("\tConjugate imprecision."));
+        }
         auto q2n = q2;
         q2n.normalize();
         if (rtl::Quaternion<E>::distance(q2 / q2.norm(), q2n) > eps)
-            std::cout<<"\tNormalization imprecision."<<std::endl;
+        {
+            ASSERT_ANY_THROW(STRING_STREAM("\tNormalization imprecision."));
+        }
         auto slerp = q1.normalized().slerp(q2.normalized(), 0.5);
         if (q1.normalized().data().angularDistance(q2.normalized().data()) - q1.normalized().data().angularDistance(slerp.data()) - slerp.data().angularDistance(q2.normalized().data()) > eps)
-            std::cout<<"\tSlerp imprecision."<<std::endl;
+        {
+            ASSERT_ANY_THROW(STRING_STREAM("\tSlerp imprecision."));
+        }
     }
 }
 
-int main()
-{
+
+TEST(t_quaternion_tests, general_test) {
+
     size_t repeat = 10000;
     float err_eps_f = 0.00001f;
     double err_eps_d = 0.000000001;
@@ -162,6 +178,11 @@ int main()
 
     quaternionOperations<float>(repeat, err_eps_f);
     quaternionOperations<double>(repeat, err_eps_d);
+}
 
-    return 0;
+
+int main(int argc, char **argv){
+
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
