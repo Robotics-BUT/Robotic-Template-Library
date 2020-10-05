@@ -119,9 +119,9 @@ namespace rtl
             *this = rot.rotMat() * (*this);
         }
 
-        //! Returns rotated copy of the vector.
+        //! Returns copy of the vector transformed by the rigid transformation \p tf.
         /*!
-         * @param rot the rotation to be applied.
+         * @param tf the rotation to be applied.
          * @return new vector after rotation.
          */
         ChildType transformed(const RigidTfND<dimensions, Element> &tf) const
@@ -129,10 +129,10 @@ namespace rtl
             return ChildType(tf.rotMat() * (*this) + tf.trVec());
         }
 
-        //! Rotates *this vector in-place.
+        //! Transformed *this vector in-place by the rigid transformation \p tf.
         /*!
          *
-         * @param rot the rotation to be applied.
+         * @param tf the rotation to be applied.
          */
         void transform(const RigidTfND<dimensions, Element> &tf)
         {

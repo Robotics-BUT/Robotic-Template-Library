@@ -148,7 +148,7 @@ std::ostream & operator<<( std::ostream & os, const rtl::TranslationND<dim, E> &
  * @tparam dim dimensionality of the transformation.
  * @tparam E ElementType of the transformation.
  * @param os output stream.
- * @param tr transformation to be printed.
+ * @param rot transformation to be printed.
  * @return reference to \p os.
  */
 template<int dim, typename E>
@@ -164,7 +164,7 @@ std::ostream & operator<<( std::ostream & os, const rtl::RotationND<dim, E> &rot
  * @tparam dim dimensionality of the transformation.
  * @tparam E ElementType of the transformation.
  * @param os output stream.
- * @param tr transformation to be printed.
+ * @param rot transformation to be printed.
  * @return reference to \p os.
  */
 template<typename E>
