@@ -1,0 +1,27 @@
+var classrtl_1_1_polygon3_d =
+[
+    [ "ElementType", "classrtl_1_1_polygon3_d.html#a192c7ab28d9c659b4f13c5a8510ec6b2", null ],
+    [ "VectorType", "classrtl_1_1_polygon3_d.html#ad4e7658a4213f7984c44edde7c997a1c", null ],
+    [ "Polygon3D", "classrtl_1_1_polygon3_d.html#a9e52348d7cc1b22b5c64e5bc7b47384c", null ],
+    [ "Polygon3D", "classrtl_1_1_polygon3_d.html#a91b7325a668d47ff7c0efa6106fe3c3b", null ],
+    [ "~Polygon3D", "classrtl_1_1_polygon3_d.html#af65de458fc1c8b98101fe28f3a8a535c", null ],
+    [ "a", "classrtl_1_1_polygon3_d.html#a62d3ac617d62150f784c49ac9bce8b88", null ],
+    [ "addPoint", "classrtl_1_1_polygon3_d.html#a19f16a82cee53c2be98e25deb204b476", null ],
+    [ "addPointDirect", "classrtl_1_1_polygon3_d.html#a7d73f2880c4d5e93c8e8f83c849f20ac", null ],
+    [ "addPoints", "classrtl_1_1_polygon3_d.html#a4c392a0e7a5dcbe19e4214cee501b2d3", null ],
+    [ "addPointsDirect", "classrtl_1_1_polygon3_d.html#a4084f626cae53e47eeaa01791897af33", null ],
+    [ "b", "classrtl_1_1_polygon3_d.html#a5c827d6f1d0f89491ebb197e0a6890a4", null ],
+    [ "c", "classrtl_1_1_polygon3_d.html#a7c26ced9f94c7c32f5245d09e97a3872", null ],
+    [ "d", "classrtl_1_1_polygon3_d.html#a26a7ede3a21d5f2595633e4633f17865", null ],
+    [ "dimensionality", "classrtl_1_1_polygon3_d.html#aec47fbbf8fdce4ab4378cc69ccddb2ae", null ],
+    [ "distance", "classrtl_1_1_polygon3_d.html#a0bce081062d41aa868e14b148f4914c4", null ],
+    [ "normal", "classrtl_1_1_polygon3_d.html#afc423fee7a54fd6c865fef1d780f4678", null ],
+    [ "points", "classrtl_1_1_polygon3_d.html#a628afe676b869bdb05fe52396e027bde", null ],
+    [ "reservePoints", "classrtl_1_1_polygon3_d.html#a5b43b15ea8cf41b301136ad2c5993b36", null ],
+    [ "transform", "classrtl_1_1_polygon3_d.html#a5b91aae4f5e003638f1e289efd686e8f", null ],
+    [ "transform", "classrtl_1_1_polygon3_d.html#a6df797c5f4d9d750f691657633b79868", null ],
+    [ "transform", "classrtl_1_1_polygon3_d.html#ab5d7b9f95b30d68888155f02ae197027", null ],
+    [ "transformed", "classrtl_1_1_polygon3_d.html#aaa55e08141726740394649de8828fe0d", null ],
+    [ "transformed", "classrtl_1_1_polygon3_d.html#a7737c4daefb62555cf81810d1283bc2e", null ],
+    [ "transformed", "classrtl_1_1_polygon3_d.html#a1d4ca3ad554e40648dee9da22938f5b9", null ]
+];

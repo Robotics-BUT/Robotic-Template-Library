@@ -1,0 +1,6 @@
+var searchData=
+[
+  ['dimensionalityresult',['DimensionalityResult',['../namespacertl.html#ac239dcb011a85cbe35e0c8aef183f29c',1,'rtl']]],
+  ['distanceresult',['DistanceResult',['../namespacertl.html#aac5069c3cb7feddea44bd66743d76224',1,'rtl']]],
+  ['distancetype',['DistanceType',['../classrtl_1_1_matrix.html#add290bccd535f5e4e7fd3ee903a58692',1,'rtl::Matrix::DistanceType()'],['../classrtl_1_1_vector_n_d__common.html#a3c57d9da376bab7cc079ad52ffc308b3',1,'rtl::VectorND_common::DistanceType()'],['../classrtl_1_1_vector_n_d_3_012_00_01_element_01_4.html#ab7cfce7c94d29ff32d178af9f3392fdd',1,'rtl::VectorND&lt; 2, Element &gt;::DistanceType()'],['../classrtl_1_1_vector_n_d_3_013_00_01_element_01_4.html#a3e069935de7b84dec3074803660a97da',1,'rtl::VectorND&lt; 3, Element &gt;::DistanceType()'],['../classrtl_1_1_rotation_n_d__common.html#a37418eaed8e6189dbf131451af5ca4e4',1,'rtl::RotationND_common::DistanceType()'],['../classrtl_1_1_transformation2_d.html#a2fd56d9abd4276354a7540bbaca83eb2',1,'rtl::Transformation2D::DistanceType()'],['../classrtl_1_1_transformation3_d.html#a7f2c63328b8190ac0810cf43515d9f99',1,'rtl::Transformation3D::DistanceType()'],['../classrtl_1_1_translation_n_d__common.html#a4ee77c414d854ea9cb77835ba4bbe0de',1,'rtl::TranslationND_common::DistanceType()']]]
+];
