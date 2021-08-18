@@ -24,6 +24,40 @@ The content of the library is sorted into several modules according to the funct
 | **Transformation** | Geometrical transformations are essential in robotics. This module covers the most important: translation, rotation and rigid transformation of applicable objects from the **Core** module. All transformation work in general in N-dimensional space and can be composed together. Next to transformations themselves, there are also tree and chain structures to manage relations between them and to harness those in a more general template-based code.    
 | **Test** | Testing tools for the library, however templates for automated testing of instantiation of other templates and random number generation might come in handy in RTL applications as well. | 
 
+## Usage Example
+
+The RTL is header only library, so we recomand to add it into the existing project by clonning it as a subsepository in existing project.
+
+```
+git submodule add https://github.com/Robotics-BUT/Robotic-Template-Library.git libs/rtl/
+git submodule init
+git submodule update --recursive
+```
+
+To make just a brief overview and to make the examples work, clone this repo and run following commands.
+
+```
+git clone https://github.com/Robotics-BUT/Robotic-Template-Library.git
+cd Robotic-Template-Library/
+mkdir build
+cd build
+cmake .. -DENABLE_EXAMPLES=1
+make -j4
+```
+
+To evaluate tests, run:
+
+```
+git clone https://github.com/Robotics-BUT/Robotic-Template-Library.git
+cd Robotic-Template-Library/
+mkdir build
+cd build
+cmake .. -DENABLE_TESTS=1
+make -j4
+ctest
+```
+ 
+
 ## Documentation
 
 Code reference: https://Robotics-BUT.github.io/Robotic-Template-Library

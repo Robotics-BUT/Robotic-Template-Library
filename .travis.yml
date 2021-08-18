@@ -3,7 +3,6 @@ sudo: false
 branches:
   only:
     - master
-    - test
 
 addons:
   apt:
@@ -13,14 +12,10 @@ addons:
       - doxygen-latex
       - doxygen-gui
       - graphviz
-      - cmake
 
 
 script:
   - doxygen Doxyfile
-  - cmake --build . -- -j2
-  - ctest -j2
-  - bash <(curl -s https://codecov.io/bash)
 
 deploy:
   provider: pages
