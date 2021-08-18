@@ -7,6 +7,7 @@ jobs:
       - run: echo "test"
       - run: sudo apt-get update && sudo apt-get install -y gcc g++ build-essential
       - run: mkdir build && cd build
+      - run: pwd
       - run: cmake .. -DENABLE_EXAMPLES=1 -DENABLE_TESTS=1
       - run: make
       - run: ctest .
