@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - run: echo "test"
-      - run: apt-get update && apt-get install -y gcc g++ build-essential
+      - run: sudo apt-get update && apt-get install -y gcc g++ build-essential
       - run: mkdir build && cd build
       - run: cmake .. -DENABLE_EXAMPLES=1 -DENABLE_TESTS=1
       - run: make
