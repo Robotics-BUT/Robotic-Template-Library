@@ -1,0 +1,7 @@
+name: CI Build
+on: [push]
+jobs:
+  CI-Build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "🎉test"
