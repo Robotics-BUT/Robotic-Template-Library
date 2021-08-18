@@ -1,5 +1,7 @@
 # Robotic template library (RTL)
 
+![example workflow](https://github.com/Robotics-BUT/Robotic-Template-Library/actions/workflows/ubuntu-20-04/badge.svg)
+
 A C++ template library for use in robotics. RTL builds on [Standard Template Library](https://en.cppreference.com/w/)  (STL) of the C++ language and the [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)  library for highly optimized linear algebra and related tasks. An original purpose of RTL was to put together an experimentation toolkit for research in robotic mapping and localization, however over the years it became a little more mature and seemed worthwhile to be offered to the community. This way, we want to publish implementations of our algorithms for better reproducibility of our research results, which seems to be [an issue in robotics in general](https://www.nature.com/articles/s42256-019-0066-8). Of course, RTL is not here only for *re*-production, but for production as well. Feel free to built on top of it, adapt it, or just use it as an inspiration for your own implementations of the algorithms discussed. 
 
 ## Authors and feedback
