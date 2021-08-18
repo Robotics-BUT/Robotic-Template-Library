@@ -4,6 +4,8 @@ jobs:
   CI-Build:
     runs-on: ubuntu-20.04
     steps:
+      - run: pwd
+      - run: ls
       - run: echo "test"
       - run: sudo apt-get update && sudo apt-get install -y gcc g++ build-essential
       - run: cmake . -DENABLE_EXAMPLES=1 -DENABLE_TESTS=1
