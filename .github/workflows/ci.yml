@@ -4,6 +4,7 @@ jobs:
   CI-Build:
     runs-on: ubuntu-20.04
     steps:
+      - run: cd ..
       - run: pwd
       - run: ls -la
       - run: echo "test"
