@@ -2,7 +2,7 @@ name: Build Ubuntu 20.04
 
 on:
   push:
-    branches: [ master ]
+    branches: [ test ]
   pull_request:
     branches: [ master ]
 
