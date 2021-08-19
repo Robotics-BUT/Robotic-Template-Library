@@ -1,0 +1,37 @@
+name: Build and Tests - Ubuntu 20.04
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install GTest
+        run: sudo apt-get install libgtest-dev -y && sudo apt-get install cmake -y && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && cd lib/ && sudo cp *.a /usr/lib && sudo mkdir /usr/local/lib/gtest/ && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/gtest/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/gtest/libgtest_main.a
+
+      - name: Install Eigen
+        run: git clone https://gitlab.com/libeigen/eigen.git && cd eigen/ && mkdir build && cd build && cmake .. && make && sudo make install
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DENABLE_EXAMPLES=1 -DENABLE_TESTS=1
+
+      - name: Build
+        # Build your program with the given configuration
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest -C ${{env.BUILD_TYPE}}
+

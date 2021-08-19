@@ -9,5 +9,10 @@ set(CMAKE_CXX_FLAGS_RELEASE  "-O3")
 
 include_directories(include)
 
-add_subdirectory(test)
-add_subdirectory(examples)
+if(ENABLE_TESTS)
+    add_subdirectory(test)
+endif()
+
+if(ENABLE_EXAMPLES)
+    add_subdirectory(examples)
+endif()

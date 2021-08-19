@@ -1,5 +1,7 @@
 # Robotic template library (RTL)
 
+![build and test badge](https://github.com/Robotics-BUT/Robotic-Template-Library/actions/workflows/ubuntu-20-04.yml/badge.svg)
+
 A C++ template library for use in robotics. RTL builds on [Standard Template Library](https://en.cppreference.com/w/)  (STL) of the C++ language and the [Eigen](http://eigen.tuxfamily.org/index.php?title=Main_Page)  library for highly optimized linear algebra and related tasks. An original purpose of RTL was to put together an experimentation toolkit for research in robotic mapping and localization, however over the years it became a little more mature and seemed worthwhile to be offered to the community. This way, we want to publish implementations of our algorithms for better reproducibility of our research results, which seems to be [an issue in robotics in general](https://www.nature.com/articles/s42256-019-0066-8). Of course, RTL is not here only for *re*-production, but for production as well. Feel free to built on top of it, adapt it, or just use it as an inspiration for your own implementations of the algorithms discussed. 
 
 ## Authors and feedback
@@ -23,6 +25,54 @@ The content of the library is sorted into several modules according to the funct
 | **Vectorization** | Algorithms for fitting of geometrical primitives to point clouds. Traditional point-eliminating approaches are covered (Reumann-Witkam and Douglas-Peucker algorithms), but the main focus is on total least squares (TLS) fitting. Fast algorithms for lines in 2D and 3D and for planes in 3D are present with many optional features such as approximating polyline construction. or global error optimization. |
 | **Transformation** | Geometrical transformations are essential in robotics. This module covers the most important: translation, rotation and rigid transformation of applicable objects from the **Core** module. All transformation work in general in N-dimensional space and can be composed together. Next to transformations themselves, there are also tree and chain structures to manage relations between them and to harness those in a more general template-based code.    
 | **Test** | Testing tools for the library, however templates for automated testing of instantiation of other templates and random number generation might come in handy in RTL applications as well. | 
+
+## Usage Example
+
+### Add to Existing Project
+
+The RTL is header only library, so we recomand to add it into the existing project by clonning it as a subsepository in existing project.
+
+```
+git submodule add https://github.com/Robotics-BUT/Robotic-Template-Library.git libs/rtl/
+git submodule init
+git submodule update --recursive
+```
+
+and in your CMakeLists.txt file add
+
+```
+include_directories(libs/rtl/include/)
+```
+
+Now you are able to include RTL headers into you code.
+
+### Run Examples
+
+To make just a brief overview and to make the examples work, clone this repo and run following commands.
+
+```
+git clone https://github.com/Robotics-BUT/Robotic-Template-Library.git
+cd Robotic-Template-Library/
+mkdir build
+cd build
+cmake .. -DENABLE_EXAMPLES=1
+make -j4
+```
+
+### Run Tests
+
+To evaluate tests, run:
+
+```
+git clone https://github.com/Robotics-BUT/Robotic-Template-Library.git
+cd Robotic-Template-Library/
+mkdir build
+cd build
+cmake .. -DENABLE_TESTS=1
+make -j4
+ctest
+```
+ 
 
 ## Documentation
 
