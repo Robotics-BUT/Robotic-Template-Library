@@ -2,7 +2,7 @@ name: Build and Tests - Ubuntu 20.04
 
 on:
   push:
-    branches: [ test ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
