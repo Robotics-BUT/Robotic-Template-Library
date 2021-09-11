@@ -10,9 +10,9 @@ For technical feedback, bug reporting, feature proposition etc. please use the G
 
 For research related communication, paper sharing etc. please use the following contact list:  
 
-- Ales Jelinek ([email](Ales.Jelinek@ceitec.vutbr.cz), [ResearchGate](https://www.researchgate.net/profile/Ales_Jelinek)) - main developer and contact person
-- Adam Ligocki ([email](Adam.Ligocki@ceitec.vutbr.cz), [ResearchGate](https://www.researchgate.net/profile/Adam_Ligocki))
-- Ludek Zalud ([email](Ludek.Zalud@ceitec.vutbr.cz), [ResearchGate](https://www.researchgate.net/profile/Ludek_Zalud))
+- Ales Jelinek (<Ales.Jelinek@ceitec.vutbr.cz>, [ResearchGate](https://www.researchgate.net/profile/Ales_Jelinek)) - main developer and contact person
+- Adam Ligocki (<Adam.Ligocki@ceitec.vutbr.cz>, [ResearchGate](https://www.researchgate.net/profile/Adam_Ligocki))
+- Ludek Zalud (<Ludek.Zalud@ceitec.vutbr.cz>, [ResearchGate](https://www.researchgate.net/profile/Ludek_Zalud))
 
 ## Scope
 The content of the library is sorted into several modules according to the functionality they provide.
