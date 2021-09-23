@@ -43,6 +43,10 @@ add_executable(t_matrix t_matrix.cpp)
 target_link_libraries(t_matrix GTest::GTest GTest::Main)
 add_test(NAME t_matrix COMMAND t_matrix)
 
+add_executable(t_munkres t_munkres.cpp)
+target_link_libraries(t_munkres GTest::GTest GTest::Main)
+add_test(NAME t_munkres COMMAND t_munkres)
+
 add_executable(t_transformationxx t_transformationxx.cpp )
 target_link_libraries(t_transformationxx GTest::GTest GTest::Main)
 add_test(NAME t_transformationxx COMMAND t_transformationxx)
