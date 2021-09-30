@@ -49,48 +49,69 @@ namespace rtl
 
     public:
 
-        static std::array<std::pair<size_t, size_t>, N> solve(std::array<std::array<T, N>, N> cost_matrix) {
+        struct Result {
+            Result() : worker{0}, job{0} {}
+            Result(size_t w, size_t j, T c) : worker{w}, job{j}, cost{c} {};
+            size_t worker;
+            size_t job;
+            T cost;
+        };
+
+        static std::array<Result, N> solve(std::array<std::array<T, N>, N> cost_matrix, bool max_cost = false) {
 
             Step step = Step::STEP_ONE;
             std::array<bool, N> row_cover{};
             std::array<bool, N> col_cover{};
             std::array<std::array<uint8_t, N>, N> mask{};
             std::optional<std::pair<size_t, size_t>> z0_row_col{};
-            print(cost_matrix, mask, row_cover, col_cover, step);
+            std::array<std::array<T, N>, N> cost_matrix_backup = cost_matrix;
+
+            if (max_cost) {
+                flip_costs(cost_matrix);
+            }
 
             while(true) {
                 switch (step) {
                     case Step::STEP_ONE:
                         step_one(cost_matrix, step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_TWO:
                         step_two(cost_matrix, mask, step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_THREE:
                         step_three(mask, col_cover, step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_FOUR:
                         z0_row_col = step_four(cost_matrix, mask, row_cover, col_cover, step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_FIVE:
                         step_five(mask, row_cover, col_cover, z0_row_col.value(), step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_SIX:
                         step_six(cost_matrix, row_cover, col_cover, step);
-                        print(cost_matrix, mask, row_cover, col_cover, step);
                         break;
                     case Step::STEP_SEVEN:
-                        return step_seven(mask);
+                        return step_seven(cost_matrix_backup, mask);
                 }
             }
         }
 
     protected:
+
+        static void flip_costs(std::array<std::array<T, N>, N>& cost_matrix) {
+            auto max = std::numeric_limits<T>::min();
+            for (const auto& row : cost_matrix) {
+                auto row_max = *std::max_element(row.begin(), row.end());
+                if (row_max > max) {max = row_max;}
+            }
+
+            for (auto& row : cost_matrix) {
+                for (auto& element : row) {
+                    element = -(element - max);
+                }
+            }
+        }
+
 
         static void step_one(std::array<std::array<T, N>, N>& cost_matrix, Step& step) {
             for (auto& row : cost_matrix) {
@@ -99,6 +120,7 @@ namespace rtl
             }
             step = Step::STEP_TWO;
         }
+
 
         static void step_two(std::array<std::array<T, N>, N>& cost_matrix,
                              std::array<std::array<uint8_t , N>, N>& mask,
@@ -234,12 +256,12 @@ namespace rtl
         }
 
 
-        static std::array<std::pair<size_t, size_t>, N> step_seven(const std::array<std::array<uint8_t, N>, N>& mask) {
-            std::array<std::pair<size_t, size_t>, N> output;
+        static std::array<Result, N> step_seven(const std::array<std::array<T, N>, N>& cost_matrix,
+                                                const std::array<std::array<uint8_t, N>, N>& mask) {
+            std::array<Result, N> output;
             {size_t r = 0; for (const auto& row_mask : mask) {
                 auto row_col = star_in_row(mask, r);
-                std::swap(row_col->first, row_col->second);
-                output.at(r) = row_col.value();
+                output.at(r) = Result(row_col->first, row_col->second, cost_matrix.at(r).at(row_col->second));
                 r += 1;
             }}
             return output;
@@ -349,32 +371,6 @@ namespace rtl
                 r += 1;
             }}
             return min_value;
-        }
-
-
-        static void print(const std::array<std::array<T, N>, N>& cost_matrix,
-                          const std::array<std::array<uint8_t, N>, N>& mask,
-                          const std::array<bool, N>& row_cover,
-                          const std::array<bool, N>& col_cover,
-                          Step& step) {
-
-            std::cout << std::endl << static_cast<int>(step) << "*************** " << std::endl << std::endl;
-            {size_t r = 0; for (auto& row : cost_matrix) {
-                {size_t c = 0; for (auto& element : row) {
-                    std::cout << element;
-
-                    if (col_cover.at(c)) {std::cout << "|";}
-
-                    if (mask.at(r).at(c) == 1) {std::cout << "*";}
-                    if (mask.at(r).at(c) == 2) {std::cout << "'";}
-
-                    if (row_cover.at(r)) {std::cout << "-";}
-                    else {std::cout << " ";}
-                    c += 1;
-                }}
-                std::cout << std::endl;
-                r += 1;
-            }}
         }
     };
 }

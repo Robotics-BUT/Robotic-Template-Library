@@ -31,22 +31,71 @@
 
 #define max_err 1e-10
 
-TEST(t_munkres, init) {
+TEST(t_munkres, test_1) {
 
-    auto cost_matrix = std::array<std::array<int, 3>, 3> {{
-        {1, 2, 3},
-        {2, 4, 6},
-        {3, 6, 9}}};
+    auto cost_matrix = std::array<std::array<size_t, 3>, 3> {{
+      {1, 2, 3},
+      {2, 4, 6},
+      {3, 6, 9}}};
 
-    auto result = rtl::Munkres<int, 3>::solve(cost_matrix);
+    auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix);
 
-    auto val = std::make_pair<size_t, size_t>(2, 0);
-    EXPECT_EQ(result[0], val);
-    val = std::make_pair<int,int>(1, 1);
-    EXPECT_EQ(result[1], val);
-    val = std::make_pair<int,int>(0, 2);
-    EXPECT_EQ(result[2], val);
+    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 2); EXPECT_EQ(result[0].cost, 3);
+    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 4);
+    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 0); EXPECT_EQ(result[2].cost, 3);
 }
+
+TEST(t_munkres, test_1_max) {
+
+    auto cost_matrix = std::array<std::array<size_t, 3>, 3> {{
+     {1, 2, 3},
+     {2, 4, 6},
+     {3, 6, 9}}};
+
+    auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix, true);
+
+    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 0); EXPECT_EQ(result[0].cost, 1);
+    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 4);
+    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 2); EXPECT_EQ(result[2].cost, 9);
+}
+
+TEST(t_munkres, test_2) {
+
+    auto cost_matrix = std::array<std::array<int, 6>, 6> {{
+      {22, 14, 120, 21, 4, 51},
+      {19, 12, 172, 21, 28, 43},
+      {161, 122, 2, 50, 128, 39},
+      {19, 22, 90, 11, 28, 4},
+      {1, 30, 113, 14, 28, 86},
+      {60, 70, 170, 28, 68, 104}}};
+
+    auto result = rtl::Munkres<int, 6>::solve(cost_matrix);
+
+    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 4); EXPECT_EQ(result[0].cost, 4);
+    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 12);
+    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 2); EXPECT_EQ(result[2].cost, 2);
+    EXPECT_EQ(result[3].worker, 3); EXPECT_EQ(result[3].job, 5); EXPECT_EQ(result[3].cost, 4);
+    EXPECT_EQ(result[4].worker, 4); EXPECT_EQ(result[4].job, 0); EXPECT_EQ(result[4].cost, 1);
+    EXPECT_EQ(result[5].worker, 5); EXPECT_EQ(result[5].job, 3); EXPECT_EQ(result[5].cost, 28);
+}
+
+
+TEST(t_munkres, test_3_max) {
+
+    auto cost_matrix = std::array<std::array<float, 4>, 4> {{
+    {0.8f, 0.0f, 0.0f, 0.0f, },
+    {0.0f, 0.0f, 0.65f, 0.1f, },
+    {0.0f, 0.0f, 0.0f, 0.0f, },
+    {0.1f, 0.7f, 0.0f, 0.0f, }}};
+
+    auto result = rtl::Munkres<float, 4>::solve(cost_matrix, true);
+
+    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 0); EXPECT_EQ(result[0].cost, 0.8f);
+    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 2); EXPECT_EQ(result[1].cost, 0.65f);
+    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 3); EXPECT_EQ(result[2].cost, 0.0f);
+    EXPECT_EQ(result[3].worker, 3); EXPECT_EQ(result[3].job, 1); EXPECT_EQ(result[3].cost, 0.7f);
+}
+
 
 
 int main(int argc, char **argv){
