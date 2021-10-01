@@ -57,14 +57,14 @@ namespace rtl
             T cost;
         };
 
-        static std::array<Result, N> solve(std::array<std::array<T, N>, N> cost_matrix, bool max_cost = false) {
+        static std::array<Result, N> solve(Matrix<N, N, T> cost_matrix, bool max_cost = false) {
 
             Step step = Step::STEP_ONE;
-            std::array<bool, N> row_cover{};
-            std::array<bool, N> col_cover{};
-            std::array<std::array<uint8_t, N>, N> mask{};
+            VectorND<N, bool> row_cover{};
+            VectorND<N, bool> col_cover{};
+            Matrix<N, N, uint8_t> mask{};
             std::optional<std::pair<size_t, size_t>> z0_row_col{};
-            std::array<std::array<T, N>, N> cost_matrix_backup = cost_matrix;
+            Matrix<N, N, T> cost_matrix_backup = cost_matrix;
 
             if (max_cost) {
                 flip_costs(cost_matrix);
@@ -98,67 +98,72 @@ namespace rtl
 
     protected:
 
-        static void flip_costs(std::array<std::array<T, N>, N>& cost_matrix) {
+        static void flip_costs(Matrix<N, N, T>& cost_matrix) {
             auto max = std::numeric_limits<T>::min();
-            for (const auto& row : cost_matrix) {
-                auto row_max = *std::max_element(row.begin(), row.end());
-                if (row_max > max) {max = row_max;}
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    if (cost_matrix.getElement(r, c) > max) { max = cost_matrix.getElement(r, c); }
+                }
             }
 
-            for (auto& row : cost_matrix) {
-                for (auto& element : row) {
-                    element = -(element - max);
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    cost_matrix.setElement(r, c, -(cost_matrix.getElement(r,c) - max) );
                 }
             }
         }
 
 
-        static void step_one(std::array<std::array<T, N>, N>& cost_matrix, Step& step) {
-            for (auto& row : cost_matrix) {
-                T row_minimum = *std::min_element(row.begin(), row.end());
-                std::for_each(row.begin(), row.end(), [row_minimum](T& element){element -= row_minimum;});
+        static void step_one(Matrix<N, N, T>& cost_matrix, Step& step) {
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                T row_min = std::numeric_limits<T>::max();
+
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    if (cost_matrix.getElement(r, c) < row_min) {row_min = cost_matrix.getElement(r, c);}
+                }
+
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    cost_matrix.setElement(r, c, cost_matrix.getElement(r, c) - row_min);
+                }
             }
             step = Step::STEP_TWO;
         }
 
 
-        static void step_two(std::array<std::array<T, N>, N>& cost_matrix,
-                             std::array<std::array<uint8_t , N>, N>& mask,
+        static void step_two(Matrix<N, N, T>& cost_matrix,
+                             Matrix<N, N, uint8_t>& mask,
                              Step& step) {
 
-            std::array<bool, N> row_cover{};
-            std::array<bool, N> col_cover{};
+            auto row_cover = VectorND<N, bool>::zeros();
+            auto col_cover = VectorND<N, bool>::zeros();
 
-            {size_t r = 0; for (auto& row : cost_matrix) {
-                {size_t c = 0; for (auto& element : row) {
-                    if (element == 0 && row_cover[r] == 0 && col_cover[c] == 0) {
-                        mask[r][c] = 1;
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+
+                    if (cost_matrix.getElement(r, c) == 0 && row_cover[r] == 0 && col_cover[c] == 0) {
+                        mask.setElement(r, c, 1);
                         row_cover[r] = 1;
                         col_cover[c] = 1;
                     }
-                    c += 1;
-                }}
-                r += 1;
-            }}
+                }
+            }
             step = Step::STEP_THREE;
         }
 
 
-        static void step_three(const std::array<std::array<uint8_t, N>, N>& mask,
-                               std::array<bool, N>& col_cover,
+        static void step_three(const Matrix<N, N, uint8_t>& mask,
+                               VectorND<N, bool>& col_cover,
                                Step& step) {
 
             size_t covered_col_count = 0;
-            {size_t r = 0; for (auto& mask_row : mask) {
-                    {size_t c = 0; for (auto& mask_element : mask_row) {
-                        if (mask_element == 1) {
-                            col_cover[c] = 1;
-                            covered_col_count += 1;
-                        }
-                        c += 1;
-                    }}
-                    r += 1;
-            }}
+            for (int r = 0 ; r < mask.rowNr() ; r++) {
+                for (int c = 0 ; c < mask.colNr() ; c++) {
+                    if (mask.getElement(r, c) == 1) {
+                        col_cover[c] = 1;
+                        covered_col_count += 1;
+                    }
+                }
+            }
 
             if (covered_col_count >= N) {
                 step = Step::STEP_SEVEN;
@@ -168,11 +173,11 @@ namespace rtl
         }
 
 
-        static std::optional<std::pair<size_t, size_t>> step_four(std::array<std::array<T, N>, N>& cost_matrix,
-                              std::array<std::array<uint8_t, N>, N>& mask,
-                              std::array<bool, N>& row_cover,
-                              std::array<bool, N>& col_cover,
-                              Step& step) {
+        static std::optional<std::pair<size_t, size_t>> step_four(Matrix<N, N, T>& cost_matrix,
+                                                                  Matrix<N, N, uint8_t>& mask,
+                                                                  VectorND<N, bool>& row_cover,
+                                                                  VectorND<N, bool>& col_cover,
+                                                                  Step& step) {
 
             while (true) {
 
@@ -182,12 +187,12 @@ namespace rtl
                     step = Step::STEP_SIX;
                     return std::nullopt;
                 } else {
-                    mask[row_col->first][row_col->second] = 2;
+                    mask.setElement(row_col->first, row_col->second, 2);
                     row_col = star_in_row(mask, row_col->first);
 
                     if (row_col != std::nullopt) {
-                        row_cover.at(row_col->first) = 1;
-                        col_cover.at(row_col->second) = 0;
+                        row_cover.setElement(row_col->first, 1);
+                        col_cover.setElement(row_col->second, 0);
                     } else {
                         step = Step::STEP_FIVE;
                         return std::make_optional<std::pair<size_t, size_t>>(row_col->first, row_col->second);
@@ -197,9 +202,9 @@ namespace rtl
         }
 
 
-        static void step_five(std::array<std::array<uint8_t, N>, N>& mask,
-                              std::array<bool, N>& row_cover,
-                              std::array<bool, N>& col_cover,
+        static void step_five(Matrix<N, N, uint8_t>& mask,
+                              VectorND<N, bool>& row_cover,
+                              VectorND<N, bool>& col_cover,
                               std::pair<size_t, size_t>& z0_row_col,
                               Step& step) {
 
@@ -234,142 +239,132 @@ namespace rtl
         }
 
 
-        static void step_six(std::array<std::array<T, N>, N>& cost_matrix,
-                             std::array<bool, N>& row_cover,
-                             std::array<bool, N>& col_cover,
+        static void step_six(Matrix<N, N, T>& cost_matrix,
+                             VectorND<N, bool>& row_cover,
+                             VectorND<N, bool>& col_cover,
                              Step& step) {
 
             auto min_value = minimal_value(cost_matrix, row_cover, col_cover);
-            {size_t r = 0; for (auto& row : cost_matrix) {
-                {size_t c = 0; for (auto& element : row) {
-                        if (row_cover.at(r) == 1) {
-                            cost_matrix[r][c] += min_value;
-                        }
-                        if (col_cover.at(c) == 0) {
-                            cost_matrix[r][c] -= min_value;
-                        }
-                        c += 1;
-                    }}
-                r += 1;
-            }}
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    if (row_cover.getElement(r) == 1) {
+                        cost_matrix.setElement(r, c, cost_matrix.getElement(r, c) + min_value);
+                    }
+                    if (col_cover.getElement(c) == 0) {
+                        cost_matrix.setElement(r, c, cost_matrix.getElement(r, c) - min_value);
+                    }
+                }
+            }
             step = Step::STEP_FOUR;
         }
 
 
-        static std::array<Result, N> step_seven(const std::array<std::array<T, N>, N>& cost_matrix,
-                                                const std::array<std::array<uint8_t, N>, N>& mask) {
+        static std::array<Result, N> step_seven(const Matrix<N, N, T>& cost_matrix,
+                                                const Matrix<N, N, uint8_t>& mask) {
             std::array<Result, N> output;
-            {size_t r = 0; for (const auto& row_mask : mask) {
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
                 auto row_col = star_in_row(mask, r);
-                output.at(r) = Result(row_col->first, row_col->second, cost_matrix.at(r).at(row_col->second));
-                r += 1;
-            }}
+                output.at(r) = Result(row_col->first, row_col->second, cost_matrix.getElement(r, row_col->second));
+            }
             return output;
         }
 
 
-        static std::optional<std::pair<size_t, size_t>> find_uncovered_zero(const std::array<std::array<T, N>, N>& cost_matrix,
-                                                                            const std::array<bool, N>& row_cover,
-                                                                            const std::array<bool, N>& col_cover) {
+        static std::optional<std::pair<size_t, size_t>> find_uncovered_zero(const Matrix<N, N, T>& cost_matrix,
+                                                                            const VectorND<N, bool>& row_cover,
+                                                                            const VectorND<N, bool>& col_cover) {
 
-            {size_t r = 0; for (auto& row : cost_matrix) {
-                {size_t c = 0; for (auto& element : row) {
-                        if (element == 0 && row_cover[r] == 0 && col_cover[c] == 0) {
-                            return std::make_optional<std::pair<size_t, size_t>>(r, c);
-                        }
-                        c += 1;
-                    }}
-                r += 1;
-            }}
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    if (cost_matrix.getElement(r, c) == 0 && row_cover.getElement(r) == 0 && col_cover.getElement(c) == 0) {
+                        return std::make_optional<std::pair<size_t, size_t>>(r, c);
+                    }
+                }
+            }
 
             return std::nullopt;
         }
 
 
-        static std::optional<std::pair<size_t, size_t>> star_in_row(const std::array<std::array<uint8_t, N>, N>& mask, size_t row) {
-            {size_t c = 0; for (const auto& element : mask.at(row)) {
-                if (element == 1) {
+        static std::optional<std::pair<size_t, size_t>> star_in_row(const Matrix<N, N, uint8_t>& mask, size_t row) {
+            for (int c = 0 ; c < mask.colNr() ; c++) {
+                if (mask.getElement(row, c) == 1) {
                     return std::make_optional<std::pair<size_t, size_t>>(row, c);
                 }
-                c += 1;
-            }}
+            }
             return std::nullopt;
         }
 
 
-        static std::optional<std::pair<size_t, size_t>> star_in_col(const std::array<std::array<uint8_t, N>, N>& mask,
+        static std::optional<std::pair<size_t, size_t>> star_in_col(const Matrix<N, N, uint8_t>& mask,
                                                                     size_t col) {
 
-            {size_t r = 0; for (const auto& row : mask) {
-                if (row.at(col) == 1) {
+            for (int r = 0 ; r < mask.rowNr() ; r++) {
+                if (mask.getElement(r, col) == 1) {
                     return std::make_optional<std::pair<size_t, size_t>>(r, col);
                 }
-                r += 1;
-            }}
+            }
             return std::nullopt;
         };
 
 
-        static std::optional<std::pair<size_t, size_t>> prime_in_row(const std::array<std::array<uint8_t, N>, N>& mask,
-                                                                    size_t row) {
+        static std::optional<std::pair<size_t, size_t>> prime_in_row(const Matrix<N, N, uint8_t>& mask,
+                                                                     size_t row) {
 
-            {size_t c = 0; for (const auto& element : mask.at(row)) {
-                if (mask[row][c] == 2) {
+            for (int c = 0 ; c < mask.colNr() ; c++) {
+                if (mask.getElement(row, c) == 2) {
                     return std::make_optional<std::pair<size_t, size_t>>(row, c);
                 }
-                c += 1;
-            }}
+            }
             return std::nullopt;
         }
 
 
-        static void augment_path(std::array<std::array<uint8_t, N>, N>& mask,
+        static void augment_path(Matrix<N, N, uint8_t>& mask,
                                  std::array<std::array<size_t, 2>, N*2>& path,
                                  size_t path_count) {
 
             for (size_t p = 0 ; p < path_count ; p++) {
-                if (mask[path[p][0]][path[p][1]] == 1) {
-                    mask[path[p][0]][path[p][1]] = 0;
+                if (mask.getElement(path[p][0],path[p][1]) == 1) {
+                    mask.setElement(path[p][0],path[p][1], 0);
                 }
                 else {
-                    mask[path[p][0]][path[p][1]] = 1;
+                    mask.setElement(path[p][0],path[p][1], 1);
                 }
             }
         }
 
 
-        static void clear_covers(std::array<bool, N>& row_cover,
-                                 std::array<bool, N>& col_cover) {
-            for (auto& r : row_cover) {r = 0;}
-            for (auto& c : col_cover) {c = 0;}
+        static void clear_covers(VectorND<N, bool>& row_cover,
+                                 VectorND<N, bool>& col_cover) {
+            for (int i = 0 ; i < row_cover.length() ; i++) { row_cover.setElement(i, 0);}
+            for (int i = 0 ; i < col_cover.length() ; i++) { col_cover.setElement(i, 0);}
         }
 
 
-        static void erase_primes(std::array<std::array<uint8_t, N>, N>& mask) {
-            for (auto& row_mask : mask) {
-                for (auto& element_mask : row_mask) {
-                    if (element_mask == 2) {element_mask = 0;}
+        static void erase_primes(Matrix<N, N, uint8_t>& mask) {
+            for (int r = 0 ; r < mask.rowNr() ; r++) {
+                for (int c = 0 ; c < mask.colNr() ; c++) {
+                    if (mask.getElement(r, c) == 2) {mask.setElement(r, c, 0);}
                 }
             }
         }
 
 
-        static T minimal_value(const std::array<std::array<T, N>, N>& cost_matrix,
-                               const std::array<bool, N>& row_cover,
-                               const std::array<bool, N>& col_cover) {
+        static T minimal_value(const Matrix<N, N, T>& cost_matrix,
+                               const VectorND<N, bool>& row_cover,
+                               const VectorND<N, bool>& col_cover) {
 
             auto min_value = std::numeric_limits<T>::max();
-            {size_t r = 0; for (auto& row : cost_matrix) {
-                {size_t c = 0; for (auto& element : row) {
-                    if (row_cover[r] == 0 && col_cover[c] == 0){
-                        if (min_value > cost_matrix[r][c]) {
-                            min_value = cost_matrix[r][c];
+            for (int r = 0 ; r < cost_matrix.rowNr() ; r++) {
+                for (int c = 0 ; c < cost_matrix.colNr() ; c++) {
+                    if (row_cover.getElement(r) == 0 && col_cover.getElement(c) == 0){
+                        if (min_value > cost_matrix.getElement(r, c)) {
+                            min_value = cost_matrix.getElement(r, c);
                         }
                     }
-                    c += 1;
-                }}
-                r += 1;
-            }}
+                }
+            }
             return min_value;
         }
     };

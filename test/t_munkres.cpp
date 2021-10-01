@@ -33,10 +33,10 @@
 
 TEST(t_munkres, test_1) {
 
-    auto cost_matrix = std::array<std::array<size_t, 3>, 3> {{
-      {1, 2, 3},
-      {2, 4, 6},
-      {3, 6, 9}}};
+    auto cost_matrix = rtl::Matrix<3, 3, size_t>::zeros();
+    cost_matrix.setRow(0, rtl::VectorND<3, size_t>{1, 2, 3});
+    cost_matrix.setRow(1, rtl::VectorND<3, size_t>{2, 4, 6});
+    cost_matrix.setRow(2, rtl::VectorND<3, size_t>{3, 6, 9});
 
     auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix);
 
@@ -47,10 +47,10 @@ TEST(t_munkres, test_1) {
 
 TEST(t_munkres, test_1_max) {
 
-    auto cost_matrix = std::array<std::array<size_t, 3>, 3> {{
-     {1, 2, 3},
-     {2, 4, 6},
-     {3, 6, 9}}};
+    auto cost_matrix = rtl::Matrix<3, 3, size_t>::zeros();
+    cost_matrix.setRow(0, rtl::VectorND<3, size_t>{1, 2, 3});
+    cost_matrix.setRow(1, rtl::VectorND<3, size_t>{2, 4, 6});
+    cost_matrix.setRow(2, rtl::VectorND<3, size_t>{3, 6, 9});
 
     auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix, true);
 
@@ -61,13 +61,13 @@ TEST(t_munkres, test_1_max) {
 
 TEST(t_munkres, test_2) {
 
-    auto cost_matrix = std::array<std::array<int, 6>, 6> {{
-      {22, 14, 120, 21, 4, 51},
-      {19, 12, 172, 21, 28, 43},
-      {161, 122, 2, 50, 128, 39},
-      {19, 22, 90, 11, 28, 4},
-      {1, 30, 113, 14, 28, 86},
-      {60, 70, 170, 28, 68, 104}}};
+    auto cost_matrix = rtl::Matrix<6, 6, int>::zeros();
+    cost_matrix.setRow(0, rtl::VectorND<6, int>{22, 14, 120, 21, 4, 51});
+    cost_matrix.setRow(1, rtl::VectorND<6, int>{19, 12, 172, 21, 28, 43});
+    cost_matrix.setRow(2, rtl::VectorND<6, int>{161, 122, 2, 50, 128, 39});
+    cost_matrix.setRow(3, rtl::VectorND<6, int>{19, 22, 90, 11, 28, 4});
+    cost_matrix.setRow(4, rtl::VectorND<6, int>{1, 30, 113, 14, 28, 86});
+    cost_matrix.setRow(5, rtl::VectorND<6, int>{60, 70, 170, 28, 68, 104});
 
     auto result = rtl::Munkres<int, 6>::solve(cost_matrix);
 
@@ -82,11 +82,11 @@ TEST(t_munkres, test_2) {
 
 TEST(t_munkres, test_3_max) {
 
-    auto cost_matrix = std::array<std::array<float, 4>, 4> {{
-    {0.8f, 0.0f, 0.0f, 0.0f, },
-    {0.0f, 0.0f, 0.65f, 0.1f, },
-    {0.0f, 0.0f, 0.0f, 0.0f, },
-    {0.1f, 0.7f, 0.0f, 0.0f, }}};
+    auto cost_matrix = rtl::Matrix<4, 4, float>::zeros();
+    cost_matrix.setRow(0, rtl::VectorND<4, float>{0.8f, 0.0f, 0.0f, 0.0f});
+    cost_matrix.setRow(1, rtl::VectorND<4, float>{0.0f, 0.0f, 0.65f, 0.1f});
+    cost_matrix.setRow(2, rtl::VectorND<4, float>{0.0f, 0.0f, 0.0f, 0.0f});
+    cost_matrix.setRow(3, rtl::VectorND<4, float>{0.1f, 0.7f, 0.0f, 0.0f});
 
     auto result = rtl::Munkres<float, 4>::solve(cost_matrix, true);
 
