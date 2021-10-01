@@ -209,26 +209,26 @@ namespace rtl
                               Step& step) {
 
             auto path_count = 1;
-            std::array<std::array<size_t, 2>, N*2> path;
+            Matrix<N*2, 2, size_t> path;
 
-            path[path_count - 1][0] = z0_row_col.first;
-            path[path_count - 1][1] = z0_row_col.second;
+            path.setElement(path_count - 1, 0, z0_row_col.first);
+            path.setElement(path_count - 1, 1, z0_row_col.second);
             bool ready = false;
 
             while(!ready) {
-                auto row_col = star_in_col(mask, path[path_count - 1][1]);
+                auto row_col = star_in_col(mask, path.getElement(path_count - 1, 1));
                 if (row_col != std::nullopt) {
                     path_count += 1;
-                    path[path_count - 1][0] = row_col->first;
-                    path[path_count - 1][1] = path[path_count - 2][1];
+                    path.setElement(path_count - 1, 0, row_col->first);
+                    path.setElement(path_count - 1, 1, path.getElement(path_count - 2, 1));
                 } else {
                     ready = true;
                 }
                 if (!ready) {
-                    row_col = prime_in_row(mask, path[path_count - 1][0]);
+                    row_col = prime_in_row(mask, path.getElement(path_count - 1, 0));
                     path_count += 1;
-                    path[path_count - 1][0] = path[path_count - 2][0];
-                    path[path_count - 1][1] = row_col->second;
+                    path.setElement(path_count - 1, 0, path.getElement(path_count - 2, 0));
+                    path.setElement(path_count - 1, 1, row_col->second);
                 }
             }
 
@@ -321,15 +321,15 @@ namespace rtl
 
 
         static void augment_path(Matrix<N, N, uint8_t>& mask,
-                                 std::array<std::array<size_t, 2>, N*2>& path,
+                                 Matrix<N*2, 2, size_t>& path,
                                  size_t path_count) {
 
             for (size_t p = 0 ; p < path_count ; p++) {
-                if (mask.getElement(path[p][0],path[p][1]) == 1) {
-                    mask.setElement(path[p][0],path[p][1], 0);
+                if (mask.getElement(path.getElement(p,0),path.getElement(p,1)) == 1) {
+                    mask.setElement(path.getElement(p,0),path.getElement(p,1), 0);
                 }
                 else {
-                    mask.setElement(path[p][0],path[p][1], 1);
+                    mask.setElement(path.getElement(p,0),path.getElement(p,1), 1);
                 }
             }
         }
