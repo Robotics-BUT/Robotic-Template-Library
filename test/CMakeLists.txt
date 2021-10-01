@@ -51,6 +51,10 @@ add_executable(t_munkres t_munkres.cpp)
 target_link_libraries(t_munkres GTest::GTest GTest::Main)
 add_test(NAME t_munkres COMMAND t_munkres)
 
+add_executable(t_particle_filter t_particle_filter.cpp)
+target_link_libraries(t_particle_filter GTest::GTest GTest::Main)
+add_test(NAME t_particle_filter COMMAND t_particle_filter)
+
 add_executable(t_transformationxx t_transformationxx.cpp )
 target_link_libraries(t_transformationxx GTest::GTest GTest::Main)
 add_test(NAME t_transformationxx COMMAND t_transformationxx)

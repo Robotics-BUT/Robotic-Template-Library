@@ -24,12 +24,18 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
-#define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+#include <gtest/gtest.h>
 
-#include "alg/kalman/Kalman.h"
-#include "alg/munkres/Munkres.h"
-#include "rtl/alg/particle_filter/ParticleFilter.h"
-#include "alg/particle_filter/SimpleParticle.h"
+#include "rtl/Algorithms.h"
 
-#endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+
+TEST(t_particle_filter, init) {
+    rtl::ParticleFilter<rtl::SimpleParticle, 100>();
+}
+
+
+
+int main(int argc, char **argv){
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}

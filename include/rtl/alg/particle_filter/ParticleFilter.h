@@ -24,12 +24,26 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
-#define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+#ifndef ROBOTICTEMPLATELIBRARY_PARTICLEFILTER_H
+#define ROBOTICTEMPLATELIBRARY_PARTICLEFILTER_H
 
-#include "alg/kalman/Kalman.h"
-#include "alg/munkres/Munkres.h"
-#include "rtl/alg/particle_filter/ParticleFilter.h"
-#include "alg/particle_filter/SimpleParticle.h"
+namespace rtl
+{
+    template<typename ParticleType, size_t no_of_particles>
+    class ParticleFilter {
 
-#endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+
+    public:
+
+        ParticleFilter() {
+
+        }
+
+    private:
+
+        std::array<ParticleType, no_of_particles> particles_;
+    };
+
+}
+
+#endif //ROBOTICTEMPLATELIBRARY_PARTICLEFILTER_H

@@ -24,12 +24,14 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
-#define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+#ifndef ROBOTICTEMPLATELIBRARY_SIMPLEPARTICLE_H
+#define ROBOTICTEMPLATELIBRARY_SIMPLEPARTICLE_H
 
-#include "alg/kalman/Kalman.h"
-#include "alg/munkres/Munkres.h"
-#include "rtl/alg/particle_filter/ParticleFilter.h"
-#include "alg/particle_filter/SimpleParticle.h"
+namespace rtl {
 
-#endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+    class SimpleParticle {
+
+    };
+}
+
+#endif //ROBOTICTEMPLATELIBRARY_SIMPLEPARTICLE_H
