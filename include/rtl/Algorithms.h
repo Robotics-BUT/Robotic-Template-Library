@@ -27,6 +27,7 @@
 #ifndef ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
 #define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
 
+#include "alg/kalman/kalman.h"
 #include "alg/munkres/munkres.h"
 
 #endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H

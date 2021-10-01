@@ -19,6 +19,10 @@ add_executable(t_frustum t_frustum.cpp)
 target_link_libraries(t_frustum GTest::GTest GTest::Main)
 add_test(NAME t_frustum COMMAND t_frustum)
 
+add_executable(t_kalman t_kalman.cpp)
+target_link_libraries(t_kalman GTest::GTest GTest::Main)
+add_test(NAME t_kalman COMMAND t_kalman)
+
 add_executable(t_tf_chain tf/t_tf_chain.cpp)
 target_link_libraries(t_tf_chain GTest::GTest GTest::Main)
 add_test(NAME t_tf_chain COMMAND t_tf_chain)
