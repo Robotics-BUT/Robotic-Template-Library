@@ -28,8 +28,10 @@
 #define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
 
 #include "alg/kalman/Kalman.h"
+
 #include "alg/munkres/Munkres.h"
-#include "rtl/alg/particle_filter/ParticleFilter.h"
+
+#include "alg/particle_filter/ParticleFilter.h"
 #include "alg/particle_filter/SimpleParticle.h"
 
 #endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H

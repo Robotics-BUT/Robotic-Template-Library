@@ -27,10 +27,57 @@
 #ifndef ROBOTICTEMPLATELIBRARY_SIMPLEPARTICLE_H
 #define ROBOTICTEMPLATELIBRARY_SIMPLEPARTICLE_H
 
+#include <random>
+#include <cmath>
+
 namespace rtl {
 
+    template <typename T/*, T range_min, T range_max*/>
     class SimpleParticle {
+    public:
 
+        SimpleParticle(float val) : value_{val} {}
+
+        static SimpleParticle random() {
+            static std::random_device r;
+            static auto engine = std::default_random_engine(r());
+            static std::uniform_real_distribution<float> distribution(-100.0f, 100.0f);
+            return SimpleParticle(distribution(engine));
+        }
+
+        void move(const SimpleParticle& action) {
+            value_ += action.value_;
+        }
+
+        double belief(const SimpleParticle& measurement) {
+            return gauss(cost(measurement));
+        }
+
+        [[nodiscard]] double value() const {return value_;}
+
+        [[nodiscard]] static SimpleParticle evaluation(const std::vector<SimpleParticle>& vec) {
+            double mean = 0.0;
+            std::for_each(vec.begin(), vec.end(), [&](auto particle){
+                mean += particle.value();
+            });
+            return mean / vec.size();
+        }
+
+    private:
+
+        [[nodiscard]] double cost(const SimpleParticle& measurement) {
+            return abs(value_ - measurement.value_);
+        }
+
+        [[nodiscard]] double gauss(float x) const {
+            constexpr double mean = 0;
+            constexpr double std_dev = 10;
+            constexpr double variance = std_dev * std_dev;
+            constexpr double sqrt_2_pi = 2.5066;
+            return (1 / (std_dev * sqrt_2_pi)) * exp(-0.5 * std::pow(x - mean, 2) / variance);
+        }
+
+        double value_;
     };
 }
 

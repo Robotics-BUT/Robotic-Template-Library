@@ -30,9 +30,33 @@
 
 
 TEST(t_particle_filter, init) {
-    rtl::ParticleFilter<rtl::SimpleParticle, 100>();
+    auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 10, 5>();
 }
 
+
+TEST(t_particle_filter, test_1) {
+
+    auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 100, 30>();
+    for (size_t i = 0 ; i < 100 ; i++) {
+        particle_filter.iteration(0.0, 0.0);
+    }
+    EXPECT_NEAR(particle_filter.estimated_val().value(), 0.0, 5.0);
+}
+
+
+
+TEST(t_particle_filter, test_2) {
+
+    auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 1000, 300>();
+    double step = 0.1;
+    double measurement = 0.0;
+
+    for (size_t i = 0 ; i < 100 ; i++) {
+        measurement += step;
+        particle_filter.iteration(rtl::SimpleParticle<float>(step), rtl::SimpleParticle<float>(measurement));
+    }
+    EXPECT_NEAR(particle_filter.estimated_val().value(), measurement, 5.0);
+}
 
 
 int main(int argc, char **argv){
