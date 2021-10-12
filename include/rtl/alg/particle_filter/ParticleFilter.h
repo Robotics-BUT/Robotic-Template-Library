@@ -27,7 +27,6 @@
 #ifndef ROBOTICTEMPLATELIBRARY_PARTICLEFILTER_H
 #define ROBOTICTEMPLATELIBRARY_PARTICLEFILTER_H
 
-#include <rtl/alg/particle_filter/GenericParticle.h>
 #include <rtl/alg/particle_filter/SimpleParticle.h>
 
 namespace rtl
