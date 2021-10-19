@@ -47,7 +47,7 @@ namespace rtl {
         }
 
         float score() {
-            return 1.0f / (cost_(value_) + 0.001f);
+            return fit_(value_);
         }
 
         SimpleAgent crossover(const SimpleAgent<T>& mate) {
@@ -61,13 +61,13 @@ namespace rtl {
             value_ += static_cast<T>(distribution(engine));
         }
 
-        static void set_cost_fn(const std::function<float(T)>& fn) {
-            cost_ = fn;
+        static void set_fit_fn(const std::function<float(T)>& fn) {
+            fit_ = fn;
         }
 
     private:
 
-        inline static std::function<float(T)> cost_ = [](const T& t){ return std::abs(0.0 - t);};
+        inline static std::function<float(T)> fit_ = [](const T&){ return 1.0f; };
         T value_;
     };
 }

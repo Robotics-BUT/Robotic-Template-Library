@@ -38,8 +38,8 @@ TEST(t_genetic_algorithm, init) {
 TEST(t_genetic_algorithm, test_float_1) {
     auto genetic_algorithm = rtl::GeneticAlgorithm<rtl::SimpleAgent<float>, 100, 10, 50, 50>();
 
-    rtl::SimpleAgent<float>::set_cost_fn([](float val){
-        return std::abs(val - 0.0f);
+    rtl::SimpleAgent<float>::set_fit_fn([](float val){
+        return 1.0f / (std::abs(0.0 - val) + 0.001f);
     });
 
     for (size_t i = 0 ; i < 10 ; i++) {
@@ -54,8 +54,8 @@ TEST(t_genetic_algorithm, test_float_1) {
 TEST(t_genetic_algorithm, test_float_2) {
     auto genetic_algorithm = rtl::GeneticAlgorithm<rtl::SimpleAgent<float>, 1000, 100, 500, 500>();
 
-    rtl::SimpleAgent<float>::set_cost_fn([](float val){
-        return std::abs(val - 0.0f);
+    rtl::SimpleAgent<float>::set_fit_fn([](float val){
+        return 1.0f / (std::abs(0.0 - val) + 0.001f);
     });
 
     for (size_t i = 0 ; i < 100 ; i++) {
@@ -70,8 +70,8 @@ TEST(t_genetic_algorithm, test_float_2) {
 TEST(t_genetic_algorithm, test_float_3) {
     auto genetic_algorithm = rtl::GeneticAlgorithm<rtl::SimpleAgent<float>, 10000, 1000, 5000, 5000>();
 
-    rtl::SimpleAgent<float>::set_cost_fn([](float val){
-        return std::abs(val - 0.0f);
+    rtl::SimpleAgent<float>::set_fit_fn([](float val){
+        return 1.0f / (std::abs(0.0 - val) + 0.001f);
     });
 
     for (size_t i = 0 ; i < 1000 ; i++) {
@@ -85,8 +85,8 @@ TEST(t_genetic_algorithm, test_float_3) {
 TEST(t_genetic_algorithm, test_int_1) {
     auto genetic_algorithm = rtl::GeneticAlgorithm<rtl::SimpleAgent<int>, 100, 10, 50, 50>();
 
-    rtl::SimpleAgent<float>::set_cost_fn([](int val){
-        return std::abs(val - 0.0f);
+    rtl::SimpleAgent<int>::set_fit_fn([](int val){
+        return 1.0f / (std::abs(0.0 - val) + 0.001f);
     });
 
     for (size_t i = 0 ; i < 10 ; i++) {
