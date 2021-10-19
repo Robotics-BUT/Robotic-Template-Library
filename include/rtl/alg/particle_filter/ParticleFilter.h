@@ -51,7 +51,7 @@ namespace rtl
             resampling();
         }
 
-        ParticleType estimated_val() {
+        typename ParticleType::Result estimate() {
             std::vector<ParticleType> evaluation_particles;
             evaluation_particles.reserve(no_of_survivors);
 
@@ -92,12 +92,16 @@ namespace rtl
 
             double step = 1.0 / (no_of_survivors+1);
             double th = 0.0;
+
+            auto it = particles_and_cum_score.begin();
             for (size_t n = 0 ; n < no_of_survivors ; n++) {
                 th += step;
-                for(auto it = particles_and_cum_score.begin() ; it < particles_and_cum_score.end() ; it++) {
+                while(true) {
                     if (it->second > th) {
                         new_particles.push_back(*it);
                         break;
+                    } else {
+                        it++;
                     }
                 }
             }

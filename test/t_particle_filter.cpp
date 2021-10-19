@@ -38,9 +38,14 @@ TEST(t_particle_filter, test_1) {
 
     auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 100, 30>();
     for (size_t i = 0 ; i < 100 ; i++) {
-        particle_filter.iteration(0.0, 0.0);
+        particle_filter.iteration(
+                rtl::SimpleParticle<float>(0.0),
+                rtl::SimpleParticle<float>(0.0));
     }
-    EXPECT_NEAR(particle_filter.estimated_val().value(), 0.0, 5.0);
+
+    auto result = particle_filter.estimate();
+    std::cout << "gt: " << 0.0 << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    EXPECT_NEAR(result.mean(), 0.0, 5.0);
 }
 
 
@@ -48,14 +53,34 @@ TEST(t_particle_filter, test_1) {
 TEST(t_particle_filter, test_2) {
 
     auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 1000, 300>();
-    double step = 0.1;
-    double measurement = 0.0;
+    float step = 0.1;
+    float measurement = 0.0;
 
     for (size_t i = 0 ; i < 100 ; i++) {
         measurement += step;
         particle_filter.iteration(rtl::SimpleParticle<float>(step), rtl::SimpleParticle<float>(measurement));
     }
-    EXPECT_NEAR(particle_filter.estimated_val().value(), measurement, 5.0);
+
+    auto result = particle_filter.estimate();
+    std::cout << "gt: " << measurement << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    EXPECT_NEAR(result.mean(), measurement, 5.0);
+}
+
+
+TEST(t_particle_filter, test_3) {
+
+    auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 10000, 3000>();
+    float step = 0.1;
+    float measurement = 0.0;
+
+    for (size_t i = 0 ; i < 100 ; i++) {
+        measurement += step;
+        particle_filter.iteration(rtl::SimpleParticle<float>(step), rtl::SimpleParticle<float>(measurement));
+    }
+
+    auto result = particle_filter.estimate();
+    std::cout << "gt: " << measurement << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    EXPECT_NEAR(result.mean(), measurement, 5.0);
 }
 
 

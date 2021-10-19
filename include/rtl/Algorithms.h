@@ -34,4 +34,7 @@
 #include "alg/particle_filter/ParticleFilter.h"
 #include "alg/particle_filter/SimpleParticle.h"
 
+#include "alg/genetic/GeneticAlgorithm.h"
+#include "alg/genetic/SimpleAgent.h"
+
 #endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H

@@ -19,6 +19,10 @@ add_executable(t_frustum t_frustum.cpp)
 target_link_libraries(t_frustum GTest::GTest GTest::Main)
 add_test(NAME t_frustum COMMAND t_frustum)
 
+add_executable(t_genetic_algorithm t_genetic_algorithm.cpp)
+target_link_libraries(t_genetic_algorithm GTest::GTest GTest::Main)
+add_test(NAME t_genetic_algorithm COMMAND t_genetic_algorithm)
+
 add_executable(t_kalman t_kalman.cpp)
 target_link_libraries(t_kalman GTest::GTest GTest::Main)
 add_test(NAME t_kalman COMMAND t_kalman)
