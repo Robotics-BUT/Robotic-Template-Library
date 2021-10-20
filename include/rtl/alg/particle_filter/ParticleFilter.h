@@ -29,49 +29,50 @@
 
 #include <rtl/alg/particle_filter/SimpleParticle.h>
 
-namespace rtl
-{
+namespace rtl {
+
     template<typename ParticleType, size_t no_of_particles, size_t no_of_survivors>
     class ParticleFilter {
 
+        using score_type = float;
 
     public:
 
         ParticleFilter() {
-            particles_and_cum_score.reserve(no_of_particles);
+            particles_.reserve(no_of_particles);
             for (size_t i = 0 ; i < no_of_particles ; i++) {
-                particles_and_cum_score.push_back(std::pair<ParticleType, double>{ParticleType::random(), 0.0});
+                particles_.push_back(std::pair<ParticleType, score_type>{ParticleType::random(), 0.0});
             }
         }
 
 
-        void iteration(const ParticleType& action, const ParticleType& measurement) {
+        void iteration(const typename ParticleType::Action& action, const typename ParticleType::Measurement& measurement) {
             prediction(action);
             correction(measurement);
             resampling();
         }
 
-        typename ParticleType::Result estimate() {
+        typename ParticleType::Result evaluate() {
             std::vector<ParticleType> evaluation_particles;
             evaluation_particles.reserve(no_of_survivors);
 
             for (size_t i = 0 ; i < no_of_survivors ; i++) {
-                evaluation_particles.push_back(particles_and_cum_score.at(i).first);
+                evaluation_particles.push_back(particles_.at(i).first);
             }
             return ParticleType::evaluation(evaluation_particles);
         }
 
     private:
 
-        void prediction(const ParticleType& action) {
-            std::for_each(particles_and_cum_score.begin(), particles_and_cum_score.end(), [&](auto particle){
+        void prediction(const typename ParticleType::Action& action) {
+            std::for_each(particles_.begin(), particles_.end(), [&](auto& particle){
                 particle.first.move(action);
             });
         }
 
-        void correction(const ParticleType& measurement) {
+        void correction(const typename ParticleType::Measurement& measurement) {
             double cum_sum = 0.0;
-            for (auto& particle_cum_score : particles_and_cum_score) {
+            for (auto& particle_cum_score : particles_) {
                 auto particle_score = particle_cum_score.first.belief(measurement);
                 particle_cum_score.second = cum_sum + particle_score;
                 cum_sum += particle_score;
@@ -81,19 +82,19 @@ namespace rtl
         }
 
         void normalize_score(double cum_sum) {
-            std::for_each(particles_and_cum_score.begin(), particles_and_cum_score.end(), [&](auto& particle_score){
+            std::for_each(particles_.begin(), particles_.end(), [&](auto& particle_score){
                 particle_score.second /= cum_sum;
             });
         }
 
         void resampling() {
-            std::vector<std::pair<ParticleType, double>> new_particles;
-            new_particles.reserve(particles_and_cum_score.size());
+            std::vector<std::pair<ParticleType, score_type>> new_particles;
+            new_particles.reserve(particles_.size());
 
             double step = 1.0 / (no_of_survivors+1);
             double th = 0.0;
 
-            auto it = particles_and_cum_score.begin();
+            auto it = particles_.begin();
             for (size_t n = 0 ; n < no_of_survivors ; n++) {
                 th += step;
                 while(true) {
@@ -107,12 +108,12 @@ namespace rtl
             }
 
             for (size_t n = new_particles.size() ; n < no_of_particles ; n++) {
-                new_particles.push_back(std::pair<ParticleType, double>{ParticleType::random(), 0.0});
+                new_particles.push_back(std::pair<ParticleType, score_type>{ParticleType::random(), 0.0});
             }
-            particles_and_cum_score = new_particles;
+            particles_ = new_particles;
         }
 
-        std::vector<std::pair<ParticleType, double>> particles_and_cum_score;
+        std::vector<std::pair<ParticleType, score_type>> particles_;
     };
 
 }

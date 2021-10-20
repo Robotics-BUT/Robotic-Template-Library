@@ -34,17 +34,37 @@ namespace rtl {
 
     template <typename T>
     class SimpleParticle {
+
+        using score_type = float;
+
     public:
 
-        class Result{
+        class Action {
         public:
-            Result(T mean, T std_dev) : mean_{mean}, std_dev_{std_dev} {}
+            explicit Action(const T& val) : value_{val} {}
+            [[nodiscard]] T value() const {return value_;}
+        private:
+            T value_;
+        };
+
+        class Measurement {
+        public:
+            explicit Measurement(const T& val) : value_{val} {}
+            [[nodiscard]] T value() const {return value_;}
+        private:
+            T value_;
+        };
+
+        class Result {
+        public:
+            explicit Result(T mean, T std_dev) : mean_{mean}, std_dev_{std_dev} {}
             [[nodiscard]] T mean() const {return mean_;}
             [[nodiscard]] T std_dev() const {return std_dev_;}
         private:
             T mean_;
             T std_dev_;
         };
+
 
         explicit SimpleParticle(T val) : value_{val} {}
 
@@ -55,26 +75,24 @@ namespace rtl {
             return SimpleParticle(distribution(engine));
         }
 
-        void move(const SimpleParticle& action) {
-            value_ += action.value_;
+        void move(const SimpleParticle::Action& action) {
+            value_ += action.value();
         }
 
-        T belief(const SimpleParticle& measurement) {
+        [[nodiscard]] score_type belief(const SimpleParticle::Measurement& measurement) {
             return gauss(cost(measurement));
         }
-
-        [[nodiscard]] T value() const {return value_;}
 
         [[nodiscard]] static Result evaluation(const std::vector<SimpleParticle>& vec) {
             T sum = 0.0;
             std::for_each(vec.begin(), vec.end(), [&](auto particle){
-                sum += particle.value();
+                sum += particle.value_;
             });
 
             T mean = sum/vec.size();
             T square_diff_sum = 0.0;
             std::for_each(vec.begin(), vec.end(), [&](auto particle){
-                square_diff_sum += std::pow(particle.value() - mean, 2.0);
+                square_diff_sum += std::pow(particle.value_ - mean, 2.0);
             });
 
             return Result(mean, std::sqrt(square_diff_sum/vec.size()));
@@ -82,17 +100,17 @@ namespace rtl {
 
     private:
 
-        [[nodiscard]] T cost(const SimpleParticle& measurement) {
-            return abs(value_ - measurement.value_);
+        [[nodiscard]] score_type cost(const SimpleParticle::Measurement& measurement) {
+            return abs(value_ - measurement.value());
         }
 
-        [[nodiscard]] T gauss(float x) const {
-            constexpr T mean = 0;
-            constexpr T std_dev = 10;
-            constexpr T variance = std_dev * std_dev;
-            constexpr T sqrt_2_pi = 2.5066;
-            constexpr T a = (1 / (std_dev * sqrt_2_pi));
-            return a * exp(-0.5 * std::pow(x - mean, 2) / variance);
+        [[nodiscard]] score_type gauss(float x) const {
+            constexpr float mean = 0;
+            constexpr float std_dev = 10;
+            constexpr float variance = std_dev * std_dev;
+            constexpr float sqrt_2_pi = 2.5066;
+            constexpr float a = (1 / (std_dev * sqrt_2_pi));
+            return a * expf(-0.5f * powf(x - mean, 2) / variance);
         }
 
         T value_;

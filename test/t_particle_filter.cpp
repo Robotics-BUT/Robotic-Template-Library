@@ -38,13 +38,12 @@ TEST(t_particle_filter, test_1) {
 
     auto particle_filter = rtl::ParticleFilter<rtl::SimpleParticle<float>, 100, 30>();
     for (size_t i = 0 ; i < 100 ; i++) {
-        particle_filter.iteration(
-                rtl::SimpleParticle<float>(0.0),
-                rtl::SimpleParticle<float>(0.0));
+        particle_filter.iteration(rtl::SimpleParticle<float>::Action(0.0f),
+                                  rtl::SimpleParticle<float>::Measurement(0.0f));
     }
 
-    auto result = particle_filter.estimate();
-    std::cout << "gt: " << 0.0 << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    auto result = particle_filter.evaluate();
+    std::cout << "gt: " << 0.0 << " mean_pose: " << result.mean() << " std_dev_pose: " << result.std_dev() << std::endl;
     EXPECT_NEAR(result.mean(), 0.0, 5.0);
 }
 
@@ -58,11 +57,11 @@ TEST(t_particle_filter, test_2) {
 
     for (size_t i = 0 ; i < 100 ; i++) {
         measurement += step;
-        particle_filter.iteration(rtl::SimpleParticle<float>(step), rtl::SimpleParticle<float>(measurement));
+        particle_filter.iteration(rtl::SimpleParticle<float>::Action(step), rtl::SimpleParticle<float>::Measurement(measurement));
     }
 
-    auto result = particle_filter.estimate();
-    std::cout << "gt: " << measurement << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    auto result = particle_filter.evaluate();
+    std::cout << "gt: " << measurement << " mean_pose: " << result.mean() << " std_dev_pose: " << result.std_dev() << std::endl;
     EXPECT_NEAR(result.mean(), measurement, 5.0);
 }
 
@@ -75,16 +74,16 @@ TEST(t_particle_filter, test_3) {
 
     for (size_t i = 0 ; i < 100 ; i++) {
         measurement += step;
-        particle_filter.iteration(rtl::SimpleParticle<float>(step), rtl::SimpleParticle<float>(measurement));
+        particle_filter.iteration(rtl::SimpleParticle<float>::Action(step), rtl::SimpleParticle<float>::Measurement(measurement));
     }
 
-    auto result = particle_filter.estimate();
-    std::cout << "gt: " << measurement << " mean: " << result.mean() << " std_dev: " << result.std_dev() << std::endl;
+    auto result = particle_filter.evaluate();
+    std::cout << "gt: " << measurement << " mean_pose: " << result.mean() << " std_dev_pose: " << result.std_dev() << std::endl;
     EXPECT_NEAR(result.mean(), measurement, 5.0);
 }
 
 
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
