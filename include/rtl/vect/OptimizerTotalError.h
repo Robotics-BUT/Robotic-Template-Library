@@ -169,7 +169,7 @@ namespace rtl
                     else
                         pi[j] = bp_array[j];
                     //std::cout << pi[j] << "\t";
-                    bp_sums[j] += pi[j]; // sum of all of the vectors for the mean_pose value computation
+                    bp_sums[j] += pi[j]; // sum of all of the vectors for the mean value computation
                 }
                 forwardHomogenize(pi);
                 //std::cout<<std::endl;
@@ -201,7 +201,7 @@ namespace rtl
                 for (i = bp_cnt - 1; i < bp_cnt; i--)
                 {
                     bp_sums[i] -= discard[i]; // remove the discarded vector from the sum m
-                    bp_mean[i] = bp_sums[i] / bp_cnt; // compute the mean_pose vector
+                    bp_mean[i] = bp_sums[i] / bp_cnt; // compute the mean vector
                     tmp_pt = 2 * bp_mean[i] - discard[i]; // compute REFLECT vector
                     if (i == bp_cnt - 1)
                         (tmp_pt < bp_last_i - 1) ? bp_tmp[i] = tmp_pt : bp_tmp[i] = bp_last_i - 2;

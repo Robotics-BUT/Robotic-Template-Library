@@ -887,7 +887,7 @@ namespace rtl
                     }
                 }
 
-                if (i == pp->poly_3d.points().size()) // if none distant enough point was found, take the mean_pose and decide
+                if (i == pp->poly_3d.points().size()) // if none distant enough point was found, take the mean and decide
                 {
                     auto v_sum = Vector3f::zeros();
                     for (const auto &pt : pp->poly_3d.points())
