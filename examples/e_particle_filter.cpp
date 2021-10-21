@@ -149,9 +149,6 @@ private:
 
 int main() {
 
-
-
-
     auto robot_pose = rtl::Vector2f{0.0, 0.0};
     auto robot_orientation = rtl::Rotation2f{0.0f};
 
@@ -159,7 +156,7 @@ int main() {
     const auto motion_rotation = rtl::Rotation2f{M_PI/2.0f / 9}; // 10 deg
 
     std::cout << "pose: " << robot_pose.x() << " " << robot_pose.y() << " orient: " << robot_orientation.rotAngle() << std::endl;
-    auto particle_filter = rtl::ParticleFilter<Robot, 500, 200>();
+    auto particle_filter = rtl::ParticleFilter<Robot, 500, 300>();
     for (size_t i = 0 ; i < 36 ; i++) {
 
         // Oriented translation, based on current robot rotation
@@ -168,7 +165,7 @@ int main() {
         // Robot first translates, than rotates
         robot_pose += oriented_translation;
         robot_orientation.transform(motion_rotation);
-        std::cout << "- - - - - - - - - -" << std::endl;
+        std::cout << "- - - - - - - - - - - - - - - - - - - -" << std::endl;
         std::cout << "GT pose: " << robot_pose.x() << " " << robot_pose.y() << " orient: " << robot_orientation.rotAngle() << std::endl;
 
         particle_filter.iteration(Robot::Action{motion_translation, motion_rotation}, Robot::Measurement{robot_pose});
