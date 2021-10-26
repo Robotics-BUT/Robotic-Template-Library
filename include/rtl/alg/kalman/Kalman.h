@@ -5,9 +5,18 @@
 
 namespace rtl
 {
+
+    /*!
+     * Simple implementation of Kalman Filter with strict typed input and output matrices.
+     * Before using the KF, user has to manually specify the inner matrices of the filter.
+     *
+     * @tparam dtype Data type of values in KF's matrices
+     * @tparam state_dim Dimension of inner state vector
+     * @tparam measurement_dim Dimension of measurement vector
+     * @tparam control_dim Dimension of control vector
+     */
     template <typename dtype, size_t state_dim, size_t measurement_dim, size_t control_dim>
     class Kalman {
-
 
     public:
 

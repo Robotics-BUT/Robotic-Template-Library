@@ -22,7 +22,7 @@
 // OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 // OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-// Contact person: Ales Jelinek <adam.ligocki@vutbr.cz>
+// Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
 #include <iostream>
 #include "rtl/Algorithms.h"

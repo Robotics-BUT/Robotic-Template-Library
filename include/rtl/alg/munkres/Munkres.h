@@ -24,7 +24,6 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-// Implementation based on: https://brc2.com/the-algorithm-workshop/
 
 #ifndef ROBOTICTEMPLATELIBRARY_MUNKRES_H
 #define ROBOTICTEMPLATELIBRARY_MUNKRES_H
@@ -34,6 +33,19 @@
 
 namespace rtl
 {
+
+    /*!
+     * Implementation of the Munkres (Hungarian) algorithm. Also called assignment algorithm. Takes cost matrix at the
+     * input (columns - workers, rows - tasks) and search for the combination with the smallest cost sum.
+     *
+     * Implementation based on: https://brc2.com/the-algorithm-workshop/
+     *
+     * Algorithm is also suitable for pairing detected ojects between two frames (maximize Intersecion over Union of the
+     * bounding boxes).
+     *
+     * @tparam T Data type of values in the const matrix
+     * @tparam N Dimension of the cost matrix (NxN)
+     * */
     template <typename T, size_t N>
     class Munkres {
 
@@ -57,6 +69,12 @@ namespace rtl
             T cost;
         };
 
+        /*!
+         * Solves assignment problem for given cost matrix.
+         *
+         * @param cost_matrix cost matrix of a given problem (cols: workers, rows: tasks). Matrix must be square-shaped
+         * @param max_cost If true, algorithm maximize sum of all costs (sitable for best IoU search)
+         * */
         static std::array<Result, N> solve(Matrix<N, N, T> cost_matrix, bool max_cost = false) {
 
             Step step = Step::STEP_ONE;

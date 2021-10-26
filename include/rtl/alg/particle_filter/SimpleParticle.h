@@ -32,6 +32,22 @@
 
 namespace rtl {
 
+    /*!
+     * Custom particle that implements mandatory methods and data types.
+     * Mandatory Methods:
+     *  - ParticleType(...) - value constructor
+     *  - static ParticleType random()
+     *  - void move(Action)
+     *  - scoretype[float] belief(Measurement)
+     *  - static Result evaluation()
+     *
+     * Mandatory Data Types:
+     *  - Action
+     *  - Measurement
+     *  - Result
+     *
+     * @tparam T Data type of value represented by the particle
+     */
     template <typename T>
     class SimpleParticle {
 
@@ -66,23 +82,42 @@ namespace rtl {
         };
 
 
+        /*!
+         * Value constructor
+         * @param val State value represented by particle
+         */
         explicit SimpleParticle(T val) : value_{val} {}
 
+        /*!
+         * Generates particle with random inner state value
+         * @return Random particle
+         */
         static SimpleParticle random() {
-            static std::random_device r;
-            static auto engine = std::default_random_engine(r());
-            static std::uniform_real_distribution<T> distribution(-100.0f, 100.0f);
-            return SimpleParticle(distribution(engine));
+            return SimpleParticle(get_uniform_random_value(-100.0f, 100.0f));
         }
 
+        /*!
+         * Move particle's inner state by given control input
+         * @param action Control input applied on each particle
+         */
         void move(const SimpleParticle::Action& action) {
             value_ += action.value();
         }
 
+        /*!
+         * Evaluates belief of given particle corresponds with measurement
+         * @param measurement States of the system modeled by particle filter
+         * @return Belief score of particle itself
+         */
         [[nodiscard]] score_type belief(const SimpleParticle::Measurement& measurement) {
             return gauss(cost(measurement));
         }
 
+        /*!
+         * Estimate system state based on the N selected particles (it can be mean, median, most common val, etc.)
+         * @param vec Vector of particles that are used to estimate state simulated by particle filter
+         * @return Estimated state of modeled system
+         */
         [[nodiscard]] static Result evaluation(const std::vector<SimpleParticle>& vec) {
             T sum = 0.0;
             std::for_each(vec.begin(), vec.end(), [&](auto particle){
@@ -111,6 +146,13 @@ namespace rtl {
             constexpr float sqrt_2_pi = 2.5066;
             constexpr float a = (1 / (std_dev * sqrt_2_pi));
             return a * expf(-0.5f * powf(x - mean, 2) / variance);
+        }
+
+        static float get_uniform_random_value(float min, float max) {
+            static std::random_device r;
+            static auto engine = std::default_random_engine(r());
+            std::uniform_real_distribution<T> distribution(min, max);
+            return distribution(engine);
         }
 
         T value_;

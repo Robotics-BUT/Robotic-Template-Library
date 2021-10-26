@@ -31,6 +31,21 @@
 
 namespace rtl {
 
+
+    /*!
+     * Generic implementation of the particle filter with custom-implemented particle type.
+     * Particle filter implemnets following phases:
+     * 1] Particle initialization
+     * 2] Predict particle movement (control input)
+     * 3] Evaluate particles w.r.t. the measurement (correction)
+     * 4] Resampling - random selection of N particles and generating new, random ones
+     * 5] Evaluating result. From survived particles, estimate value.
+     * 6] Back to phase 2
+     *
+     * @tparam ParticleType Custom data type of the particle
+     * @tparam no_of_particles Number of particles at the beginning of each epoch
+     * @tparam no_of_survivors Number of particles, that survives epoch
+     * */
     template<typename ParticleType, size_t no_of_particles, size_t no_of_survivors>
     class ParticleFilter {
 
@@ -38,20 +53,30 @@ namespace rtl {
 
     public:
 
+        /*!
+         * Default constructor. Generates initial population
+         * */
         ParticleFilter() {
-            particles_.reserve(no_of_particles);
-            for (size_t i = 0 ; i < no_of_particles ; i++) {
-                particles_.push_back(std::pair<ParticleType, score_type>{ParticleType::random(), 0.0});
-            }
+            init();
         }
 
 
+        /*!
+         * Iterates full single epoch
+         *
+         * @param action control input to all particles
+         * @param measurement measured states after the correction
+         * */
         void iteration(const typename ParticleType::Action& action, const typename ParticleType::Measurement& measurement) {
             prediction(action);
             correction(measurement);
             resampling();
         }
 
+        /*!
+         * Takes survivals form last epoch end returns state value estimated by the particle filter
+         * @return Evaluated state value
+         */
         typename ParticleType::Result evaluate() {
             std::vector<ParticleType> evaluation_particles;
             evaluation_particles.reserve(no_of_survivors);
@@ -64,12 +89,30 @@ namespace rtl {
 
     private:
 
+        /*!
+         * Generates random population for next epoch.
+         */
+        void init() {
+            particles_.reserve(no_of_particles);
+            for (size_t i = 0 ; i < no_of_particles ; i++) {
+                particles_.push_back(std::pair<ParticleType, score_type>{ParticleType::random(), 0.0});
+            }
+        }
+
+        /*!
+         * Predicts particle motion based on action (control input).
+         * @param action Control input
+         */
         void prediction(const typename ParticleType::Action& action) {
             std::for_each(particles_.begin(), particles_.end(), [&](auto& particle){
                 particle.first.move(action);
             });
         }
 
+        /*!
+         * Estimate score for each particle based on the measurement.
+         * @param measurement observed state of the modeled system
+         * */
         void correction(const typename ParticleType::Measurement& measurement) {
             double cum_sum = 0.0;
             for (auto& particle_cum_score : particles_) {
@@ -81,16 +124,35 @@ namespace rtl {
             normalize_score(cum_sum);
         }
 
+        /*!
+         * Normalize score of all particles, so cumulative sum for all particles is 1.0
+         * @param cum_sum
+         */
         void normalize_score(double cum_sum) {
             std::for_each(particles_.begin(), particles_.end(), [&](auto& particle_score){
                 particle_score.second /= cum_sum;
             });
         }
 
+
+        /*!
+         * Select survivals for next epoch and generates new particles.
+         */
         void resampling() {
             std::vector<std::pair<ParticleType, score_type>> new_particles;
             new_particles.reserve(particles_.size());
 
+            select_survivals(new_particles);
+            generate_new_particles(new_particles);
+
+            particles_ = new_particles;
+        }
+
+        /*!
+         * Select survivals for next epoch. Bigger the particle's score, bigger chance to be selected.
+         * @param new_particles Vector of selected particles for the next epoch
+         */
+        void select_survivals(std::vector<std::pair<ParticleType, score_type>>& new_particles) {
             double step = 1.0 / (no_of_survivors+1);
             double th = 0.0;
 
@@ -106,11 +168,16 @@ namespace rtl {
                     }
                 }
             }
+        }
 
-            for (size_t n = new_particles.size() ; n < no_of_particles ; n++) {
+        /*!
+         * Generates particles form entire state-space, that is defined by the ParticleType
+         * @param new_particles Vector of selected particles for the next epoch
+         */
+        void generate_new_particles(std::vector<std::pair<ParticleType, score_type>>& new_particles) {
+            while(new_particles.size() < no_of_particles) {
                 new_particles.push_back(std::pair<ParticleType, score_type>{ParticleType::random(), 0.0});
             }
-            particles_ = new_particles;
         }
 
         std::vector<std::pair<ParticleType, score_type>> particles_;
