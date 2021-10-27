@@ -41,7 +41,7 @@ int main() {
         std::cout << "  column (worker): " << result.worker << " -> row (job): " << result.job << std::endl;
         score_sum += result.cost;
     }
-    std::cout << "  total sum: " << score_sum << std::endl;
+    std::cout << "  cost sum: " << score_sum << std::endl;
     std::cout << std::endl;
 
 
@@ -57,5 +57,7 @@ int main() {
     for (const auto& result : results_2) {
         std::cout << "  column (previous object): " << result.worker << " -> row (new object): " << result.job << ", IoU: " << result.cost << std::endl;
     }
+    std::cout << "  cost sum: " << score_sum << std::endl;
+
     return 0;
 }
