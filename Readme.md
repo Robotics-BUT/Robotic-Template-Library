@@ -84,6 +84,25 @@ Online documentation covers RTL library from a programmers point of view. For de
 
 If you build on Robotic Template Library in your published research or if you would like to give us credit for our library for some other reason, there is a summary of papers covering notable algorithms presented. Please select an appropriate reference regarding the portion of RTL you have used from the list below.
 
+### Robotic Template Library
+This [whitepaper](https://openresearchsoftware.metajnl.com/articles/10.5334/jors.353/) describes the functionality and implementation details of the RTL. We published the paper in the Journal of Open Research Software.
+
+<details>
+<summary>BibTeX</summary>
+  
+```
+@article{10.5334/jors.353,
+  title={Robotic Template Library},
+  author={Jelinek, Ales and Ligocki, Adam and Zalud, Ludek},
+  journal={Journal of Open Research Software},
+  volume={9},
+  number={1},
+  year={2021},
+  publisher={Ubiquity Press}
+}
+```
+</details>
+
 #### Fast vectorization of an ordered point cloud
 Any vectorizer with "FTLS" in its name uses this algorithm, its implementation is in the ExtractorChainFast class and an in-depth description is in the [Fast total least squares vectorization](https://link.springer.com/article/10.1007%2Fs11554-016-0562-6) paper.
 
