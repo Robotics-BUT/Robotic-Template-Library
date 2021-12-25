@@ -62,10 +62,10 @@ namespace rtl
     public:
 
         struct Result {
-            Result() : worker{0}, job{0} {}
-            Result(size_t w, size_t j, T c) : worker{w}, job{j}, cost{c} {};
-            size_t worker;
-            size_t job;
+            Result() : col{0}, row{0} {}
+            Result(size_t c, size_t r, T cst) : col{c}, row{r}, cost{cst} {};
+            size_t col;
+            size_t row;
             T cost;
         };
 

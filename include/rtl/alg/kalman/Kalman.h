@@ -27,6 +27,7 @@
 #ifndef ROBOTICTEMPLATELIBRARY_KALMAN_H
 #define ROBOTICTEMPLATELIBRARY_KALMAN_H
 
+#include <iostream>
 #include "rtl/core/Matrix.h"
 
 namespace rtl
@@ -66,13 +67,45 @@ namespace rtl
             P_covariance_ = A_transition_matrix_ * P_covariance_ * A_transition_matrix_.transposed() + Q_process_noise_covariance_;
         }
 
+        void extended_predict(Matrix<control_dim, 1, dtype>& control_input,
+                              Matrix<state_dim, state_dim, dtype>& G_motion_jacobian) {
+            x_states_ = A_transition_matrix_ * x_states_ + B_control_matrix_ * control_input;
+//            std::cout << " - G - - - - " << std::endl;
+//            for (size_t i = 0 ; i < G_motion_jacobian.rowNr() ; i++) {
+//                for (size_t j = 0 ; j < G_motion_jacobian.colNr() ; j++) {
+//                    std::cout << G_motion_jacobian.getElement(i, j) << " ";
+//                }
+//                std::cout << std::endl;
+//            }
+//            std::cout << " - P - - - - " << std::endl;
+//            for (size_t i = 0 ; i < P_covariance_.rowNr() ; i++) {
+//                for (size_t j = 0 ; j < P_covariance_.colNr() ; j++) {
+//                    std::cout << P_covariance_.getElement(i, j) << " ";
+//                }
+//                std::cout << std::endl;
+//            }
+            P_covariance_ = G_motion_jacobian * P_covariance_ * G_motion_jacobian.transposed() + Q_process_noise_covariance_;
+            std::cout << " - P - - - - " << std::endl;
+            for (size_t i = 0 ; i < P_covariance_.rowNr() ; i++) {
+                for (size_t j = 0 ; j < P_covariance_.colNr() ; j++) {
+                    std::cout << P_covariance_.getElement(i, j) << " ";
+                }
+                std::cout << std::endl;
+            }
+        }
+
         void correct(Matrix<measurement_dim, 1, dtype> z_measurement) {
             K_kalman_gain_ = P_covariance_ * H_measurement_matrix_.transposed() * (H_measurement_matrix_ * P_covariance_ * H_measurement_matrix_.transposed() + R_measurement_noise_covariance_).inverted();
-            auto tmp = (z_measurement - H_measurement_matrix_ * x_states_);
             x_states_ = x_states_ + K_kalman_gain_ * (z_measurement - H_measurement_matrix_ * x_states_);
             P_covariance_ = (I_ - K_kalman_gain_ * H_measurement_matrix_) * P_covariance_;
         }
 
+        void extended_correct(Matrix<measurement_dim, 1, dtype> z_measurement,
+                              Matrix<measurement_dim, state_dim, dtype> H_measurement_jacobian) {
+            K_kalman_gain_ = P_covariance_ * H_measurement_jacobian.transposed() * (H_measurement_jacobian * P_covariance_ * H_measurement_jacobian.transposed() + R_measurement_noise_covariance_).inverted();
+            x_states_ = x_states_ + K_kalman_gain_ * (z_measurement - H_measurement_jacobian * x_states_);
+            P_covariance_ = (I_ - K_kalman_gain_ * H_measurement_jacobian) * P_covariance_;
+        }
 
         const Matrix<state_dim, 1, dtype>& states() const {return x_states_;}
         const Matrix<state_dim, state_dim, dtype>& covariance() const {return P_covariance_;}
@@ -81,6 +114,7 @@ namespace rtl
         void set_states(const Matrix<state_dim, 1, dtype>& states) {x_states_ = states;}
         void set_transision_matrix(const Matrix<state_dim, state_dim, dtype>& transition_matrix) {A_transition_matrix_ = transition_matrix;}
         void set_control_matrix(const Matrix<state_dim, control_dim, dtype>& control_matrix) {B_control_matrix_ = control_matrix;}
+        void set_covariance_matrix(const Matrix<state_dim, state_dim, dtype>& covariance_matrix) {P_covariance_ = covariance_matrix;}
         void set_measurement_matrix(const Matrix<measurement_dim, state_dim, dtype>& measurement_matrix) {H_measurement_matrix_ = measurement_matrix;}
 
         void set_process_noise_covariance_matrix(const Matrix<state_dim, state_dim, dtype>& process_noise_covariance) {Q_process_noise_covariance_ = process_noise_covariance;}

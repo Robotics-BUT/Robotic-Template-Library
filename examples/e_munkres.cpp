@@ -31,14 +31,14 @@ int main() {
 
     auto cost_matrix = rtl::Matrix<3, 3, size_t>::zeros();
     cost_matrix.setRow(0, rtl::VectorND<3, size_t>{1, 2, 3});
-    cost_matrix.setRow(1, rtl::VectorND<3, size_t>{2, 4, 6});
-    cost_matrix.setRow(2, rtl::VectorND<3, size_t>{3, 6, 9});
+    cost_matrix.setRow(1, rtl::VectorND<3, size_t>{4, 2, 6});
+    cost_matrix.setRow(2, rtl::VectorND<3, size_t>{6, 3, 9});
 
     std::cout << " Minimalization task: " << std::endl;
     auto results = rtl::Munkres<size_t, 3>::solve(cost_matrix);
     float score_sum = 0.0f;
     for (const auto& result : results) {
-        std::cout << "  column (worker): " << result.worker << " -> row (job): " << result.job << std::endl;
+        std::cout << "  column: " << result.col << " -> row: " << result.row << ", cost: " << result.cost << std::endl;
         score_sum += result.cost;
     }
     std::cout << "  cost sum: " << score_sum << std::endl;
@@ -54,8 +54,10 @@ int main() {
 
     std::cout << " Maximalization task: " << std::endl;
     auto results_2 = rtl::Munkres<float, 4>::solve(cost_matrix_2, true);
+    score_sum = 0.0;
     for (const auto& result : results_2) {
-        std::cout << "  column (previous object): " << result.worker << " -> row (new object): " << result.job << ", IoU: " << result.cost << std::endl;
+        std::cout << "  column (previous object): " << result.col << " -> row (new object): " << result.row << ", IoU: " << result.cost << std::endl;
+        score_sum += result.cost;
     }
     std::cout << "  cost sum: " << score_sum << std::endl;
 
