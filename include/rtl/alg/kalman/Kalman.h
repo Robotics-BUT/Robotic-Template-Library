@@ -70,28 +70,7 @@ namespace rtl
         void extended_predict(Matrix<control_dim, 1, dtype>& control_input,
                               Matrix<state_dim, state_dim, dtype>& G_motion_jacobian) {
             x_states_ = A_transition_matrix_ * x_states_ + B_control_matrix_ * control_input;
-//            std::cout << " - G - - - - " << std::endl;
-//            for (size_t i = 0 ; i < G_motion_jacobian.rowNr() ; i++) {
-//                for (size_t j = 0 ; j < G_motion_jacobian.colNr() ; j++) {
-//                    std::cout << G_motion_jacobian.getElement(i, j) << " ";
-//                }
-//                std::cout << std::endl;
-//            }
-//            std::cout << " - P - - - - " << std::endl;
-//            for (size_t i = 0 ; i < P_covariance_.rowNr() ; i++) {
-//                for (size_t j = 0 ; j < P_covariance_.colNr() ; j++) {
-//                    std::cout << P_covariance_.getElement(i, j) << " ";
-//                }
-//                std::cout << std::endl;
-//            }
             P_covariance_ = G_motion_jacobian * P_covariance_ * G_motion_jacobian.transposed() + Q_process_noise_covariance_;
-            std::cout << " - P - - - - " << std::endl;
-            for (size_t i = 0 ; i < P_covariance_.rowNr() ; i++) {
-                for (size_t j = 0 ; j < P_covariance_.colNr() ; j++) {
-                    std::cout << P_covariance_.getElement(i, j) << " ";
-                }
-                std::cout << std::endl;
-            }
         }
 
         void correct(Matrix<measurement_dim, 1, dtype> z_measurement) {
