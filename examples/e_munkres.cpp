@@ -34,11 +34,20 @@ int main() {
     cost_matrix.setRow(1, rtl::VectorND<3, size_t>{4, 2, 6});
     cost_matrix.setRow(2, rtl::VectorND<3, size_t>{6, 3, 9});
 
+    std::cout << " Const matrix: " << std::endl;
+    for (size_t r = 0 ; r < cost_matrix.rowNr() ; r+=1) {
+        for (size_t c = 0 ; c < cost_matrix.colNr() ; c+=1) {
+            std::cout << cost_matrix.getElement(r, c) << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << " Minimalization task: " << std::endl;
     auto results = rtl::Munkres<size_t, 3>::solve(cost_matrix);
     float score_sum = 0.0f;
     for (const auto& result : results) {
-        std::cout << "  column: " << result.col << " -> row: " << result.row << ", cost: " << result.cost << std::endl;
+        std::cout << "  row: " << result.row << " -> col: " << result.col << ", cost: " << result.cost << std::endl;
         score_sum += result.cost;
     }
     std::cout << "  cost sum: " << score_sum << std::endl;
@@ -52,11 +61,21 @@ int main() {
     cost_matrix_2.setRow(2, rtl::VectorND<4, float>{0.0f, 0.0f, 0.0f, 0.0f});
     cost_matrix_2.setRow(3, rtl::VectorND<4, float>{0.1f, 0.7f, 0.0f, 0.0f});
 
+
+    std::cout << " Const matrix: " << std::endl;
+    for (size_t r = 0 ; r < cost_matrix_2.rowNr() ; r+=1) {
+        for (size_t c = 0 ; c < cost_matrix_2.colNr() ; c+=1) {
+            std::cout << cost_matrix_2.getElement(r, c) << " ";
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << " Maximalization task: " << std::endl;
     auto results_2 = rtl::Munkres<float, 4>::solve(cost_matrix_2, true);
     score_sum = 0.0;
     for (const auto& result : results_2) {
-        std::cout << "  column (previous object): " << result.col << " -> row (new object): " << result.row << ", IoU: " << result.cost << std::endl;
+        std::cout << "  row (new object): " << result.row << " -> col (previous object): " << result.col << ", IoU: " << result.cost << std::endl;
         score_sum += result.cost;
     }
     std::cout << "  cost sum: " << score_sum << std::endl;

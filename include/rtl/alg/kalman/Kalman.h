@@ -56,7 +56,7 @@ namespace rtl
             P_covariance_ = Matrix<state_dim, state_dim, dtype>::identity();
             H_measurement_matrix_ = Matrix<measurement_dim, state_dim, dtype>::zeros();
 
-            Q_process_noise_covariance_ = Matrix<state_dim, state_dim, dtype>::zeros() * process_noise_;
+            Q_process_noise_covariance_ = Matrix<state_dim, state_dim, dtype>::identity() * process_noise_;
             R_measurement_noise_covariance_ = Matrix<measurement_dim, measurement_dim, dtype>::identity() * observation_noise_;
 
             I_ = Matrix<state_dim, state_dim, dtype>::identity();
@@ -67,9 +67,9 @@ namespace rtl
             P_covariance_ = A_transition_matrix_ * P_covariance_ * A_transition_matrix_.transposed() + Q_process_noise_covariance_;
         }
 
-        void extended_predict(Matrix<control_dim, 1, dtype>& control_input,
+        void extended_predict(Matrix<state_dim, 1, dtype>& x_diff,
                               Matrix<state_dim, state_dim, dtype>& G_motion_jacobian) {
-            x_states_ = A_transition_matrix_ * x_states_ + B_control_matrix_ * control_input;
+            x_states_ += x_diff;
             P_covariance_ = G_motion_jacobian * P_covariance_ * G_motion_jacobian.transposed() + Q_process_noise_covariance_;
         }
 
@@ -79,10 +79,10 @@ namespace rtl
             P_covariance_ = (I_ - K_kalman_gain_ * H_measurement_matrix_) * P_covariance_;
         }
 
-        void extended_correct(Matrix<measurement_dim, 1, dtype> z_measurement,
+        void extended_correct(Matrix<measurement_dim, 1, dtype> z_diff,
                               Matrix<measurement_dim, state_dim, dtype> H_measurement_jacobian) {
             K_kalman_gain_ = P_covariance_ * H_measurement_jacobian.transposed() * (H_measurement_jacobian * P_covariance_ * H_measurement_jacobian.transposed() + R_measurement_noise_covariance_).inverted();
-            x_states_ = x_states_ + K_kalman_gain_ * (z_measurement - H_measurement_jacobian * x_states_);
+            x_states_ = x_states_ + K_kalman_gain_ * z_diff;
             P_covariance_ = (I_ - K_kalman_gain_ * H_measurement_jacobian) * P_covariance_;
         }
 
