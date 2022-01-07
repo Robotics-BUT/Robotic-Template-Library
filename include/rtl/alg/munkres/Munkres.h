@@ -62,10 +62,10 @@ namespace rtl
     public:
 
         struct Result {
-            Result() : col{0}, row{0} {}
+            Result() : row{0}, col{0} {}
             Result(size_t r, size_t c, T cst) : row{r}, col{c}, cost{cst} {};
-            size_t col;
             size_t row;
+            size_t col;
             T cost;
         };
 
