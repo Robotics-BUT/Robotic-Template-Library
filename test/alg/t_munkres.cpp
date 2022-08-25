@@ -40,9 +40,9 @@ TEST(t_munkres, test_1) {
 
     auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix);
 
-    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 2); EXPECT_EQ(result[0].cost, 3);
-    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 4);
-    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 0); EXPECT_EQ(result[2].cost, 3);
+    EXPECT_EQ(result[0].row, 0); EXPECT_EQ(result[0].col, 2); EXPECT_EQ(result[0].cost, 3);
+    EXPECT_EQ(result[1].row, 1); EXPECT_EQ(result[1].col, 1); EXPECT_EQ(result[1].cost, 4);
+    EXPECT_EQ(result[2].row, 2); EXPECT_EQ(result[2].col, 0); EXPECT_EQ(result[2].cost, 3);
 }
 
 TEST(t_munkres, test_1_max) {
@@ -54,9 +54,9 @@ TEST(t_munkres, test_1_max) {
 
     auto result = rtl::Munkres<size_t, 3>::solve(cost_matrix, true);
 
-    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 0); EXPECT_EQ(result[0].cost, 1);
-    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 4);
-    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 2); EXPECT_EQ(result[2].cost, 9);
+    EXPECT_EQ(result[0].row, 0); EXPECT_EQ(result[0].col, 0); EXPECT_EQ(result[0].cost, 1);
+    EXPECT_EQ(result[1].row, 1); EXPECT_EQ(result[1].col, 1); EXPECT_EQ(result[1].cost, 4);
+    EXPECT_EQ(result[2].row, 2); EXPECT_EQ(result[2].col, 2); EXPECT_EQ(result[2].cost, 9);
 }
 
 TEST(t_munkres, test_2) {
@@ -71,12 +71,12 @@ TEST(t_munkres, test_2) {
 
     auto result = rtl::Munkres<int, 6>::solve(cost_matrix);
 
-    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 4); EXPECT_EQ(result[0].cost, 4);
-    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 1); EXPECT_EQ(result[1].cost, 12);
-    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 2); EXPECT_EQ(result[2].cost, 2);
-    EXPECT_EQ(result[3].worker, 3); EXPECT_EQ(result[3].job, 5); EXPECT_EQ(result[3].cost, 4);
-    EXPECT_EQ(result[4].worker, 4); EXPECT_EQ(result[4].job, 0); EXPECT_EQ(result[4].cost, 1);
-    EXPECT_EQ(result[5].worker, 5); EXPECT_EQ(result[5].job, 3); EXPECT_EQ(result[5].cost, 28);
+    EXPECT_EQ(result[0].row, 0); EXPECT_EQ(result[0].col, 4); EXPECT_EQ(result[0].cost, 4);
+    EXPECT_EQ(result[1].row, 1); EXPECT_EQ(result[1].col, 1); EXPECT_EQ(result[1].cost, 12);
+    EXPECT_EQ(result[2].row, 2); EXPECT_EQ(result[2].col, 2); EXPECT_EQ(result[2].cost, 2);
+    EXPECT_EQ(result[3].row, 3); EXPECT_EQ(result[3].col, 5); EXPECT_EQ(result[3].cost, 4);
+    EXPECT_EQ(result[4].row, 4); EXPECT_EQ(result[4].col, 0); EXPECT_EQ(result[4].cost, 1);
+    EXPECT_EQ(result[5].row, 5); EXPECT_EQ(result[5].col, 3); EXPECT_EQ(result[5].cost, 28);
 }
 
 
@@ -90,10 +90,10 @@ TEST(t_munkres, test_3_max) {
 
     auto result = rtl::Munkres<float, 4>::solve(cost_matrix, true);
 
-    EXPECT_EQ(result[0].worker, 0); EXPECT_EQ(result[0].job, 0); EXPECT_EQ(result[0].cost, 0.8f);
-    EXPECT_EQ(result[1].worker, 1); EXPECT_EQ(result[1].job, 2); EXPECT_EQ(result[1].cost, 0.65f);
-    EXPECT_EQ(result[2].worker, 2); EXPECT_EQ(result[2].job, 3); EXPECT_EQ(result[2].cost, 0.0f);
-    EXPECT_EQ(result[3].worker, 3); EXPECT_EQ(result[3].job, 1); EXPECT_EQ(result[3].cost, 0.7f);
+    EXPECT_EQ(result[0].row, 0); EXPECT_EQ(result[0].col, 0); EXPECT_EQ(result[0].cost, 0.8f);
+    EXPECT_EQ(result[1].row, 1); EXPECT_EQ(result[1].col, 2); EXPECT_EQ(result[1].cost, 0.65f);
+    EXPECT_EQ(result[2].row, 2); EXPECT_EQ(result[2].col, 3); EXPECT_EQ(result[2].cost, 0.0f);
+    EXPECT_EQ(result[3].row, 3); EXPECT_EQ(result[3].col, 1); EXPECT_EQ(result[3].cost, 0.7f);
 }
 
 

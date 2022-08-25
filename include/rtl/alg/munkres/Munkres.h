@@ -40,7 +40,7 @@ namespace rtl
      *
      * Implementation based on: https://brc2.com/the-algorithm-workshop/
      *
-     * Algorithm is also suitable for pairing detected ojects between two frames (maximize Intersecion over Union of the
+     * Algorithm is also suitable for pairing detected objects between two frames (maximize Intersection over Union of the
      * bounding boxes).
      *
      * @tparam T Data type of values in the const matrix
@@ -72,8 +72,8 @@ namespace rtl
         /*!
          * Solves assignment problem for given cost matrix.
          *
-         * @param cost_matrix cost matrix of a given problem (cols: workers, rows: tasks). Matrix must be square-shaped
-         * @param max_cost If true, algorithm maximize sum of all costs (sitable for best IoU search)
+         * @param cost_matrix cost matrix of a given problem (rows: workers, cols: jobs). Matrix must be square-shaped
+         * @param max_cost If true, algorithm maximize sum of all costs (suitable for best IoU search)
          * */
         static std::array<Result, N> solve(Matrix<N, N, T> cost_matrix, bool max_cost = false) {
 
