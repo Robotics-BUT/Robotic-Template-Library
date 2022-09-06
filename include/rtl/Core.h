@@ -37,6 +37,7 @@
 #include "rtl/core/Quaternion.h"
 #include "rtl/core/Polygon2D.h"
 #include "rtl/core/Polygon3D.h"
+#include "rtl/core/OccupancyMapND.h"
 
 namespace rtl
 {
@@ -88,6 +89,16 @@ namespace rtl
 
     using Polygon3Df = Polygon3D<float>;                          //!< Full Polygon3D specialization for three dimensions and float elements.
     using Polygon3Dd = Polygon3D<double>;                         //!< Full Polygon3D specialization for three dimensions and double elements.
+
+    template<typename Element>
+    using Occupancy2D = OccupancyMapND<2, Element>;                 //!< Partial OccupancyMap specialization for two dimensions
+    using Occupancy2Df = OccupancyMapND<2, float>;                  //!< Full OccupancyMap specialization for two dimensions and float elements.
+    using Occupancy2Dd = OccupancyMapND<2, double>;                 //!< Full OccupancyMap specialization for two dimensions and double elements.
+
+    template<typename Element>
+    using Occupancy3D = OccupancyMapND<3, Element>;                 //!< Partial OccupancyMap specialization for three dimensions
+    using Occupancy3Df = OccupancyMapND<3, float>;                  //!< Full OccupancyMap specialization for three dimensions and float elements.
+    using Occupancy3Dd = OccupancyMapND<3, double>;                 //!< Full OccupancyMap specialization for three dimensions and double elements.
 }
 
 #endif //ROBOTICTEMPLATELIBRARY_CORE_H

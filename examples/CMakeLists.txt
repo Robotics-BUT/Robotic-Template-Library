@@ -19,4 +19,6 @@ add_executable(e_tf_tree e_tf_tree.cpp)
 add_executable(e_transformations e_transformations.cpp)
 add_executable(e_vectors e_vectors.cpp)
 add_executable(e_latexexport e_latexexport.cpp)
+add_executable(e_astar e_astar.cpp)
+add_executable(e_occupancymap.cpp e_occupancymap.cpp)
 

@@ -48,11 +48,13 @@ make_core_test(t_frustum)
 make_core_test(t_matrix)
 make_core_test(t_quaternion)
 make_core_test(t_vectorxx)
+make_core_test(t_occupancymap)
 
 make_alg_test(t_genetic_algorithm)
 make_alg_test(t_kalman)
 make_alg_test(t_munkres)
 make_alg_test(t_particle_filter)
+make_alg_test(t_astar)
 
 make_tf_test(t_tf_chain)
 make_tf_test(t_tf_general_tf)
