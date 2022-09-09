@@ -26,9 +26,18 @@
 
 #include <gtest/gtest.h>
 #include "rtl/Core.h"
+#include <utility>
+
+template <std::size_t... A>
+constexpr std::size_t mul = (A * ... * std::size_t(1u));
 
 TEST(t_occupancymap_tests, initial) {
+    rtl::Occupancy2Df map{{100, 100}, {1.0f, 1.0f}};
 
+    constexpr auto arr = std::array<size_t, 5>{0, 1, 2, 3, 4};
+    auto a = mul<arr>;
+    constexpr std::size_t val = mul<1, 2, 3, 4>;
+    int i = 5;
 }
 
 
