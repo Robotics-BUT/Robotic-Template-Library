@@ -32,48 +32,39 @@
 
 namespace rtl
 {
-    template<unsigned int dim, typename CellType, typename distanceDType = float>
+    template<size_t dim, typename CellType, typename distanceDType = float>
     class OccupancyMapND {
 
-        using indexDType = int;
+        using indexDType = size_t;
 
-        constexpr indexDType mult(indexDType const &a, indexDType const &b) { return a * b; }
-
-        template <size_t... Is, size_t N>
-        constexpr std::array<indexDType, N> multiply(std::array<indexDType, N> const &src,
-                                            std::index_sequence<Is...>, indexDType const &mul) {
-            return std::array<indexDType, N>{{mult(src[Is], mul)...}};
-        }
+        template<typename T, size_t N>
+        static constexpr size_t array_product(std::array<T, N> arr) {
+            T prod = 1;
+            for (size_t i = 0 ; i < N ; i++) {prod *= arr.at(i);}
+            return prod;
+        };
 
     public:
-        OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize, const std::array<indexDType, dim>& indexOffset = {0})
+        OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
                 : gridSize_{gridSize}
-                , cellSize_{cellSize}
-                , indexOffset_{indexOffset}{
+                , cellSize_{cellSize}{
             static_assert(dim != 0, "Occupancy Map has to be non-zero dimension");
-            indexDType arraySize = 1;
-            std::for_each(gridSize.begin(), gridSize.end(), [&](auto value){
-                arraySize *= value;
-            });
-            occGrid_ = new CellType[arraySize];
+            occGrid_ = new CellType[array_product(gridSize_)];
         }
 
         ~OccupancyMapND() {
             delete occGrid_;
         }
 
-        [[nodiscard]] std::optional<const CellType&> getCell(const std::array<indexDType, dim>& index) const {
-            if (!indexIsValid(index)) {
-                return std::nullopt;
-            }
-            return std::optional<const CellType&>{occGrid_[indexTo1D(index)]};
+        [[nodiscard]] const CellType& getCell(const std::array<indexDType, dim>& index) const {
+            return occGrid_[indexTo1D(index)];
         }
 
         void setCell(const CellType& cell, const std::array<indexDType, dim>& index) {
             if (!indexIsValid(index)) {
                 return;
             }
-            *occGrid_[indexTo1D(index)] = cell;
+            occGrid_[indexTo1D(index)] = cell;
         }
 
         [[nodiscard]] std::array<distanceDType, dim> indexToCoordinates(const std::array<indexDType, dim>& index) const {
@@ -102,9 +93,8 @@ namespace rtl
 
     private:
 
-        const std::array<indexDType, dim>& gridSize_;
-        const std::array<distanceDType, dim>& cellSize_;
-        const std::array<indexDType, dim>& indexOffset_;
+        const std::array<indexDType, dim> gridSize_;
+        const std::array<distanceDType, dim> cellSize_;
         CellType* occGrid_;
 
         bool indexIsValid(const std::array<indexDType, dim>& index) const {

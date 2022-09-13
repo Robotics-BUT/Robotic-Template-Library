@@ -27,17 +27,41 @@
 #include <gtest/gtest.h>
 #include "rtl/Core.h"
 #include <utility>
+#include <iostream>
 
-template <std::size_t... A>
-constexpr std::size_t mul = (A * ... * std::size_t(1u));
+template<typename T, std::size_t N>
+constexpr T array_sum( std::array<T,N> array) {
+    T sum = 0;
+    for (std::size_t i = 0; i < N; i++) {
+        sum += array[i];
+    }
+    return sum;
+}
+
+template<typename T, std::size_t N>
+constexpr T array_product( std::array<T,N> array) {
+    T sum = 0;
+    for (std::size_t i = 0; i < N; i++) {
+        sum += array[i];
+    }
+    return sum;
+}
+
 
 TEST(t_occupancymap_tests, initial) {
-    rtl::Occupancy2Df map{{100, 100}, {1.0f, 1.0f}};
+    rtl::Occupancy2Df map{{10, 10}, {1.0f, 1.0f}};
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            map.setCell(i*j, {i,j});
+        }
+    }
 
-    constexpr auto arr = std::array<size_t, 5>{0, 1, 2, 3, 4};
-    auto a = mul<arr>;
-    constexpr std::size_t val = mul<1, 2, 3, 4>;
-    int i = 5;
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            std::cout << map.getCell({i,j}) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 
