@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
     constexpr float cell_size = 1.0f;
     rtl::OccupancyMapND<2, SimpleCell> map({map_size, map_size}, {cell_size, cell_size});
 
+
     // Fill map with values
     std::random_device dev;
     std::mt19937 rng(dev());
@@ -51,6 +52,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+
     // Read map data
     for (size_t i = 0 ; i < map_size ; i++) {
         for (size_t j = 0 ; j < map_size ; j++) {
@@ -60,12 +62,14 @@ int main(int argc, char* argv[]) {
     }
     std::cout << std::endl;
 
+
     // Coordinates -> Index
     std::array<float, 2> coordinates = {8.3, 5.2};
     auto index = map.coordinatesToIndex(coordinates);
     std::cout << "X axis ... coord " << coordinates.at(0) << " corresponds with " << index.at(0) << " index" << std::endl;
     std::cout << "Y axis ... coord " << coordinates.at(1) << " corresponds with " << index.at(1) << " index" << std::endl;
     std::cout << std::endl;
+
 
     // Index -> Coordinates
     index = {3, 7};
@@ -74,13 +78,20 @@ int main(int argc, char* argv[]) {
     std::cout << "Y axis ... index " << index.at(1) << " corresponds with " << coordinates.at(1) << " coordinate (middle of the cell)" << std::endl;
     std::cout << std::endl;
 
+
     // Distance between cells estimation
     std::array<size_t, 2> cell_index_1 = {1, 3};
-    std::array<size_t, 2> cell_index_2 = {7, 9};
+    std::array<size_t, 2> cell_index_2 = {9, 7};
 
-    auto dist_in_axis = map.distanceInAxis(cell_index_1, cell_index_2);
+    auto dist_by_axis = map.distanceByAxis(cell_index_1, cell_index_2);
     auto euclidean_dist = map.euclidean_distance(cell_index_1, cell_index_2);
-
+    std::cout << "Cell 1 index: " << cell_index_1.at(0) << " " << cell_index_1.at(1) << std::endl;
+    std::cout << "Cell 2 index: " << cell_index_2.at(0) << " " << cell_index_2.at(1) << std::endl;
+    std::cout << "Cell dimensions: " << cell_size << " x " << cell_size << std::endl;
+    std::cout << "Distance in X axis: " << dist_by_axis.at(0) << std::endl;
+    std::cout << "Distance in Y axis: " << dist_by_axis.at(1) << std::endl;
+    std::cout << "Euclidean distance: " << euclidean_dist << std::endl;
+    std::cout << std::endl;
 
     return 0;
 }

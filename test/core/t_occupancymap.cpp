@@ -107,14 +107,14 @@ TEST(t_occupancymap_tests, initial3D) {
 TEST(t_occupancymap_tests, distance1D) {
     rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
     EXPECT_EQ(map.euclidean_distance({0}, {9}), 9.0f);
-    EXPECT_EQ(map.distanceInAxis({0}, {9}).at(0), 9.0f);
+    EXPECT_EQ(map.distanceByAxis({0}, {9}).at(0), 9.0f);
 }
 
 
 TEST(t_occupancymap_tests, distance2D) {
     rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 0.5f}};
     EXPECT_NEAR(map.euclidean_distance({0, 0}, {9, 9}), 10.0623f, error);
-    auto dist = map.distanceInAxis({0,0}, {9,9});
+    auto dist = map.distanceByAxis({0, 0}, {9, 9});
     EXPECT_EQ(dist.at(0), 9.0f);
     EXPECT_EQ(dist.at(1), 4.5f);
 }
@@ -123,7 +123,7 @@ TEST(t_occupancymap_tests, distance2D) {
 TEST(t_occupancymap_tests, distance3D) {
     rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 0.5f, 2.0f}};
     EXPECT_NEAR(map.euclidean_distance({0, 0, 0}, {9, 9, 9}), 20.62159f, error);
-    auto dist = map.distanceInAxis({0,0,0}, {9,9,9});
+    auto dist = map.distanceByAxis({0, 0, 0}, {9, 9, 9});
     EXPECT_EQ(dist.at(0), 9.0f);
     EXPECT_EQ(dist.at(1), 4.5f);
     EXPECT_EQ(dist.at(2), 18.0f);
@@ -206,6 +206,153 @@ TEST(t_occupancymap_tests, coordinates3D) {
 
     coords = map.indexToCoordinates({9, 8, 1});
     EXPECT_EQ(coords.at(0), 9.5); EXPECT_EQ(coords.at(1), 4.25); EXPECT_EQ(coords.at(2), 3.0);
+}
+
+TEST(t_occupancymap_tests, neighbours1D) {
+    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    auto counter = 0.0f;
+    for (size_t i = 0 ; i < 10 ; i++) {
+        map.setCell(counter++, {i});
+    }
+
+    size_t index = 5;
+    auto neighbours = map.directNeighbourCellIndexes({index});
+    EXPECT_EQ(neighbours.size(), 2);
+    EXPECT_EQ(neighbours.at(0).at(0), 4);
+    EXPECT_EQ(neighbours.at(1).at(0), 6);
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 4);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 6);
+
+    index = 0;
+    neighbours = map.directNeighbourCellIndexes({index});
+    EXPECT_EQ(neighbours.size(), 1);
+    EXPECT_EQ(neighbours.at(0).at(0), 1);
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 1);
+
+    index = 9;
+    neighbours = map.directNeighbourCellIndexes({index});
+    EXPECT_EQ(neighbours.size(), 1);
+    EXPECT_EQ(neighbours.at(0).at(0), 8);
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 8);
+}
+
+
+TEST(t_occupancymap_tests, neighbours2D) {
+    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 1.0f}};
+    auto counter = 0.0f;
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            map.setCell(counter++, {i, j});
+        }
+    }
+
+    auto neighbours = map.directNeighbourCellIndexes({5, 8});
+    EXPECT_EQ(neighbours.size(), 4);
+    EXPECT_EQ(neighbours.at(0).at(0), 4); EXPECT_EQ(neighbours.at(0).at(1), 8);
+    EXPECT_EQ(neighbours.at(1).at(0), 6); EXPECT_EQ(neighbours.at(1).at(1), 8);
+    EXPECT_EQ(neighbours.at(2).at(0), 5); EXPECT_EQ(neighbours.at(2).at(1), 7);
+    EXPECT_EQ(neighbours.at(3).at(0), 5); EXPECT_EQ(neighbours.at(3).at(1), 9);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 48);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 68);
+    EXPECT_EQ(map.getCell(neighbours.at(2)), 57);
+    EXPECT_EQ(map.getCell(neighbours.at(3)), 59);
+
+
+    neighbours = map.directNeighbourCellIndexes({0, 0});
+    EXPECT_EQ(neighbours.size(), 2);
+    EXPECT_EQ(neighbours.at(0).at(0), 1); EXPECT_EQ(neighbours.at(0).at(1), 0);
+    EXPECT_EQ(neighbours.at(1).at(0), 0); EXPECT_EQ(neighbours.at(1).at(1), 1);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 10);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 1);
+
+
+    neighbours = map.directNeighbourCellIndexes({0, 9});
+    EXPECT_EQ(neighbours.size(), 2);
+    EXPECT_EQ(neighbours.at(0).at(0), 1); EXPECT_EQ(neighbours.at(0).at(1), 9);
+    EXPECT_EQ(neighbours.at(1).at(0), 0); EXPECT_EQ(neighbours.at(1).at(1), 8);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 19);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 8);
+
+
+    neighbours = map.directNeighbourCellIndexes({9, 0});
+    EXPECT_EQ(neighbours.size(), 2);
+    EXPECT_EQ(neighbours.at(0).at(0), 8); EXPECT_EQ(neighbours.at(0).at(1), 0);
+    EXPECT_EQ(neighbours.at(1).at(0), 9); EXPECT_EQ(neighbours.at(1).at(1), 1);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 80);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 91);
+
+
+    neighbours = map.directNeighbourCellIndexes({9, 9});
+    EXPECT_EQ(neighbours.size(), 2);
+    EXPECT_EQ(neighbours.at(0).at(0), 8); EXPECT_EQ(neighbours.at(0).at(1), 9);
+    EXPECT_EQ(neighbours.at(1).at(0), 9); EXPECT_EQ(neighbours.at(1).at(1), 8);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 89);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 98);
+}
+
+
+TEST(t_occupancymap_tests, neighbours3D) {
+    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
+    auto counter = 0.0f;
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            for (size_t k = 0 ; k < 10 ; k++) {
+                map.setCell(counter++, {i, j, k});
+            }
+        }
+    }
+
+    auto neighbours = map.directNeighbourCellIndexes({7, 3, 4});
+    EXPECT_EQ(neighbours.size(), 6);
+    EXPECT_EQ(neighbours.at(0).at(0), 6); EXPECT_EQ(neighbours.at(0).at(1), 3); EXPECT_EQ(neighbours.at(0).at(2), 4);
+    EXPECT_EQ(neighbours.at(1).at(0), 8); EXPECT_EQ(neighbours.at(1).at(1), 3); EXPECT_EQ(neighbours.at(1).at(2), 4);
+    EXPECT_EQ(neighbours.at(2).at(0), 7); EXPECT_EQ(neighbours.at(2).at(1), 2); EXPECT_EQ(neighbours.at(2).at(2), 4);
+    EXPECT_EQ(neighbours.at(3).at(0), 7); EXPECT_EQ(neighbours.at(3).at(1), 4); EXPECT_EQ(neighbours.at(3).at(2), 4);
+    EXPECT_EQ(neighbours.at(4).at(0), 7); EXPECT_EQ(neighbours.at(4).at(1), 3); EXPECT_EQ(neighbours.at(4).at(2), 3);
+    EXPECT_EQ(neighbours.at(5).at(0), 7); EXPECT_EQ(neighbours.at(5).at(1), 3); EXPECT_EQ(neighbours.at(5).at(2), 5);
+
+    EXPECT_EQ(map.getCell(neighbours.at(0)), 634);
+    EXPECT_EQ(map.getCell(neighbours.at(1)), 834);
+    EXPECT_EQ(map.getCell(neighbours.at(2)), 724);
+    EXPECT_EQ(map.getCell(neighbours.at(3)), 744);
+    EXPECT_EQ(map.getCell(neighbours.at(4)), 733);
+    EXPECT_EQ(map.getCell(neighbours.at(5)), 735);
+
+    neighbours = map.directNeighbourCellIndexes({0, 0, 0}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({0, 0, 9}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({0, 9, 0}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({0, 9, 9}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({9, 0, 0}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({9, 0, 9}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({9, 9, 0}); EXPECT_EQ(neighbours.size(), 3);
+    neighbours = map.directNeighbourCellIndexes({9, 9, 9}); EXPECT_EQ(neighbours.size(), 3);
+
+    neighbours = map.directNeighbourCellIndexes({5, 5, 0}); EXPECT_EQ(neighbours.size(), 5);
+    neighbours = map.directNeighbourCellIndexes({5, 0, 0}); EXPECT_EQ(neighbours.size(), 4);
+    neighbours = map.directNeighbourCellIndexes({5, 5, 9}); EXPECT_EQ(neighbours.size(), 5);
+    neighbours = map.directNeighbourCellIndexes({5, 9, 9}); EXPECT_EQ(neighbours.size(), 4);
+
+    auto all_neighbours = map.allNeighbourCellIndexes({1, 5, 8});
+    EXPECT_EQ(all_neighbours.size(), 26);
+
+    all_neighbours = map.allNeighbourCellIndexes({0, 0, 0});
+    EXPECT_EQ(all_neighbours.size(), 7);
+}
+
+
+TEST(t_occupancymap_tests, neighbours4D) {
+
+    rtl::OccupancyMapND<4, float> map{{10, 10, 10, 10}, {1.0f, 1.0f, 1.0f, 1.0f}};
+    auto all_neighbours = map.allNeighbourCellIndexes({2, 4, 6, 8});
+    EXPECT_EQ(all_neighbours.size(), 80);
+
+    all_neighbours = map.allNeighbourCellIndexes({0, 0, 0, 0});
+    EXPECT_EQ(all_neighbours.size(), 15);
 }
 
 

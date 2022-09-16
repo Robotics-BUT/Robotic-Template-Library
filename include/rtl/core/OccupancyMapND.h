@@ -40,7 +40,9 @@ namespace rtl
         template<typename T, size_t N>
         static constexpr size_t array_product(std::array<T, N> arr) {
             T prod = 1;
-            for (size_t i = 0 ; i < N ; i++) {prod *= arr.at(i);}
+            for (size_t i = 0 ; i < N ; i+=1) {
+                prod *= arr.at(i);
+            }
             return prod;
         };
 
@@ -68,7 +70,7 @@ namespace rtl
 
         [[nodiscard]] std::array<distanceDType, dim> indexToCoordinates(const std::array<indexDType, dim>& index) const {
             std::array<distanceDType, dim> outputCoordinates;
-            for(size_t i = 0 ; i < dim ; i++) {
+            for(size_t i = 0 ; i < dim ; i+=1) {
                 outputCoordinates.at(i) = cellSize_.at(i) * (index.at(i) + 0.5);
             }
             return outputCoordinates;
@@ -76,14 +78,14 @@ namespace rtl
 
         [[nodiscard]] std::array<indexDType, dim> coordinatesToIndex(const std::array<distanceDType, dim>& coordinates) const {
             std::array<indexDType, dim> outputIndex;
-            for(size_t i = 0 ; i < dim ; i++) {
+            for(size_t i = 0 ; i < dim ; i+=1) {
                 outputIndex.at(i) = static_cast<indexDType>(std::floor(coordinates.at(i) / cellSize_.at(i)));
             }
             return outputIndex;
         }
 
         distanceDType euclidean_distance(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) const {
-            auto dist = distanceInAxis(i1, i2);
+            auto dist = distanceByAxis(i1, i2);
             distanceDType sum = 0;
             for (const auto& d : dist) {
                 sum += std::pow(d, 2);
@@ -91,12 +93,69 @@ namespace rtl
             return std::sqrt(sum);
         }
 
-        [[nodiscard]] std::array<distanceDType, dim> distanceInAxis(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) const {
+        [[nodiscard]] std::array<distanceDType, dim> distanceByAxis(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) const {
             std::array<distanceDType, dim> outputDistance;
-            for(size_t i = 0 ; i < dim ; i++) {
+            for(size_t i = 0 ; i < dim ; i+=1) {
                 outputDistance.at(i) = cellSize_.at(i) * (i2.at(i) - i1.at(i));
             }
             return outputDistance;
+        }
+
+        std::vector<std::array<indexDType, dim>> directNeighbourCellIndexes(const std::array<indexDType, dim>& index) {
+            std::vector<std::array<indexDType, dim>> neighbours;
+            neighbours.reserve(2*dim);
+
+            for (size_t d = 0 ; d < dim ; d+=1) {
+                if (index.at(d) > 0) {
+                    auto i = index; i.at(d)-=1;
+                    neighbours.template emplace_back(i);
+                }
+                if (index.at(d) < (gridSize_.at(d)-1)) {
+                    auto i = index; i.at(d)+=1;
+                    neighbours.template emplace_back(i);
+                }
+            }
+            return neighbours;
+        }
+
+        std::vector<std::array<indexDType, dim>> allNeighbourCellIndexes(const std::array<indexDType, dim>& index) {
+            std::vector<std::array<indexDType, dim>> neighbours;
+            constexpr auto max_neighbours = static_cast<size_t>(std::pow(3,dim)-1);
+            neighbours.reserve(max_neighbours);
+
+            std::array<int, 3> index_offsets = {0, -1, 1};
+            std::array<indexDType, dim> period_helper;
+            for (size_t d = 0 ; d < dim ; d+=1) {
+                period_helper.at(d) = std::pow(3,d);
+            }
+
+            std::array<std::array<int, dim>, max_neighbours> index_array = {0};
+            for (size_t d = 0 ; d < dim ; d+=1) {
+                size_t counter = 1;
+                size_t index_offset_pointer = 0;
+                for (size_t i = 0 ; i < max_neighbours+1 ; i+=1) {
+                    if (i > 0) { index_array.at(i-1).at(d) = index_offsets.at(index_offset_pointer); }
+                    if (counter == period_helper.at(d)) {
+                        counter = 0;
+                        index_offset_pointer = (index_offset_pointer+1) % 3;
+                    }
+                    counter+=1;
+                }
+            }
+
+            for (const auto& offset : index_array) {
+                bool valid = true;
+                for (size_t d = 0 ; d < dim ; d+=1) {
+                    int tmp = offset.at(d) + index.at(d);
+                    if (tmp < 0 || tmp >= gridSize_.at(d)) {valid = false; break;}
+                }
+                if (valid) {
+                    std::array<indexDType, dim> new_index = {0};
+                    for (size_t d = 0 ; d < dim ; d+=1) { new_index.at(d) = index.at(d) + offset.at(d); }
+                    neighbours.template emplace_back(new_index);
+                }
+            }
+            return neighbours;
         }
 
     private:
@@ -108,7 +167,7 @@ namespace rtl
         indexDType indexTo1D(const std::array<indexDType, dim>& index) const {
             indexDType index1D = 0;
             indexDType cumulativeDimSize = 1;
-            for (size_t i = 0 ; i < index.size() ; i++) {
+            for (size_t i = 0 ; i < index.size() ; i+=1) {
                 index1D += index.at(i) * cumulativeDimSize;
                 cumulativeDimSize *= gridSize_.at(i);
             }
