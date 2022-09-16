@@ -57,14 +57,13 @@ namespace rtl
         }
 
         [[nodiscard]] const CellType& getCell(const std::array<indexDType, dim>& index) const {
-            return occGrid_[indexTo1D(index)];
+            auto i = indexTo1D(index);
+            return occGrid_[i];
         }
 
         void setCell(const CellType& cell, const std::array<indexDType, dim>& index) {
-            if (!indexIsValid(index)) {
-                return;
-            }
-            occGrid_[indexTo1D(index)] = cell;
+            auto i = indexTo1D(index);
+            occGrid_[i] = cell;
         }
 
         [[nodiscard]] std::array<distanceDType, dim> indexToCoordinates(const std::array<indexDType, dim>& index) const {
@@ -78,12 +77,21 @@ namespace rtl
         [[nodiscard]] std::array<indexDType, dim> coordinatesToIndex(const std::array<distanceDType, dim>& coordinates) const {
             std::array<indexDType, dim> outputIndex;
             for(size_t i = 0 ; i < dim ; i++) {
-                outputIndex.at(i) = static_cast<indexDType>(coordinates.at(i) % cellSize_.at(i));
+                outputIndex.at(i) = static_cast<indexDType>(std::floor(coordinates.at(i) / cellSize_.at(i)));
             }
             return outputIndex;
         }
 
-        [[nodiscard]] std::array<distanceDType, dim> distance(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) {
+        distanceDType euclidean_distance(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) const {
+            auto dist = distanceInAxis(i1, i2);
+            distanceDType sum = 0;
+            for (const auto& d : dist) {
+                sum += std::pow(d, 2);
+            }
+            return std::sqrt(sum);
+        }
+
+        [[nodiscard]] std::array<distanceDType, dim> distanceInAxis(const std::array<indexDType, dim>& i1, const std::array<indexDType, dim>& i2) const {
             std::array<distanceDType, dim> outputDistance;
             for(size_t i = 0 ; i < dim ; i++) {
                 outputDistance.at(i) = cellSize_.at(i) * (i2.at(i) - i1.at(i));
@@ -97,24 +105,15 @@ namespace rtl
         const std::array<distanceDType, dim> cellSize_;
         CellType* occGrid_;
 
-        bool indexIsValid(const std::array<indexDType, dim>& index) const {
-            for(indexDType i = 0 ; i < dim ; i++) {
-                if (index.at(i) >= gridSize_.at(i)) {return false;}
-            }
-            return true;
-        }
-
         indexDType indexTo1D(const std::array<indexDType, dim>& index) const {
             indexDType index1D = 0;
             indexDType cumulativeDimSize = 1;
-            for (const auto& i : index) {
-                index1D += i * cumulativeDimSize;
+            for (size_t i = 0 ; i < index.size() ; i++) {
+                index1D += index.at(i) * cumulativeDimSize;
                 cumulativeDimSize *= gridSize_.at(i);
             }
             return index1D;
         }
-
-
     };
 }
 

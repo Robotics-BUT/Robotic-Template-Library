@@ -29,6 +29,8 @@
 #include <utility>
 #include <iostream>
 
+#define error 1e-4
+
 template<typename T, std::size_t N>
 constexpr T array_sum( std::array<T,N> array) {
     T sum = 0;
@@ -48,11 +50,25 @@ constexpr T array_product( std::array<T,N> array) {
 }
 
 
-TEST(t_occupancymap_tests, initial) {
+TEST(t_occupancymap_tests, initial1D) {
+    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    auto counter = 0.0f;
+    for (size_t i = 0 ; i < 10 ; i++) {
+            map.setCell(counter++, {i});
+    }
+
+    for (size_t i = 0 ; i < 10 ; i++) {
+            std::cout << map.getCell({i}) << " ";
+    }
+}
+
+
+TEST(t_occupancymap_tests, initial2D) {
     rtl::Occupancy2Df map{{10, 10}, {1.0f, 1.0f}};
+    auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
-            map.setCell(i*j, {i,j});
+            map.setCell(counter++, {i,j});
         }
     }
 
@@ -62,6 +78,134 @@ TEST(t_occupancymap_tests, initial) {
         }
         std::cout << std::endl;
     }
+}
+
+
+TEST(t_occupancymap_tests, initial3D) {
+    rtl::Occupancy3Dd map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
+    auto counter = 0.0f;
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            for (size_t k = 0 ; k < 10 ; k++) {
+                map.setCell(counter++, {i, j, k});
+            }
+        }
+    }
+
+    for (size_t i = 0 ; i < 10 ; i++) {
+        for (size_t j = 0 ; j < 10 ; j++) {
+            for (size_t k = 0 ; k < 10 ; k++) {
+                std::cout << map.getCell({i, j, k}) << " ";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+        std::cout << std::endl;
+    }
+}
+
+TEST(t_occupancymap_tests, distance1D) {
+    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    EXPECT_EQ(map.euclidean_distance({0}, {9}), 9.0f);
+    EXPECT_EQ(map.distanceInAxis({0}, {9}).at(0), 9.0f);
+}
+
+
+TEST(t_occupancymap_tests, distance2D) {
+    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 0.5f}};
+    EXPECT_NEAR(map.euclidean_distance({0, 0}, {9, 9}), 10.0623f, error);
+    auto dist = map.distanceInAxis({0,0}, {9,9});
+    EXPECT_EQ(dist.at(0), 9.0f);
+    EXPECT_EQ(dist.at(1), 4.5f);
+}
+
+
+TEST(t_occupancymap_tests, distance3D) {
+    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 0.5f, 2.0f}};
+    EXPECT_NEAR(map.euclidean_distance({0, 0, 0}, {9, 9, 9}), 20.62159f, error);
+    auto dist = map.distanceInAxis({0,0,0}, {9,9,9});
+    EXPECT_EQ(dist.at(0), 9.0f);
+    EXPECT_EQ(dist.at(1), 4.5f);
+    EXPECT_EQ(dist.at(2), 18.0f);
+}
+
+
+TEST(t_occupancymap_tests, coordinates1D) {
+    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+
+    EXPECT_EQ(map.coordinatesToIndex({0.0f}).at(0), 0);
+    EXPECT_EQ(map.coordinatesToIndex({0.1f}).at(0), 0);
+    EXPECT_EQ(map.coordinatesToIndex({0.5f}).at(0), 0);
+    EXPECT_EQ(map.coordinatesToIndex({0.99f}).at(0), 0);
+    EXPECT_EQ(map.coordinatesToIndex({1.0f}).at(0), 1);
+    EXPECT_EQ(map.coordinatesToIndex({4.5f}).at(0), 4);
+    EXPECT_EQ(map.coordinatesToIndex({9.99f}).at(0), 9);
+    EXPECT_EQ(map.coordinatesToIndex({10.0f}).at(0), 10);
+
+    EXPECT_EQ(map.indexToCoordinates({0}).at(0), 0.5);
+    EXPECT_EQ(map.indexToCoordinates({2}).at(0), 2.5);
+    EXPECT_EQ(map.indexToCoordinates({5}).at(0), 5.5);
+    EXPECT_EQ(map.indexToCoordinates({8}).at(0), 8.5);
+    EXPECT_EQ(map.indexToCoordinates({9}).at(0), 9.5);
+}
+
+
+TEST(t_occupancymap_tests, coordinates2D) {
+    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 0.5}};
+
+    auto index = map.coordinatesToIndex({0.0f, 0.0f});
+    EXPECT_EQ(index.at(0), 0); EXPECT_EQ(index.at(1), 0);
+
+    index = map.coordinatesToIndex({2.0f, 3.0f});
+    EXPECT_EQ(index.at(0), 2); EXPECT_EQ(index.at(1), 6);
+
+    index = map.coordinatesToIndex({8.3f, 1.3});
+    EXPECT_EQ(index.at(0), 8); EXPECT_EQ(index.at(1), 2);
+
+    index = map.coordinatesToIndex({9.3f, 0.49});
+    EXPECT_EQ(index.at(0), 9); EXPECT_EQ(index.at(1), 0);
+
+
+    auto coords = map.indexToCoordinates({0, 0});
+    EXPECT_EQ(coords.at(0), 0.5); EXPECT_EQ(coords.at(1), 0.25);
+
+    coords = map.indexToCoordinates({5, 3});
+    EXPECT_EQ(coords.at(0), 5.5); EXPECT_EQ(coords.at(1), 1.75);
+
+    coords = map.indexToCoordinates({2, 8});
+    EXPECT_EQ(coords.at(0), 2.5); EXPECT_EQ(coords.at(1), 4.25);
+
+    coords = map.indexToCoordinates({7, 6});
+    EXPECT_EQ(coords.at(0), 7.5); EXPECT_EQ(coords.at(1), 3.25);
+}
+
+TEST(t_occupancymap_tests, coordinates3D) {
+    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 0.5f, 2.0f}};
+
+    auto index = map.coordinatesToIndex({0.0f, 0.0f, 0.0f});
+    EXPECT_EQ(index.at(0), 0); EXPECT_EQ(index.at(1), 0); EXPECT_EQ(index.at(2), 0);
+
+    index = map.coordinatesToIndex({5.0f, 2.0f, 8.0});
+    EXPECT_EQ(index.at(0), 5); EXPECT_EQ(index.at(1), 4); EXPECT_EQ(index.at(2), 4);
+
+    index = map.coordinatesToIndex({6.8, 1.3, 7.2});
+    EXPECT_EQ(index.at(0), 6); EXPECT_EQ(index.at(1), 2); EXPECT_EQ(index.at(2), 3);
+
+    index = map.coordinatesToIndex({1.1f, 0.3, 13.6});
+    EXPECT_EQ(index.at(0), 1); EXPECT_EQ(index.at(1), 0); EXPECT_EQ(index.at(2), 6);
+
+
+    auto coords = map.indexToCoordinates({0, 0, 0});
+    EXPECT_EQ(coords.at(0), 0.5); EXPECT_EQ(coords.at(1), 0.25); EXPECT_EQ(coords.at(2), 1.0);
+
+    coords = map.indexToCoordinates({1, 2, 3});
+    EXPECT_EQ(coords.at(0), 1.5); EXPECT_EQ(coords.at(1), 1.25); EXPECT_EQ(coords.at(2), 7.0);
+
+    coords = map.indexToCoordinates({7, 5, 6});
+    EXPECT_EQ(coords.at(0), 7.5); EXPECT_EQ(coords.at(1), 2.75); EXPECT_EQ(coords.at(2), 13.0);
+
+    coords = map.indexToCoordinates({9, 8, 1});
+    EXPECT_EQ(coords.at(0), 9.5); EXPECT_EQ(coords.at(1), 4.25); EXPECT_EQ(coords.at(2), 3.0);
 }
 
 
