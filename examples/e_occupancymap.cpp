@@ -93,5 +93,22 @@ int main(int argc, char* argv[]) {
     std::cout << "Euclidean distance: " << euclidean_dist << std::endl;
     std::cout << std::endl;
 
+    // Get neighbour cells
+
+    std::array<size_t, 2> base_index = {5, 5};
+    auto four_neighbour = map.directNeighbourCellIndexes(base_index);
+    std::cout << "4-neighbour for cell " << base_index.at(0) << " " << base_index.at(1) << std::endl;
+    for (const auto& index : four_neighbour) {
+        std::cout << "   " << index.at(0) << " " << index.at(1) << std::endl;
+    }
+    std::cout << std::endl;
+
+    auto eight_neighbour = map.allNeighbourCellIndexes({5, 5});
+    std::cout << "8-neighbour for cell " << base_index.at(0) << " " << base_index.at(1) << std::endl;
+    for (const auto& index : eight_neighbour) {
+        std::cout << "   " << index.at(0) << " " << index.at(1) << std::endl;
+    }
+    std::cout << std::endl;
+
     return 0;
 }

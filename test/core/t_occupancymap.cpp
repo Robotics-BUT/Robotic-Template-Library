@@ -348,6 +348,10 @@ TEST(t_occupancymap_tests, neighbours3D) {
 TEST(t_occupancymap_tests, neighbours4D) {
 
     rtl::OccupancyMapND<4, float> map{{10, 10, 10, 10}, {1.0f, 1.0f, 1.0f, 1.0f}};
+
+    auto neighbours = map.directNeighbourCellIndexes({4, 2, 6, 8});
+    EXPECT_EQ(neighbours.size(), 8);
+
     auto all_neighbours = map.allNeighbourCellIndexes({2, 4, 6, 8});
     EXPECT_EQ(all_neighbours.size(), 80);
 

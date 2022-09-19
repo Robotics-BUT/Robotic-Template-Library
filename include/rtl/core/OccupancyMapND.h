@@ -119,42 +119,10 @@ namespace rtl
         }
 
         std::vector<std::array<indexDType, dim>> allNeighbourCellIndexes(const std::array<indexDType, dim>& index) {
-            std::vector<std::array<indexDType, dim>> neighbours;
+
             constexpr auto max_neighbours = static_cast<size_t>(std::pow(3,dim)-1);
-            neighbours.reserve(max_neighbours);
-
-            std::array<int, 3> index_offsets = {0, -1, 1};
-            std::array<indexDType, dim> period_helper;
-            for (size_t d = 0 ; d < dim ; d+=1) {
-                period_helper.at(d) = std::pow(3,d);
-            }
-
-            std::array<std::array<int, dim>, max_neighbours> index_array = {0};
-            for (size_t d = 0 ; d < dim ; d+=1) {
-                size_t counter = 1;
-                size_t index_offset_pointer = 0;
-                for (size_t i = 0 ; i < max_neighbours+1 ; i+=1) {
-                    if (i > 0) { index_array.at(i-1).at(d) = index_offsets.at(index_offset_pointer); }
-                    if (counter == period_helper.at(d)) {
-                        counter = 0;
-                        index_offset_pointer = (index_offset_pointer+1) % 3;
-                    }
-                    counter+=1;
-                }
-            }
-
-            for (const auto& offset : index_array) {
-                bool valid = true;
-                for (size_t d = 0 ; d < dim ; d+=1) {
-                    int tmp = offset.at(d) + index.at(d);
-                    if (tmp < 0 || tmp >= gridSize_.at(d)) {valid = false; break;}
-                }
-                if (valid) {
-                    std::array<indexDType, dim> new_index = {0};
-                    for (size_t d = 0 ; d < dim ; d+=1) { new_index.at(d) = index.at(d) + offset.at(d); }
-                    neighbours.template emplace_back(new_index);
-                }
-            }
+            auto neighbourIndexOffsets = getNeighbourIndexOffsets<max_neighbours>();
+            auto neighbours = getValidNeighbourIndexes<max_neighbours>(index, neighbourIndexOffsets);
             return neighbours;
         }
 
@@ -172,6 +140,51 @@ namespace rtl
                 cumulativeDimSize *= gridSize_.at(i);
             }
             return index1D;
+        }
+
+        template<size_t max_size>
+        std::array<std::array<int, dim>, max_size> getNeighbourIndexOffsets() {
+
+            std::array<int, 3> index_offsets = {0, -1, 1};
+            std::array<indexDType, dim> period_helper;
+            for (size_t d = 0 ; d < dim ; d+=1) {
+                period_helper.at(d) = std::pow(3,d);
+            }
+
+            std::array<std::array<int, dim>, max_size> offsets = {0};
+            for (size_t d = 0 ; d < dim ; d+=1) {
+                size_t counter = 1;
+                size_t index_offset_pointer = 0;
+                for (size_t i = 0 ; i < max_size+1 ; i+=1) {
+                    if (i > 0) { offsets.at(i - 1).at(d) = index_offsets.at(index_offset_pointer); }
+                    if (counter == period_helper.at(d)) {
+                        counter = 0;
+                        index_offset_pointer = (index_offset_pointer+1) % 3;
+                    }
+                    counter+=1;
+                }
+            }
+            return offsets;
+        }
+
+        template<size_t max_size>
+        std::vector<std::array<indexDType, dim>> getValidNeighbourIndexes(const std::array<indexDType, dim>& baseIndex,
+                                                                          const std::array<std::array<int, dim>, max_size> offsetArray) {
+            std::vector<std::array<indexDType, dim>> neighbours = {};
+            neighbours.reserve(max_size);
+            for (const auto& offset : offsetArray) {
+                bool validOffset = true;
+                for (size_t d = 0 ; d < dim ; d+=1) {
+                    int tmp = offset.at(d) + baseIndex.at(d);
+                    if (tmp < 0 || tmp >= static_cast<int>(gridSize_.at(d))) { validOffset = false; break;}
+                }
+                if (validOffset) {
+                    std::array<indexDType, dim> new_index = {0};
+                    for (size_t d = 0 ; d < dim ; d+=1) { new_index.at(d) = baseIndex.at(d) + offset.at(d); }
+                    neighbours.emplace_back(new_index);
+                }
+            }
+            return neighbours;
         }
     };
 }
