@@ -26,9 +26,11 @@
 
 #include <gtest/gtest.h>
 #include "rtl/Algorithms.h"
+#include "rtl/Core.h"
 
 TEST(t_astar_tests, initial) {
-
+    auto map = rtl::Occupancy2Df({10, 10}, {1.0, 1.0});
+    rtl::AStar<rtl::Occupancy2Df>::findPath(map);
 }
 
 

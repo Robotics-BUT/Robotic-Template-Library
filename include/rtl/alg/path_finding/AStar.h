@@ -29,8 +29,14 @@
 
 namespace rtl
 {
-
-
+    template<class MapElement>
+    class AStar {
+    public:
+        static void findPath(MapElement& map) {
+            std::cout << "Searching path" << std::endl;
+        }
+    private:
+    };
 }
 
 #endif ROBOTICTEMPLATELIBRARY_ASTAR_H

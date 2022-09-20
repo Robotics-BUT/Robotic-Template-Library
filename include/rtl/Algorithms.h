@@ -37,4 +37,6 @@
 #include "alg/genetic/GeneticAlgorithm.h"
 #include "alg/genetic/SimpleAgent.h"
 
+#include "alg/path_finding/AStar.h"
+
 #endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
