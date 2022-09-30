@@ -27,16 +27,20 @@
 #ifndef ROBOTICTEMPLATELIBRARY_ASTAR_H
 #define ROBOTICTEMPLATELIBRARY_ASTAR_H
 
+#include "AStarCell.h"
+
 namespace rtl
 {
-    template<class MapElement>
+    template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
     class AStar {
     public:
-        static void findPath(MapElement& map) {
+
+        static void findPath(MapElement<dim, AStarCell<distanceDType>, distanceDType>& map) {
             std::cout << "Searching path" << std::endl;
         }
+
     private:
     };
 }
 
-#endif ROBOTICTEMPLATELIBRARY_ASTAR_H
+#endif //ROBOTICTEMPLATELIBRARY_ASTAR_H

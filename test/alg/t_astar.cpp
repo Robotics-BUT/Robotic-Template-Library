@@ -28,9 +28,13 @@
 #include "rtl/Algorithms.h"
 #include "rtl/Core.h"
 
+//template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
+
 TEST(t_astar_tests, initial) {
-    auto map = rtl::Occupancy2Df({10, 10}, {1.0, 1.0});
-    rtl::AStar<rtl::Occupancy2Df>::findPath(map);
+    constexpr size_t dimension = 2;
+    using distance_dtype = float;
+    auto map = rtl::OccupancyMapND<dimension, rtl::AStarCell<distance_dtype>, distance_dtype>({10, 10}, {1.0, 1.0});
+    rtl::AStar<dimension, distance_dtype, rtl::OccupancyMapND>::findPath(map);
 }
 
 
