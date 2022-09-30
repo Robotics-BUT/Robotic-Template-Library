@@ -2,7 +2,7 @@
 // template library for usage in robotic research and applications
 // under the MIT licence:
 //
-// Copyright 2021 Brno University of Technology
+// Copyright 2022 Brno University of Technology
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -31,11 +31,17 @@
 
 namespace rtl
 {
-    template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
+
     class AStar {
     public:
 
-        static void findPath(MapElement<dim, AStarCell<distanceDType>, distanceDType>& map) {
+        template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
+        static void findPathOccupancyMap(MapElement<dim, AStarCell<distanceDType>, distanceDType>& map) {
+            std::cout << "Searching path" << std::endl;
+        }
+
+        template <size_t dim, typename distanceDType, template<typename, typename> class MapElement>
+        static void findPathGraphMap(MapElement<AStarCell<distanceDType>, distanceDType>& map) {
             std::cout << "Searching path" << std::endl;
         }
 

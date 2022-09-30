@@ -24,23 +24,7 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ASTARCELL_H
-#define ROBOTICTEMPLATELIBRARY_ASTARCELL_H
+#ifndef ROBOTICTEMPLATELIBRARY_DIJKSTRA_H
+#define ROBOTICTEMPLATELIBRARY_DIJKSTRA_H
 
-namespace rtl
-{
-    template<typename costDType = float>
-    class AStarCell {
-    public:
-        [[nodiscard]] costDType getGCost() const {return g_cost_;}
-        [[nodiscard]] costDType getHCost() const {return h_cost_;}
-        [[nodiscard]] costDType getFCost() const {return g_cost_ + h_cost_;}
-        void setGCost(costDType g_cost) {g_cost_ = g_cost;}
-        void setHCost(costDType h_cost) {h_cost_ = h_cost;}
-    private:
-        costDType g_cost_;
-        costDType h_cost_;
-    };
-}
-
-#endif //ROBOTICTEMPLATELIBRARY_ASTARCELL_H
+#endif //ROBOTICTEMPLATELIBRARY_DIJKSTRA_H
