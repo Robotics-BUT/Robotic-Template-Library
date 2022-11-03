@@ -24,29 +24,39 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ASTAR_H
-#define ROBOTICTEMPLATELIBRARY_ASTAR_H
+#ifndef ROBOTICTEMPLATELIBRARY_PATHFINDER_H
+#define ROBOTICTEMPLATELIBRARY_PATHFINDER_H
 
-#include "AStarCell.h"
+#include <iostream>
+#include <vector>
+#include <array>
+#include "PathFinderNode.h"
 
-namespace rtl
-{
+namespace rtl {
 
-    class AStar {
+    enum class PathFindingAlgorithm {
+        Wavefront,
+        Dijkstra,
+        AStar,
+    };
+
+    template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement, PathFindingAlgorithm algorithm>
+    class PathFinder {
     public:
 
-        template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
-        static void findPath(MapElement<dim, AStarCell<distanceDType>, distanceDType>& map) {
-            std::cout << "Searching path" << std::endl;
-        }
+        static std::vector<std::array<size_t, dim>> findPath(MapElement<dim, PathFinderNode<distanceDType>, distanceDType>& map) {
+            if constexpr (algorithm == PathFindingAlgorithm::Wavefront) {
 
-        template <size_t dim, typename distanceDType, template<typename, typename> class MapElement>
-        static void findPath(MapElement<AStarCell<distanceDType>, distanceDType>& map) {
-            std::cout << "Searching path" << std::endl;
+            } else if constexpr( algorithm == PathFindingAlgorithm::Dijkstra) {
+
+            } else if constexpr( algorithm == PathFindingAlgorithm::AStar) {
+
+            }
         }
 
     private:
+
     };
 }
 
-#endif //ROBOTICTEMPLATELIBRARY_ASTAR_H
+#endif //ROBOTICTEMPLATELIBRARY_PATHFINDER_H

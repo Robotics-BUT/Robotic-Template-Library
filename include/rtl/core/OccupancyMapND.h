@@ -44,7 +44,7 @@ namespace rtl
                 prod *= arr.at(i);
             }
             return prod;
-        };
+        }
 
     public:
         OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
