@@ -24,21 +24,13 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#include <gtest/gtest.h>
-#include "rtl/Algorithms.h"
-#include "rtl/Core.h"
+#ifndef ROBOTICTEMPLATELIBRARY_UNSTABLE_H
+#define ROBOTICTEMPLATELIBRARY_UNSTABLE_H
 
-//template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
+#include "rtl/unstable/AStarCell.h"
+#include "rtl/unstable/Dijkstra.h"
+#include "rtl/unstable/DijkstraCell.h"
+#include "rtl/unstable/OccupancyMapPathFinder.h"
+#include "rtl/unstable/PathFinderNode.h"
 
-TEST(t_astar_tests, initial) {
-    constexpr size_t dimension = 2;
-    using distance_dtype = float;
-    auto map = rtl::OccupancyMapND<dimension, rtl::AStarCell<distance_dtype>, distance_dtype>({10, 10}, {1.0, 1.0});
-    rtl::AStar<dimension, distance_dtype, rtl::OccupancyMapND>::findPath(map);
-}
-
-
-int main(int argc, char **argv){
-    testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
+#endif // ROBOTICTEMPLATELIBRARY_UNSTABLE_H

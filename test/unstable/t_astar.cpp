@@ -2,7 +2,7 @@
 // template library for usage in robotic research and applications
 // under the MIT licence:
 //
-// Copyright 2021 Brno University of Technology
+// Copyright 2020 Brno University of Technology
 //
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the "Software"),
@@ -24,17 +24,21 @@
 //
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
-#ifndef ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
-#define ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+#include <gtest/gtest.h>
+#include "rtl/Core.h"
+#include "rtl/unstable/AStar.h"
 
-#include "alg/kalman/Kalman.h"
+//template <size_t dim, typename distanceDType, template<size_t, typename, typename> class MapElement>
 
-#include "alg/munkres/Munkres.h"
+TEST(t_astar_tests, initial) {
+    constexpr size_t dimension = 2;
+    using distance_dtype = float;
+    auto map = rtl::OccupancyMapND<dimension, rtl::AStarCell<distance_dtype>, distance_dtype>({10, 10}, {1.0, 1.0});
+    rtl::AStar::findPath<dimension, distance_dtype, rtl::OccupancyMapND>(map);
+}
 
-#include "alg/particle_filter/ParticleFilter.h"
-#include "alg/particle_filter/SimpleParticle.h"
 
-#include "alg/genetic/GeneticAlgorithm.h"
-#include "alg/genetic/SimpleAgent.h"
-
-#endif //ROBOTICTEMPLATELIBRARY_ALGORITHMS_H
+int main(int argc, char **argv){
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
