@@ -29,13 +29,14 @@
 
 #include <array>
 #include <numeric>
+#include <cmath>
 
 namespace rtl
 {
-    template<size_t dim, typename CellType, typename distanceDType = float>
-    class OccupancyMapND {
+    using indexDType = size_t;
 
-        using indexDType = size_t;
+    template<size_t dim, typename CellType, typename distanceDType = float>
+    class OccupancyMapND_common {
 
         template<typename T, size_t N>
         static constexpr size_t array_product(std::array<T, N> arr) {
@@ -47,15 +48,18 @@ namespace rtl
         }
 
     public:
-        OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
+        OccupancyMapND_common(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
                 : gridSize_{gridSize}
                 , cellSize_{cellSize}{
             static_assert(dim != 0, "Occupancy Map has to be non-zero dimension");
             occGrid_ = new CellType[array_product(gridSize_)];
         }
 
-        ~OccupancyMapND() {
-            delete occGrid_;
+        OccupancyMapND_common (const OccupancyMapND_common&) = delete;
+        OccupancyMapND_common& operator= (const OccupancyMapND_common&) = delete;
+
+        ~OccupancyMapND_common() {
+            //delete[] occGrid_;
         }
 
         [[nodiscard]] const CellType& getCell(const std::array<indexDType, dim>& index) const {
@@ -126,7 +130,15 @@ namespace rtl
             return neighbours;
         }
 
-    private:
+        const std::array<indexDType, dim>& getGridSize() const {return gridSize_;};
+
+        const std::array<distanceDType, dim>& getCellSize() const {return cellSize_;};
+
+        void clear(CellType clearValue) {
+            for (size_t i = 0 ; i < array_product(gridSize_) ; i++) {occGrid_[i] = clearValue;}
+        }
+
+    protected:
 
         const std::array<indexDType, dim> gridSize_;
         const std::array<distanceDType, dim> cellSize_;
@@ -186,7 +198,92 @@ namespace rtl
             }
             return neighbours;
         }
+
+        [[nodiscard]] bool indexIsValid(const std::array<indexDType, 2>& index) const {
+            for (size_t d = 0 ; d < 2 ; d+=1) {
+                if (index.at(d) > (gridSize_.at(d)-1)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     };
+
+    template<size_t dim, typename CellType, typename distanceDType = float>
+    class OccupancyMapND : public OccupancyMapND_common<dim, CellType, distanceDType> {
+    public:
+        OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
+                : OccupancyMapND_common<dim, CellType, distanceDType> {gridSize, cellSize} {
+
+        }
+        OccupancyMapND (const OccupancyMapND&) = delete;
+        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
+    };
+
+    template <typename CellType, typename distanceDType>
+    class OccupancyMapND<2, CellType, distanceDType> : public OccupancyMapND_common<2, CellType, distanceDType>  {
+    public:
+        enum class Direction {
+            X_UP,
+            X_DOWN,
+            Y_UP,
+            Y_DOWN,
+        };
+
+        OccupancyMapND(const std::array<indexDType, 2>& gridSize, const std::array<distanceDType, 2>& cellSize)
+                : OccupancyMapND_common<2, CellType, distanceDType> {gridSize, cellSize}{
+
+        }
+        OccupancyMapND (const OccupancyMapND&) = delete;
+        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
+
+        std::optional<std::array<indexDType, 2>> neighbourInDirection(std::array<indexDType, 2> index, const Direction& dir) {
+            std::array<indexDType, 2> offset = index;
+            if (dir == Direction::X_UP) {offset.at(0) += 1;}
+            if (dir == Direction::X_DOWN) {offset.at(0) -= 1;}
+            if (dir == Direction::Y_UP) {offset.at(1) += 1;}
+            if (dir == Direction::Y_DOWN) {offset.at(1) -= 1;}
+            if (this->indexIsValid(offset)) {
+                return offset;
+            }
+            return std::nullopt;
+        }
+    };
+
+    template <typename CellType, typename distanceDType>
+    class OccupancyMapND<3, CellType, distanceDType> : public OccupancyMapND_common<3, CellType, distanceDType>  {
+    public:
+        enum class Direction {
+            X_UP,
+            X_DOWN,
+            Y_UP,
+            Y_DOWN,
+            Z_UP,
+            Z_DOWN,
+        };
+
+        OccupancyMapND(const std::array<indexDType, 3>& gridSize, const std::array<distanceDType, 3>& cellSize)
+                : OccupancyMapND_common<3, CellType, distanceDType> {gridSize, cellSize}{
+
+        }
+        OccupancyMapND (const OccupancyMapND&) = delete;
+        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
+
+        std::optional<std::array<indexDType, 3>> neighbourInDirection(std::array<indexDType, 3> index, const Direction& dir) {
+            std::array<indexDType, 3> offset = index;
+            if (dir == Direction::X_UP) {offset.at(0) += 1;}
+            if (dir == Direction::X_DOWN) {offset.at(0) -= 1;}
+            if (dir == Direction::Y_UP) {offset.at(1) += 1;}
+            if (dir == Direction::Y_DOWN) {offset.at(1) -= 1;}
+            if (dir == Direction::Z_UP) {offset.at(2) += 1;}
+            if (dir == Direction::Z_DOWN) {offset.at(2) -= 1;}
+            if (this->indexIsValid(offset)) {
+                return offset;
+            }
+            return std::nullopt;
+        }
+    };
+
 }
 
 #endif //ROBOTICTEMPLATELIBRARY_OCCUPANCYMAPND_H

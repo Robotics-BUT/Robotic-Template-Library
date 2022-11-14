@@ -25,7 +25,7 @@
 // Contact person: Adam Ligocki <adam.ligocki@vutbr.cz>
 
 #include <gtest/gtest.h>
-#include "rtl/Core.h"
+#include "rtl/Unstable.h"
 #include <utility>
 #include <iostream>
 
@@ -64,7 +64,7 @@ TEST(t_occupancymap_tests, initial1D) {
 
 
 TEST(t_occupancymap_tests, initial2D) {
-    rtl::Occupancy2Df map{{10, 10}, {1.0f, 1.0f}};
+    rtl::OccupancyMap2Df map{{10, 10}, {1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
@@ -82,7 +82,7 @@ TEST(t_occupancymap_tests, initial2D) {
 
 
 TEST(t_occupancymap_tests, initial3D) {
-    rtl::Occupancy3Dd map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
+    rtl::OccupancyMap3Dd map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {

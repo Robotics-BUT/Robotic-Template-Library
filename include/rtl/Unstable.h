@@ -30,7 +30,20 @@
 #include "rtl/unstable/AStarCell.h"
 #include "rtl/unstable/Dijkstra.h"
 #include "rtl/unstable/DijkstraCell.h"
+#include "rtl/unstable/OccupancyMapND.h"
 #include "rtl/unstable/OccupancyMapPathFinder.h"
 #include "rtl/unstable/PathFinderNode.h"
+
+namespace rtl {
+    template<typename Element>
+    using Occupancy2D = OccupancyMapND<2, Element>;                 //!< Partial OccupancyMap specialization for two dimensions
+    using OccupancyMap2Df = OccupancyMapND<2, float>;                  //!< Full OccupancyMap specialization for two dimensions and float elements.
+    using OccupancyMap2Dd = OccupancyMapND<2, double>;                 //!< Full OccupancyMap specialization for two dimensions and double elements.
+
+    template<typename Element>
+    using OccupancyMap3D = OccupancyMapND<3, Element>;                 //!< Partial OccupancyMap specialization for three dimensions
+    using OccupancyMap3Df = OccupancyMapND<3, float>;                  //!< Full OccupancyMap specialization for three dimensions and float elements.
+    using OccupancyMap3Dd = OccupancyMapND<3, double>;                 //!< Full OccupancyMap specialization for three dimensions and double elements.
+}
 
 #endif // ROBOTICTEMPLATELIBRARY_UNSTABLE_H
