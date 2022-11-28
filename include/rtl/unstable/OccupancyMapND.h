@@ -35,31 +35,17 @@ namespace rtl
 {
     using indexDType = size_t;
 
-    template<size_t dim, typename CellType, typename distanceDType = float>
+    template<size_t dim, typename CellType, typename distanceDType, size_t... gridSize>
     class OccupancyMapND_common {
 
-        template<typename T, size_t N>
-        static constexpr size_t array_product(std::array<T, N> arr) {
-            T prod = 1;
-            for (size_t i = 0 ; i < N ; i+=1) {
-                prod *= arr.at(i);
-            }
-            return prod;
-        }
+        static constexpr size_t memorySize = (gridSize * ...);
+        static_assert(dim != 0, "Occupancy Map has to be non-zero dimension");
+        static_assert(dim == sizeof...(gridSize), "Invalid number of gridSize variadic arguments");
 
     public:
-        OccupancyMapND_common(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
-                : gridSize_{gridSize}
-                , cellSize_{cellSize}{
-            static_assert(dim != 0, "Occupancy Map has to be non-zero dimension");
-            occGrid_ = new CellType[array_product(gridSize_)];
-        }
-
-        OccupancyMapND_common (const OccupancyMapND_common&) = delete;
-        OccupancyMapND_common& operator= (const OccupancyMapND_common&) = delete;
-
-        ~OccupancyMapND_common() {
-            //delete[] occGrid_;
+        OccupancyMapND_common() = delete;
+        explicit OccupancyMapND_common(const std::array<distanceDType, dim>& cellSize)
+                : cellSize_{cellSize}{
         }
 
         [[nodiscard]] const CellType& getCell(const std::array<indexDType, dim>& index) const {
@@ -135,14 +121,14 @@ namespace rtl
         const std::array<distanceDType, dim>& getCellSize() const {return cellSize_;};
 
         void clear(CellType clearValue) {
-            for (size_t i = 0 ; i < array_product(gridSize_) ; i++) {occGrid_[i] = clearValue;}
+            for (size_t i = 0 ; i < memorySize ; i++) {occGrid_[i] = clearValue;}
         }
 
     protected:
 
-        const std::array<indexDType, dim> gridSize_;
+        const std::array<size_t, sizeof...(gridSize)> gridSize_ = {gridSize...};
         const std::array<distanceDType, dim> cellSize_;
-        CellType* occGrid_;
+        std::array<CellType, memorySize> occGrid_;
 
         indexDType indexTo1D(const std::array<indexDType, dim>& index) const {
             indexDType index1D = 0;
@@ -209,19 +195,18 @@ namespace rtl
         }
     };
 
-    template<size_t dim, typename CellType, typename distanceDType = float>
-    class OccupancyMapND : public OccupancyMapND_common<dim, CellType, distanceDType> {
+    template<size_t dim, typename CellType, typename distanceDType, size_t... gridSize>
+    class OccupancyMapND : public OccupancyMapND_common<dim, CellType, distanceDType, gridSize...> {
     public:
-        OccupancyMapND(const std::array<indexDType, dim>& gridSize, const std::array<distanceDType, dim>& cellSize)
-                : OccupancyMapND_common<dim, CellType, distanceDType> {gridSize, cellSize} {
+        OccupancyMapND() = delete;
+        explicit OccupancyMapND(const std::array<distanceDType, dim>& cellSize)
+                : OccupancyMapND_common<dim, CellType, distanceDType, gridSize...> {cellSize} {
 
         }
-        OccupancyMapND (const OccupancyMapND&) = delete;
-        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
     };
 
-    template <typename CellType, typename distanceDType>
-    class OccupancyMapND<2, CellType, distanceDType> : public OccupancyMapND_common<2, CellType, distanceDType>  {
+    template<typename CellType, typename distanceDType, size_t... gridSize>
+    class OccupancyMapND<2, CellType, distanceDType, gridSize...> : public OccupancyMapND_common<2, CellType, distanceDType, gridSize...>  {
     public:
         enum class Direction {
             X_UP,
@@ -230,12 +215,11 @@ namespace rtl
             Y_DOWN,
         };
 
-        OccupancyMapND(const std::array<indexDType, 2>& gridSize, const std::array<distanceDType, 2>& cellSize)
-                : OccupancyMapND_common<2, CellType, distanceDType> {gridSize, cellSize}{
+        OccupancyMapND() = delete;
+        explicit OccupancyMapND(const std::array<distanceDType, 2>& cellSize)
+                : OccupancyMapND_common<2, CellType, distanceDType, gridSize...> {cellSize}{
 
         }
-        OccupancyMapND (const OccupancyMapND&) = delete;
-        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
 
         std::optional<std::array<indexDType, 2>> neighbourInDirection(std::array<indexDType, 2> index, const Direction& dir) {
             std::array<indexDType, 2> offset = index;
@@ -250,8 +234,8 @@ namespace rtl
         }
     };
 
-    template <typename CellType, typename distanceDType>
-    class OccupancyMapND<3, CellType, distanceDType> : public OccupancyMapND_common<3, CellType, distanceDType>  {
+    template<typename CellType, typename distanceDType, size_t... gridSize>
+    class OccupancyMapND<3, CellType, distanceDType, gridSize...> : public OccupancyMapND_common<3, CellType, distanceDType, gridSize...>  {
     public:
         enum class Direction {
             X_UP,
@@ -262,12 +246,11 @@ namespace rtl
             Z_DOWN,
         };
 
-        OccupancyMapND(const std::array<indexDType, 3>& gridSize, const std::array<distanceDType, 3>& cellSize)
-                : OccupancyMapND_common<3, CellType, distanceDType> {gridSize, cellSize}{
+        OccupancyMapND() = delete;
+        explicit OccupancyMapND(const std::array<distanceDType, 3>& cellSize)
+                : OccupancyMapND_common<3, CellType, distanceDType, gridSize...> {cellSize}{
 
         }
-        OccupancyMapND (const OccupancyMapND&) = delete;
-        OccupancyMapND& operator= (const OccupancyMapND&) = delete;
 
         std::optional<std::array<indexDType, 3>> neighbourInDirection(std::array<indexDType, 3> index, const Direction& dir) {
             std::array<indexDType, 3> offset = index;

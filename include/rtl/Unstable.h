@@ -35,15 +35,24 @@
 #include "rtl/unstable/PathFinderNode.h"
 
 namespace rtl {
-    template<typename Element>
-    using Occupancy2D = OccupancyMapND<2, Element>;                 //!< Partial OccupancyMap specialization for two dimensions
-    using OccupancyMap2Df = OccupancyMapND<2, float>;                  //!< Full OccupancyMap specialization for two dimensions and float elements.
-    using OccupancyMap2Dd = OccupancyMapND<2, double>;                 //!< Full OccupancyMap specialization for two dimensions and double elements.
+    template<typename Element, typename distanceType, size_t... gSize>
+    using Occupancy2D = OccupancyMapND<2, Element, distanceType, gSize...>;                 //!< Partial OccupancyMap specialization for two dimensions
 
-    template<typename Element>
-    using OccupancyMap3D = OccupancyMapND<3, Element>;                 //!< Partial OccupancyMap specialization for three dimensions
-    using OccupancyMap3Df = OccupancyMapND<3, float>;                  //!< Full OccupancyMap specialization for three dimensions and float elements.
-    using OccupancyMap3Dd = OccupancyMapND<3, double>;                 //!< Full OccupancyMap specialization for three dimensions and double elements.
+    template<size_t... gSize>
+    using OccupancyMap2Df = OccupancyMapND<2, float, float, gSize...>;                  //!< Full OccupancyMap specialization for two dimensions and float elements.
+
+    template<size_t... gSize>
+    using OccupancyMap2Dd = OccupancyMapND<2, double, double, gSize...>;                 //!< Full OccupancyMap specialization for two dimensions and double elements.
+
+
+    template<typename Element, typename distanceType,  size_t... gSize>
+    using OccupancyMap3D = OccupancyMapND<3, Element, distanceType, gSize...>;                 //!< Partial OccupancyMap specialization for three dimensions
+
+    template<size_t... gSize>
+    using OccupancyMap3Df = OccupancyMapND<3, float, float, gSize...>;                  //!< Full OccupancyMap specialization for three dimensions and float elements.
+
+    template<size_t... gSize>
+    using OccupancyMap3Dd = OccupancyMapND<3, double, double, gSize...>;                 //!< Full OccupancyMap specialization for three dimensions and double elements.
 }
 
 #endif // ROBOTICTEMPLATELIBRARY_UNSTABLE_H

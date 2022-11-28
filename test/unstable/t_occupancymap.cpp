@@ -51,7 +51,7 @@ constexpr T array_product( std::array<T,N> array) {
 
 
 TEST(t_occupancymap_tests, initial1D) {
-    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    rtl::OccupancyMapND<1, float, float, 10> map{{1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
             map.setCell(counter++, {i});
@@ -64,7 +64,7 @@ TEST(t_occupancymap_tests, initial1D) {
 
 
 TEST(t_occupancymap_tests, initial2D) {
-    rtl::OccupancyMap2Df map{{10, 10}, {1.0f, 1.0f}};
+    rtl::OccupancyMapND<2, float, float, 10, 10> map{{1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
@@ -82,7 +82,7 @@ TEST(t_occupancymap_tests, initial2D) {
 
 
 TEST(t_occupancymap_tests, initial3D) {
-    rtl::OccupancyMap3Dd map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
+    rtl::OccupancyMap3Dd<10, 10, 10> map{{1.0f, 1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
@@ -105,14 +105,14 @@ TEST(t_occupancymap_tests, initial3D) {
 }
 
 TEST(t_occupancymap_tests, distance1D) {
-    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    rtl::OccupancyMapND<1, float, float, 10> map{{1.0f}};
     EXPECT_EQ(map.euclidean_distance({0}, {9}), 9.0f);
     EXPECT_EQ(map.distanceByAxis({0}, {9}).at(0), 9.0f);
 }
 
 
 TEST(t_occupancymap_tests, distance2D) {
-    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 0.5f}};
+    rtl::OccupancyMapND<2, float, float, 10, 10> map{{1.0f, 0.5f}};
     EXPECT_NEAR(map.euclidean_distance({0, 0}, {9, 9}), 10.0623f, error);
     auto dist = map.distanceByAxis({0, 0}, {9, 9});
     EXPECT_EQ(dist.at(0), 9.0f);
@@ -121,7 +121,7 @@ TEST(t_occupancymap_tests, distance2D) {
 
 
 TEST(t_occupancymap_tests, distance3D) {
-    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 0.5f, 2.0f}};
+    rtl::OccupancyMapND<3, float, float, 10, 10, 10> map{{1.0f, 0.5f, 2.0f}};
     EXPECT_NEAR(map.euclidean_distance({0, 0, 0}, {9, 9, 9}), 20.62159f, error);
     auto dist = map.distanceByAxis({0, 0, 0}, {9, 9, 9});
     EXPECT_EQ(dist.at(0), 9.0f);
@@ -131,7 +131,7 @@ TEST(t_occupancymap_tests, distance3D) {
 
 
 TEST(t_occupancymap_tests, coordinates1D) {
-    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    rtl::OccupancyMapND<1, float, float, 10> map{{1.0f}};
 
     EXPECT_EQ(map.coordinatesToIndex({0.0f}).at(0), 0);
     EXPECT_EQ(map.coordinatesToIndex({0.1f}).at(0), 0);
@@ -151,7 +151,7 @@ TEST(t_occupancymap_tests, coordinates1D) {
 
 
 TEST(t_occupancymap_tests, coordinates2D) {
-    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 0.5}};
+    rtl::OccupancyMapND<2, float, float, 10, 10> map{{1.0f, 0.5}};
 
     auto index = map.coordinatesToIndex({0.0f, 0.0f});
     EXPECT_EQ(index.at(0), 0); EXPECT_EQ(index.at(1), 0);
@@ -180,7 +180,7 @@ TEST(t_occupancymap_tests, coordinates2D) {
 }
 
 TEST(t_occupancymap_tests, coordinates3D) {
-    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 0.5f, 2.0f}};
+    rtl::OccupancyMapND<3, float, float, 10, 10, 10> map{{1.0f, 0.5f, 2.0f}};
 
     auto index = map.coordinatesToIndex({0.0f, 0.0f, 0.0f});
     EXPECT_EQ(index.at(0), 0); EXPECT_EQ(index.at(1), 0); EXPECT_EQ(index.at(2), 0);
@@ -209,7 +209,7 @@ TEST(t_occupancymap_tests, coordinates3D) {
 }
 
 TEST(t_occupancymap_tests, neighbours1D) {
-    rtl::OccupancyMapND<1, float> map{{10}, {1.0f}};
+    rtl::OccupancyMapND<1, float, float, 10> map{{1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         map.setCell(counter++, {i});
@@ -238,7 +238,7 @@ TEST(t_occupancymap_tests, neighbours1D) {
 
 
 TEST(t_occupancymap_tests, neighbours2D) {
-    rtl::OccupancyMapND<2, float> map{{10, 10}, {1.0f, 1.0f}};
+    rtl::OccupancyMapND<2, float, float, 10, 10> map{{1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
@@ -297,7 +297,7 @@ TEST(t_occupancymap_tests, neighbours2D) {
 
 
 TEST(t_occupancymap_tests, neighbours3D) {
-    rtl::OccupancyMapND<3, float> map{{10, 10, 10}, {1.0f, 1.0f, 1.0f}};
+    rtl::OccupancyMapND<3, float, float, 10, 10, 10> map{{1.0f, 1.0f, 1.0f}};
     auto counter = 0.0f;
     for (size_t i = 0 ; i < 10 ; i++) {
         for (size_t j = 0 ; j < 10 ; j++) {
@@ -347,7 +347,7 @@ TEST(t_occupancymap_tests, neighbours3D) {
 
 TEST(t_occupancymap_tests, neighbours4D) {
 
-    rtl::OccupancyMapND<4, float> map{{10, 10, 10, 10}, {1.0f, 1.0f, 1.0f, 1.0f}};
+    rtl::OccupancyMapND<4, float, float, 10, 10, 10, 10> map{{1.0f, 1.0f, 1.0f, 1.0f}};
 
     auto neighbours = map.directNeighbourCellIndexes({4, 2, 6, 8});
     EXPECT_EQ(neighbours.size(), 8);
