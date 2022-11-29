@@ -50,12 +50,12 @@ namespace rtl
 
         [[nodiscard]] const CellType& getCell(const std::array<indexDType, dim>& index) const {
             auto i = indexTo1D(index);
-            return occGrid_[i];
+            return occGrid_.at(i);
         }
 
         void setCell(const CellType& cell, const std::array<indexDType, dim>& index) {
             auto i = indexTo1D(index);
-            occGrid_[i] = cell;
+            occGrid_.at(i) = cell;
         }
 
         [[nodiscard]] std::array<distanceDType, dim> indexToCoordinates(const std::array<indexDType, dim>& index) const {
